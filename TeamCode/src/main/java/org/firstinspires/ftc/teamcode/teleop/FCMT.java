@@ -1,3 +1,4 @@
+// Field Centric Mecanum TeleOp
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,7 +11,7 @@ import org.firstinspires.ftc.teamcode.tools.MotorGroup;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @TeleOp
-public class FieldCentricMecanumTeleOp extends LinearOpMode {
+public class FCMT extends LinearOpMode {
     private boolean intakeToggle = false;
     private int intakeDir = 1;
 
