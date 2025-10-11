@@ -6,67 +6,89 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.tools.ButtonHandler;
 import org.firstinspires.ftc.teamcode.tools.MotorGroup;
-import org.firstinspires.ftc.teamcode.RobotHardware;
+import static org.firstinspires.ftc.teamcode.RobotHardware.*;
 
 @TeleOp
 public class FCMT extends LinearOpMode {
     private boolean intakeToggle = false;
-    private int intakeDir = 1;
+    private int intakeDir = -1;
+
+    private boolean outtakeToggle = false;
+    private final int outtakeDir = 1;
+
+    double k = 2.0;
+    double expKMinus1 = Math.exp(k) - 1; // Precompute at init;
 
     @Override
     public void runOpMode() throws InterruptedException {
         RobotHardware.init(hardwareMap);
 
-        MotorGroup outtake = new MotorGroup(RobotHardware.outtakeMotor1, RobotHardware.outtakeMotor2);
+        MotorGroup outtakeMotors = new MotorGroup(outtakeMotor1, outtakeMotor2);
+        MotorGroup driveMotors = new MotorGroup(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
+
+        ButtonHandler leftPaddle = new ButtonHandler();
+        ButtonHandler rightPaddle = new ButtonHandler();
+        ButtonHandler buttonX = new ButtonHandler();
         ButtonHandler buttonA = new ButtonHandler();
-        ButtonHandler buttonB = new ButtonHandler();
         ButtonHandler buttonOption = new ButtonHandler();
 
-        boolean outtakeToggle = false;
-        int outtakeDir = -1;
+        imu.resetYaw();
 
+        // Intake
         buttonA.setOnPress(() -> intakeToggle = !intakeToggle);
-        buttonA.setOnDoubleClick(() -> intakeDir *= -1);
-        buttonB.setOnPress(() -> outtakeToggle = !outtakeToggle);
-        buttonB.setOnDoubleClick(() -> outtakeDir *= -1);
-        buttonOption.setOnPress(() -> RobotHardware.imu.resetYaw());
+        leftPaddle.setOnPress(() -> intakeDir = 1);
+        rightPaddle.setOnPress(() -> intakeDir = -1);
+
+        // Outtake
+        buttonX.setOnPress(() -> outtakeToggle = !outtakeToggle);
+
+        // Imu
+        buttonOption.setOnPress(() -> imu.resetYaw());
+
+        driveMotors.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         waitForStart();
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
             buttonA.update(gamepad1.a);
-            buttonB.update(gamepad1.b);
+            leftPaddle.update(gamepad1.left_bumper);
+            rightPaddle.update(gamepad1.right_bumper);
+
+            buttonX.update(gamepad1.x);
             buttonOption.update(gamepad1.options);
 
-            double y = -gamepad1.left_stick_y / 2;
-            double x = gamepad1.left_stick_x / 2;
-            double rx = gamepad1.right_stick_x / 2;
+            // 1. Read joystick
+            double jy = -gamepad1.left_stick_y;
+            double jx = gamepad1.left_stick_x;
+            double jrx = gamepad1.right_stick_x;
+
+            // 2. Exponential stick curve
+            double y = Math.signum(jy) * (Math.exp(k * Math.abs(jy)) - 1) / expKMinus1;
+            double x = Math.signum(jx) * (Math.exp(k * Math.abs(jx)) - 1) / expKMinus1;
 
             double botHeading = RobotHardware.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
+            // 5. Field-centric drive transform
             double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
             double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
             rotX *= 1.1;  // Strafing compensation
 
-            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-            double frontLeftPower = (rotY + rotX + rx) / denominator;
-            double backLeftPower = (rotY - rotX + rx) / denominator;
-            double frontRightPower = (rotY - rotX - rx) / denominator;
-            double backRightPower = (rotY + rotX - rx) / denominator;
+            // 6. Motor powers
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(jrx), 1);
+            frontLeftMotor.setPower((rotY + rotX + jrx) / denominator);
+            backLeftMotor.setPower((rotY - rotX + jrx) / denominator);
+            frontRightMotor.setPower((rotY - rotX - jrx) / denominator);
+            backRightMotor.setPower((rotY + rotX - jrx) / denominator);
 
             double intakePower = (intakeToggle ? 1 : 0) * intakeDir;
             double outtakePower = (outtakeToggle ? 1 : 0) * outtakeDir;
 
-            RobotHardware.frontLeftMotor.setPower(frontLeftPower);
-            RobotHardware.backLeftMotor.setPower(backLeftPower);
-            RobotHardware.frontRightMotor.setPower(frontRightPower);
-            RobotHardware.backRightMotor.setPower(backRightPower);
-            RobotHardware.intakeMotor.setPower(intakePower);
-            outtake.setPower(outtakePower);
+            intakeMotor.setPower(intakePower);
+            outtakeMotors.setPower(outtakePower);
         }
     }
 }
