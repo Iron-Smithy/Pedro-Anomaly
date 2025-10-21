@@ -18,6 +18,7 @@ public class FCMT extends LinearOpMode {
 
     private boolean outtakeToggle = false;
     private final int outtakeDir = 1;
+    private double indexingWheelDir = 1;
 
     double k = 2.0;
     double expKMinus1 = Math.exp(k) - 1; // Precompute at init;
@@ -34,6 +35,9 @@ public class FCMT extends LinearOpMode {
         ButtonHandler buttonX = new ButtonHandler();
         ButtonHandler buttonA = new ButtonHandler();
         ButtonHandler buttonOption = new ButtonHandler();
+        ButtonHandler dpadL = new ButtonHandler();
+        ButtonHandler dpadR = new ButtonHandler();
+        ButtonHandler dpadU = new ButtonHandler();
 
         imu.resetYaw();
 
@@ -44,6 +48,9 @@ public class FCMT extends LinearOpMode {
 
         // Outtake
         buttonX.setOnPress(() -> outtakeToggle = !outtakeToggle);
+        dpadL.setOnPress(() -> indexingWheelDir = 1.0);
+        dpadU.setOnPress(() -> indexingWheelDir = 0.0);
+        dpadR.setOnPress(() -> indexingWheelDir = -1.0);
 
         // Imu
         buttonOption.setOnPress(() -> imu.resetYaw());
@@ -60,6 +67,10 @@ public class FCMT extends LinearOpMode {
 
             buttonX.update(gamepad1.x);
             buttonOption.update(gamepad1.options);
+
+            dpadL.update(gamepad1.dpad_left);
+            dpadU.update(gamepad1.dpad_up);
+            dpadR.update(gamepad1.dpad_right);
 
             // 1. Read joystick
             double jy = -gamepad1.left_stick_y;
@@ -89,6 +100,7 @@ public class FCMT extends LinearOpMode {
 
             intakeMotor.setPower(intakePower);
             outtakeMotors.setPower(outtakePower);
+            indexingWheel.setPower(indexingWheelDir);
         }
     }
 }
