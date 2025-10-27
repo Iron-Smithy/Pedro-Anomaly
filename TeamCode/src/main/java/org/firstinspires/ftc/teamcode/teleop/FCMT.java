@@ -15,10 +15,9 @@ import static org.firstinspires.ftc.teamcode.RobotHardware.*;
 public class FCMT extends LinearOpMode {
     private boolean intakeToggle = false;
     private int intakeDir = -1;
-
-    private boolean outtakeToggle = false;
-    private final int outtakeDir = 1;
-    private double indexingWheelDir = 1;
+    private int outtakeDir = 1; // 1 outtake
+    private double outtakePow = 0.5;
+    private double indexingWheelDir = 0; // 1 intake
 
     double k = 2.0;
     double expKMinus1 = Math.exp(k) - 1; // Precompute at init;
@@ -28,29 +27,34 @@ public class FCMT extends LinearOpMode {
         RobotHardware.init(hardwareMap);
 
         MotorGroup outtakeMotors = new MotorGroup(outtakeMotor1, outtakeMotor2);
+        outtakeMotors.setUsingEncoder();
+
         MotorGroup driveMotors = new MotorGroup(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
 
         ButtonHandler leftPaddle = new ButtonHandler();
         ButtonHandler rightPaddle = new ButtonHandler();
-        ButtonHandler buttonX = new ButtonHandler();
+        ButtonHandler leftTrigger = new ButtonHandler();
+        ButtonHandler rightTrigger = new ButtonHandler();
         ButtonHandler buttonA = new ButtonHandler();
         ButtonHandler buttonOption = new ButtonHandler();
-        ButtonHandler dpadL = new ButtonHandler();
-        ButtonHandler dpadR = new ButtonHandler();
-        ButtonHandler dpadU = new ButtonHandler();
+        ButtonHandler DPadUP = new ButtonHandler();
+        ButtonHandler DPadDown = new ButtonHandler();
 
         imu.resetYaw();
 
         // Intake
-        buttonA.setOnPress(() -> intakeToggle = !intakeToggle);
-        leftPaddle.setOnPress(() -> intakeDir = 1);
-        rightPaddle.setOnPress(() -> intakeDir = -1);
+        rightPaddle.setOnPress(() -> intakeDir = (intakeDir == 1 ? 0 : 1));
+        rightTrigger.setOnPress(() -> intakeDir = (intakeDir == -1 ? 0 : -1));
 
         // Outtake
-        buttonX.setOnPress(() -> outtakeToggle = !outtakeToggle);
-        dpadL.setOnPress(() -> indexingWheelDir = 1.0);
-        dpadU.setOnPress(() -> indexingWheelDir = 0.0);
-        dpadR.setOnPress(() -> indexingWheelDir = -1.0);
+        leftPaddle.setOnHold(() -> indexingWheelDir = -1);
+        leftPaddle.setOnRelease(() -> indexingWheelDir = 0);
+        leftTrigger.setOnPress(() -> outtakeDir = 1 - outtakeDir);
+        buttonA.setOnHold(() -> indexingWheelDir = (indexingWheelDir == -1 ? 1 : 0));
+        buttonA.setOnRelease(() -> indexingWheelDir = (indexingWheelDir == -1 || indexingWheelDir == 1 ? 1 : 0));
+
+        DPadUP.setOnPress(() -> outtakePow = Math.min(1.0, Math.max(0, outtakePow + 0.1)));
+        DPadDown.setOnPress(() -> outtakePow = Math.min(1.0, Math.max(0, outtakePow - 0.1)));
 
         // Imu
         buttonOption.setOnPress(() -> imu.resetYaw());
@@ -65,12 +69,13 @@ public class FCMT extends LinearOpMode {
             leftPaddle.update(gamepad1.left_bumper);
             rightPaddle.update(gamepad1.right_bumper);
 
-            buttonX.update(gamepad1.x);
-            buttonOption.update(gamepad1.options);
+            leftTrigger.update(gamepad1.left_trigger, 0.25f);
+            rightTrigger.update(gamepad1.right_trigger, 0.25f);
 
-            dpadL.update(gamepad1.dpad_left);
-            dpadU.update(gamepad1.dpad_up);
-            dpadR.update(gamepad1.dpad_right);
+            DPadUP.update(gamepad1.dpad_up);
+            DPadDown.update(gamepad1.dpad_down);
+
+            buttonOption.update(gamepad1.options);
 
             // 1. Read joystick
             double jy = -gamepad1.left_stick_y;
@@ -95,12 +100,13 @@ public class FCMT extends LinearOpMode {
             frontRightMotor.setPower((rotY - rotX - jrx) / denominator);
             backRightMotor.setPower((rotY + rotX - jrx) / denominator);
 
-            double intakePower = (intakeToggle ? 1 : 0) * intakeDir;
-            double outtakePower = (outtakeToggle ? 1 : 0) * outtakeDir;
-
-            intakeMotor.setPower(intakePower);
-            outtakeMotors.setPower(outtakePower);
+            intakeMotor.setPower(intakeDir);
+            outtakeMotors.setPower(outtakePow * outtakeDir);
             indexingWheel.setPower(indexingWheelDir);
+
+            telemetry.addData("Outtake Speed", outtakePow);
+            telemetry.addData("Outtake Dir", outtakeDir);
+            telemetry.addData("Motor Speed", outtakePow * outtakeDir);
         }
     }
 }

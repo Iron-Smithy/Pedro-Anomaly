@@ -49,6 +49,34 @@ public class ButtonHandler {
 
         lastState = currentState;
     }
+    public void update(float howMuchPressed, float whenConsideredPressed) {
+        currentState = howMuchPressed >= whenConsideredPressed;
+        doubleClicked = false;
+        pressedThisFrame = false;
+        releasedThisFrame = false;
+
+        long currentTime = System.currentTimeMillis();
+
+        if (!lastState && currentState) {
+            pressedThisFrame = true;
+            if (currentTime - lastReleaseTime <= doubleClickThreshold) {
+                doubleClicked = true;
+                if (onDoubleClick != null) onDoubleClick.run();
+            }
+            if (onPress != null) onPress.run();
+            lastPressTime = currentTime;
+        }
+
+        if (lastState && currentState && onHold != null) onHold.run();
+
+        if (lastState && !currentState) {
+            releasedThisFrame = true;
+            if (onRelease != null) onRelease.run();
+            lastReleaseTime = currentTime;
+        }
+
+        lastState = currentState;
+    }
 
     public boolean wasPressed() { return pressedThisFrame; }
     public boolean isPressed() { return currentState; }

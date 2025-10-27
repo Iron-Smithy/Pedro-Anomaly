@@ -23,6 +23,13 @@ public class MotorGroup {
         for (DcMotor motor : motors) motor.setZeroPowerBehavior(behavior);
     }
 
+    public void setUsingEncoder() {
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
     public int[] getPositionRange() {
         int max = Integer.MIN_VALUE;
         int min = Integer.MAX_VALUE;
