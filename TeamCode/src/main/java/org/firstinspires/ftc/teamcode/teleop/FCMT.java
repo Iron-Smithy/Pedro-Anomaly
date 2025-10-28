@@ -35,7 +35,6 @@ public class FCMT extends LinearOpMode {
         ButtonHandler rightPaddle = new ButtonHandler();
         ButtonHandler leftTrigger = new ButtonHandler();
         ButtonHandler rightTrigger = new ButtonHandler();
-        ButtonHandler buttonA = new ButtonHandler();
         ButtonHandler buttonOption = new ButtonHandler();
         ButtonHandler DPadUP = new ButtonHandler();
         ButtonHandler DPadDown = new ButtonHandler();
@@ -50,8 +49,6 @@ public class FCMT extends LinearOpMode {
         leftPaddle.setOnHold(() -> indexingWheelDir = -1);
         leftPaddle.setOnRelease(() -> indexingWheelDir = 0);
         leftTrigger.setOnPress(() -> outtakeDir = 1 - outtakeDir);
-        buttonA.setOnHold(() -> indexingWheelDir = (indexingWheelDir == -1 ? 1 : 0));
-        buttonA.setOnRelease(() -> indexingWheelDir = (indexingWheelDir == -1 || indexingWheelDir == 1 ? 1 : 0));
 
         DPadUP.setOnPress(() -> outtakePow = Math.min(1.0, Math.max(0, outtakePow + 0.1)));
         DPadDown.setOnPress(() -> outtakePow = Math.min(1.0, Math.max(0, outtakePow - 0.1)));
@@ -65,7 +62,6 @@ public class FCMT extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            buttonA.update(gamepad1.a);
             leftPaddle.update(gamepad1.left_bumper);
             rightPaddle.update(gamepad1.right_bumper);
 
@@ -102,11 +98,12 @@ public class FCMT extends LinearOpMode {
 
             intakeMotor.setPower(intakeDir);
             outtakeMotors.setPower(outtakePow * outtakeDir);
-            indexingWheel.setPower(indexingWheelDir);
-
+            indexingWheel.setPower(gamepad1.a ? indexingWheelDir*-1 : indexingWheelDir);
+            
             telemetry.addData("Outtake Speed", outtakePow);
             telemetry.addData("Outtake Dir", outtakeDir);
             telemetry.addData("Motor Speed", outtakePow * outtakeDir);
+            telemetry.update();
         }
     }
 }
