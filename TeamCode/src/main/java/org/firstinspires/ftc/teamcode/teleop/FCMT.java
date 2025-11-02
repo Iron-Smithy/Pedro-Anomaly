@@ -35,11 +35,8 @@ public class FCMT extends LinearOpMode {
         ButtonHandler rightPaddle = new ButtonHandler();
         ButtonHandler leftTrigger = new ButtonHandler();
         ButtonHandler rightTrigger = new ButtonHandler();
-        ButtonHandler buttonOption = new ButtonHandler();
         ButtonHandler DPadUP = new ButtonHandler();
         ButtonHandler DPadDown = new ButtonHandler();
-
-        imu.resetYaw();
 
         // Intake
         rightPaddle.setOnPress(() -> intakeDir = (intakeDir == 1 ? 0 : 1));
@@ -52,9 +49,6 @@ public class FCMT extends LinearOpMode {
 
         DPadUP.setOnPress(() -> outtakePow = Math.min(1.0, Math.max(0, outtakePow + 0.1)));
         DPadDown.setOnPress(() -> outtakePow = Math.min(1.0, Math.max(0, outtakePow - 0.1)));
-
-        // Imu
-        buttonOption.setOnPress(() -> imu.resetYaw());
 
         driveMotors.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -70,8 +64,6 @@ public class FCMT extends LinearOpMode {
 
             DPadUP.update(gamepad1.dpad_up);
             DPadDown.update(gamepad1.dpad_down);
-
-            buttonOption.update(gamepad1.options);
 
             // 1. Read joystick
             double jy = -gamepad1.left_stick_y;
