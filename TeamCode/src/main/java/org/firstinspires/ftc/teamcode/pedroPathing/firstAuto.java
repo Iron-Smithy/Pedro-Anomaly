@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.tools.MotorGroup;
 import static org.firstinspires.ftc.teamcode.RobotHardware.*;
 
 @Autonomous(name = "firstTry", group = "AAA")
-public class firstAuto extends OpMode {
+public class FirstAuto extends OpMode {
 
     MotorGroup outtakeMotors = new MotorGroup(outtakeMotor1, outtakeMotor2);
 
