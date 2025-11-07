@@ -74,7 +74,7 @@ public class FCMT extends LinearOpMode {
             double y = Math.signum(jy) * (Math.exp(k * Math.abs(jy)) - 1) / expKMinus1;
             double x = Math.signum(jx) * (Math.exp(k * Math.abs(jx)) - 1) / expKMinus1;
 
-            double botHeading = RobotHardware.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            double botHeading = 0; //RobotHardware.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             // 5. Field-centric drive transform
             double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);

@@ -17,8 +17,6 @@ public class RobotHardware {
     public static DcMotor outtakeMotor2;
     public static CRServo indexingWheel;
 
-    public static IMU imu;
-
     public static void init(HardwareMap hwMap) {
         frontLeftMotor  = hwMap.get(DcMotor.class, "frontLeftMotor");
         backLeftMotor   = hwMap.get(DcMotor.class, "backLeftMotor");
@@ -32,14 +30,5 @@ public class RobotHardware {
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         outtakeMotor2.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        imu = hwMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                )
-        );
-        imu.initialize(parameters);
     }
 }
