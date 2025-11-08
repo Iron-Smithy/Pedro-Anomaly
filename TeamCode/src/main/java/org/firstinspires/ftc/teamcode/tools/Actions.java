@@ -48,7 +48,7 @@ public class Actions {
      * Shoots one ball. Make sure shooter is spun up
      */
     public void shoot() {
-        indexingWheel.setPower(1);
+        indexingWheel.setPower(0.9);
         isShooting = true;
         actionTimer.resetTimer();
     }

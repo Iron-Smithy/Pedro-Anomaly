@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.tools.MotorGroup;
  * FTC Autonomous using PedroPathing
  * Moves to scoring position, scores, collects balls    , and re-scores.
  */
-@Autonomous(name = "secondTry", group = "AAA")
+@Autonomous(name = "secondTryB", group = "AAA")
 public class SecondAutoB extends OpMode {
 
     // ========================= Hardware =========================
@@ -35,8 +35,8 @@ public class SecondAutoB extends OpMode {
     // ========================= Path Definitions =========================
     private final Pose startPose = new Pose(24, 120, Math.toRadians(-35));
     private final Pose scorePose = new Pose(60, 84, Math.toRadians(-44));
-    private final Pose tR1 = new Pose(54, 83.5,Math.toRadians(180));
-    private final Pose R1 = new Pose(24, 83.5, Math.toRadians(180));
+    private final Pose tR1 = new Pose(54, 80,Math.toRadians(180));
+    private final Pose R1 = new Pose(24, 80, Math.toRadians(180));
 
     private Path scorePreload, scoreR1, turnR1, eatR1;
     private PathChain eatR1PC;
@@ -44,7 +44,9 @@ public class SecondAutoB extends OpMode {
     // ========================= State Management =========================
     private enum AutoState {
         START,
+        REV,
         SCORE_PRELOAD,
+        TURN_R1,
         INTAKE_R1,
         SCORE_R1,
         DONE
@@ -79,18 +81,33 @@ public class SecondAutoB extends OpMode {
         switch (currentState) {
             case START:
                 follower.followPath(scorePreload);
-                transitionTo(AutoState.SCORE_PRELOAD);
+                transitionTo(AutoState.REV);
+                break;
+
+            case REV:
+                actions.spinUpShooter(2120, 1.0);
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 3000) {
+                    transitionTo(AutoState.SCORE_PRELOAD);
+                }
                 break;
 
             case SCORE_PRELOAD:
-                actions.spinUpShooter(2300, 1.0);
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 3000) {
-                    actions.intakeOn(-1);
+                actions.spinUpShooter(2120, 1.0);
+                actions.intakeOn(-1);
 
-                    if (actions.shootAuto(2300, 1.0, 1500, 3000, pathTimer.getElapsedTime()-1000)) { // spin-up 1500ms, index 3000ms
-                        follower.followPath(eatR1PC);
-                        transitionTo(AutoState.INTAKE_R1);
-                    }
+                if (actions.shootAuto(2120, 1.0, 1500, 6000, pathTimer.getElapsedTime())) {
+                    follower.followPath(turnR1);
+                    transitionTo(AutoState.TURN_R1);
+                }
+                break;
+
+            case TURN_R1:
+                actions.spinUpShooter(2120, 1.0);
+                actions.intakeOn(-1);
+
+                if (actions.shootAuto(2120, 1.0, 1500, 6000, pathTimer.getElapsedTime())) {
+                    follower.followPath(eatR1);
+                    transitionTo(AutoState.INTAKE_R1);
                 }
                 break;
 

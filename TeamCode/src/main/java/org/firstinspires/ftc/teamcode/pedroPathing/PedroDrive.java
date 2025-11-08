@@ -36,7 +36,7 @@ public class PedroDrive extends OpMode {
     private boolean isRobotCentric = false;
     private int intakeDir = -1;
     private int outtakeDir = 1; // 1 outtake
-    private double outtakePow = 0.5;
+    private double outtakePow = 0.9;
     public static double indexingWheelDir = 0; // 1 intake
 
     private ButtonHandler indexingControl = new ButtonHandler();
