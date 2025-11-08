@@ -1,17 +1,20 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import static org.firstinspires.ftc.teamcode.RobotHardware.indexingWheel;
+import static org.firstinspires.ftc.teamcode.RobotHardware.intakeMotor;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.tools.MotorGroup;
-import static org.firstinspires.ftc.teamcode.RobotHardware.*;
 import org.firstinspires.ftc.teamcode.tools.Actions;
+import org.firstinspires.ftc.teamcode.tools.MotorGroup;
 
 
 /**
@@ -19,10 +22,10 @@ import org.firstinspires.ftc.teamcode.tools.Actions;
  * Moves to scoring position, scores, collects balls    , and re-scores.
  */
 @Autonomous(name = "secondTry", group = "AAA")
-public class SecondAuto extends OpMode {
+public class SecondAutoB extends OpMode {
 
     // ========================= Hardware =========================
-    private MotorGroup outtakeMotors = new MotorGroup(outtakeMotor1, outtakeMotor2);
+    private MotorGroup outtakeMotors;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -30,11 +33,13 @@ public class SecondAuto extends OpMode {
     private Actions actions;
 
     // ========================= Path Definitions =========================
-    private final Pose startPose = new Pose(120, 120, Math.toRadians(215));
-    private final Pose scorePose = new Pose(84, 84, Math.toRadians(45));
-    private final Pose R1 = new Pose(120, 83.5, Math.toRadians(0));
+    private final Pose startPose = new Pose(24, 120, Math.toRadians(-35));
+    private final Pose scorePose = new Pose(60, 84, Math.toRadians(-44));
+    private final Pose tR1 = new Pose(54, 83.5,Math.toRadians(180));
+    private final Pose R1 = new Pose(24, 83.5, Math.toRadians(180));
 
-    private Path scorePreload, eatR1, scoreR1;
+    private Path scorePreload, scoreR1, turnR1, eatR1;
+    private PathChain eatR1PC;
 
     // ========================= State Management =========================
     private enum AutoState {
@@ -51,14 +56,19 @@ public class SecondAuto extends OpMode {
     private void buildPaths() {
         scorePreload = new Path(new BezierLine(startPose, scorePose));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-//
-        eatR1 = new Path(new BezierLine(scorePose, R1));
+
+        turnR1 = new Path(new BezierLine(scorePose, tR1));
+        turnR1.setLinearHeadingInterpolation(scorePose.getHeading(), tR1.getHeading());
+
+        eatR1 = new Path(new BezierLine(tR1, R1));
         eatR1.setLinearHeadingInterpolation(
-                scorePose.getHeading(),
-                Math.toRadians(0)
+                tR1.getHeading(),
+                Math.toRadians(180)
         );
          // .setConstantHeadingInterpolation(R1.getHeading()); // face intake direction entire path
          // .setLinearHeadingInterpolation(scorePose.getHeading(), R1.getHeading()); // normal. turns to late to intake correctly
+
+        eatR1PC = new PathChain(turnR1, eatR1);
 
         scoreR1 = new Path(new BezierLine(R1, scorePose));
         scoreR1.setLinearHeadingInterpolation(R1.getHeading(), scorePose.getHeading());
@@ -73,29 +83,36 @@ public class SecondAuto extends OpMode {
                 break;
 
             case SCORE_PRELOAD:
-                if (!follower.isBusy()) {
-                    if (actions.shootAuto(3000, 1500, 3000)) { // spin-up 1500ms, index 3000ms
+                actions.spinUpShooter(2300, 1.0);
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 3000) {
+                    actions.intakeOn(-1);
+
+                    if (actions.shootAuto(2300, 1.0, 1500, 3000, pathTimer.getElapsedTime()-1000)) { // spin-up 1500ms, index 3000ms
+                        follower.followPath(eatR1PC);
                         transitionTo(AutoState.INTAKE_R1);
                     }
                 }
                 break;
 
             case INTAKE_R1:
-                actions.intakeOn(1);
-                if (!follower.isBusy()) {
+                actions.intakeOn(-1);
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 3000) {
                     actions.intakeOff();
-                    follower.followPath(scoreR1);
-                    transitionTo(AutoState.SCORE_R1);
+//                    follower.followPath(scoreR1);
+                    transitionTo(AutoState.DONE);
                 }
                 break;
 
-            case SCORE_R1:
-                if (!follower.isBusy()) {
-                    if (actions.shootAuto(3000, 1500, 3000)) {
-                        transitionTo(AutoState.DONE);
-                    }
-                }
-                break;
+//            case SCORE_R1:
+//                actions.spinUpShooter(2300, 1.0);
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 3000) {
+//                    actions.intakeOn(-1);
+//
+//                    if (actions.shootAuto(2300, 1.0, 1500, 2000, pathTimer.getElapsedTime()-3000)) {
+//                        transitionTo(AutoState.DONE);
+//                    }
+//                }
+//                break;
 
             case DONE:
                 actions.stopShooter();
@@ -121,6 +138,10 @@ public class SecondAuto extends OpMode {
     public void init() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
+
+        RobotHardware.init(hardwareMap);
+        outtakeMotors = new MotorGroup(RobotHardware.outtakeMotor1, RobotHardware.outtakeMotor2);
+        outtakeMotors.setUsingEncoder();
 
         follower = Constants.createFollower(hardwareMap);
         buildPaths();

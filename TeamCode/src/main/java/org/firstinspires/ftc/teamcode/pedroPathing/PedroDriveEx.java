@@ -42,7 +42,7 @@ public class PedroDriveEx extends OpMode {
     // --- Intake / Outtake ---
     private int intakeDir = 0;       // -1 intake reverse, 1 intake forward
     private int outtakeDir = 1;      // 1 outtake forward
-    private long outtakeTPS = 1000;
+    private long outtakeTPS = 2000;
     public static double indexingWheelDir = 0;
 
     // --- Button Handlers ---
@@ -88,8 +88,8 @@ public class PedroDriveEx extends OpMode {
         outtakeControl.setOnPress(() -> outtakeDir = 1 - outtakeDir);
 
         // Outtake power adjustments
-        outtakeVelocityU.setOnPress(() -> outtakeTPS = Math.min(4500, outtakeTPS + 500));
-        outtakeVelocityD.setOnPress(() -> outtakeTPS = Math.max(500, outtakeTPS - 500));
+        outtakeVelocityU.setOnPress(() -> outtakeTPS = Math.min(3250, outtakeTPS + 250));
+        outtakeVelocityD.setOnPress(() -> outtakeTPS = Math.max(500, outtakeTPS - 250));
 
         // Robot drive
         slowTrigger.setOnPress(() -> slowMode = !slowMode);
@@ -151,8 +151,8 @@ public class PedroDriveEx extends OpMode {
 
         // --- Intake / Outtake ---
         RobotHardware.intakeMotor.setPower(intakeDir);
-        outtakeMotors.setVelocity(outtakeTPS * outtakeDir);
-        RobotHardware.indexingWheel.setPower(gamepad2.a ? -indexingWheelDir : indexingWheelDir);
+        outtakeMotors.setVelocity(outtakeTPS * outtakeDir, outtakeDir);
+        RobotHardware.indexingWheel.setPower(gamepad1.a ? -indexingWheelDir : indexingWheelDir);
 
         // --- Debug Telemetry ---
         telemetryM.debug("position", follower.getPose());

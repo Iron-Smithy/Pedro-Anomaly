@@ -31,14 +31,15 @@ public class Actions {
      * Starts shooter spin-up sequence.
      * Call this before shoot() or use shootAuto() for automatic timing.
      */
-    public void spinUpShooter(long velocity) {
-        outtakeMotors.setVelocity(velocity);
+    public void spinUpShooter(long velocity, double power) {
+        outtakeMotors.setVelocity(velocity, power);
         shooterSpinningUp = true;
         actionTimer.resetTimer();
     }
 
+
     public void stopShooter() {
-        outtakeMotors.setVelocity(0);
+        outtakeMotors.setVelocity(0, 0);
         shooterSpinningUp = false;
         isShooting = false;
     }
@@ -62,11 +63,11 @@ public class Actions {
      * Spins up >> waits >> indexes >> stops.
      * Returns true when finished.
      */
-    public boolean shootAuto(long velocity, long spinUpMs, long indexMs) {
-        long elapsed = actionTimer.getElapsedTime();
+    public boolean shootAuto(long velocity, double power, long spinUpMs, long indexMs, long elapsedTime) {
+        long elapsed = elapsedTime; //|| actionTimer.getElapsedTime();
 
         if (!shooterSpinningUp) {
-            spinUpShooter(velocity);
+            spinUpShooter(velocity, power);
         } else if (elapsed >= spinUpMs && !isShooting) {
             shoot();
         } else if (elapsed >= spinUpMs + indexMs) {
