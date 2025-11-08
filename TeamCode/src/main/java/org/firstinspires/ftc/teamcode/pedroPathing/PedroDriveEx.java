@@ -42,7 +42,7 @@ public class PedroDriveEx extends OpMode {
     // --- Intake / Outtake ---
     private int intakeDir = 0;       // -1 intake reverse, 1 intake forward
     private int outtakeDir = 1;      // 1 outtake forward
-    private double outtakePow = 0.5;
+    private long outtakeTPS = 1000;
     public static double indexingWheelDir = 0;
 
     // --- Button Handlers ---
@@ -54,6 +54,7 @@ public class PedroDriveEx extends OpMode {
     private ButtonHandler outtakeVelocityD = new ButtonHandler();
     private ButtonHandler slowTrigger = new ButtonHandler();
     private ButtonHandler robotCentricControl = new ButtonHandler();
+    private ButtonHandler rotationReset = new ButtonHandler();
 
     // --- Path Following ---
     private Supplier<PathChain> pathChain;
@@ -87,13 +88,15 @@ public class PedroDriveEx extends OpMode {
         outtakeControl.setOnPress(() -> outtakeDir = 1 - outtakeDir);
 
         // Outtake power adjustments
-        outtakeVelocityU.setOnPress(() -> outtakePow = Math.min(1.0, outtakePow + 0.05));
-        outtakeVelocityD.setOnPress(() -> outtakePow = Math.max(0, outtakePow - 0.05));
+        outtakeVelocityU.setOnPress(() -> outtakeTPS = Math.min(4500, outtakeTPS + 500));
+        outtakeVelocityD.setOnPress(() -> outtakeTPS = Math.max(500, outtakeTPS - 500));
 
         // Robot drive
-        slowTrigger.setOnPress(() -> slowMode = true);
-        slowTrigger.setOnRelease(() -> slowMode = false);
+        slowTrigger.setOnPress(() -> slowMode = !slowMode);
         robotCentricControl.setOnPress(() -> isRobotCentric = !isRobotCentric);
+
+        // FieldCentric rotation reset
+        rotationReset.setOnPress(() -> follower.setPose(new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(0))));
 
         // --- Lazy path builder ---
         pathChain = () -> follower.pathBuilder()
@@ -114,14 +117,16 @@ public class PedroDriveEx extends OpMode {
         telemetryM.update();
 
         // --- Update button handlers ---
-        outtakeControl.update(gamepad2.left_bumper);
+        outtakeControl.update(gamepad1.left_trigger, 0.25f);
         intakeDirectionControlU.update(gamepad1.right_bumper);
-        indexingControl.update(gamepad2.left_trigger, 0.25f);
-        intakeDirectionControlD.update(gamepad1.right_trigger, 0.25f);
-        outtakeVelocityU.update(gamepad2.dpad_up);
-        outtakeVelocityD.update(gamepad2.dpad_down);
-        slowTrigger.update(gamepad1.left_trigger, 0.25f);
-        robotCentricControl.update(gamepad1.a);
+        indexingControl.update(gamepad1.right_trigger, 0.25f);
+        intakeDirectionControlD.update(gamepad1.left_bumper);
+        outtakeVelocityU.update(gamepad1.dpad_up);
+        outtakeVelocityD.update(gamepad1.dpad_down);
+        slowTrigger.update(gamepad1.left_stick_button);
+        robotCentricControl.update(gamepad1.share);
+        rotationReset.update(gamepad1.options);
+
 
         // --- Drive ---
         if (!automatedDrive) {
@@ -146,7 +151,7 @@ public class PedroDriveEx extends OpMode {
 
         // --- Intake / Outtake ---
         RobotHardware.intakeMotor.setPower(intakeDir);
-        outtakeMotors.setPower(outtakePow * outtakeDir);
+        outtakeMotors.setVelocity(outtakeTPS * outtakeDir);
         RobotHardware.indexingWheel.setPower(gamepad2.a ? -indexingWheelDir : indexingWheelDir);
 
         // --- Debug Telemetry ---
@@ -156,9 +161,9 @@ public class PedroDriveEx extends OpMode {
 
         telemetry.addData("slowModeMultiplier", slowModeMultiplier);
         telemetry.addData("slowModeActive", slowMode);
-        telemetry.addData("Outtake Power", outtakePow);
+        telemetry.addData("Outtake Power", outtakeTPS);
         telemetry.addData("Outtake Dir", outtakeDir);
-        telemetry.addData("Motor Speed", outtakePow * outtakeDir);
+        telemetry.addData("Motor Speed", outtakeTPS * outtakeDir);
         telemetry.update();
     }
 

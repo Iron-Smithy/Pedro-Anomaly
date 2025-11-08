@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.tools;
 
 import static org.firstinspires.ftc.teamcode.RobotHardware.*;
+import org.firstinspires.ftc.teamcode.tools.MotorGroup;
 
 import com.pedropathing.util.Timer;
 
@@ -9,6 +10,7 @@ import com.pedropathing.util.Timer;
  * so autonomous can be easy.
  */
 public class Actions {
+    MotorGroup outtakeMotors = new MotorGroup(outtakeMotor1, outtakeMotor2);
 
     private final Timer actionTimer = new Timer();
 
@@ -29,16 +31,14 @@ public class Actions {
      * Starts shooter spin-up sequence.
      * Call this before shoot() or use shootAuto() for automatic timing.
      */
-    public void spinUpShooter(double power) {
-        outtakeMotor1.setPower(power);
-        outtakeMotor2.setPower(power);
+    public void spinUpShooter(long velocity) {
+        outtakeMotors.setVelocity(velocity);
         shooterSpinningUp = true;
         actionTimer.resetTimer();
     }
 
     public void stopShooter() {
-        outtakeMotor1.setPower(0);
-        outtakeMotor2.setPower(0);
+        outtakeMotors.setVelocity(0);
         shooterSpinningUp = false;
         isShooting = false;
     }
@@ -62,11 +62,11 @@ public class Actions {
      * Spins up >> waits >> indexes >> stops.
      * Returns true when finished.
      */
-    public boolean shootAuto(double spinPower, long spinUpMs, long indexMs) {
+    public boolean shootAuto(long velocity, long spinUpMs, long indexMs) {
         long elapsed = actionTimer.getElapsedTime();
 
         if (!shooterSpinningUp) {
-            spinUpShooter(spinPower);
+            spinUpShooter(velocity);
         } else if (elapsed >= spinUpMs && !isShooting) {
             shoot();
         } else if (elapsed >= spinUpMs + indexMs) {

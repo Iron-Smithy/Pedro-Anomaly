@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -10,6 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.tools.MotorGroup;
 import static org.firstinspires.ftc.teamcode.RobotHardware.*;
+import org.firstinspires.ftc.teamcode.tools.Actions;
+
 
 /**
  * FTC Autonomous using PedroPathing
@@ -27,7 +30,7 @@ public class SecondAuto extends OpMode {
     private Actions actions;
 
     // ========================= Path Definitions =========================
-    private final Pose startPose = new Pose(120, 120, Math.toRadians(270));
+    private final Pose startPose = new Pose(120, 120, Math.toRadians(215));
     private final Pose scorePose = new Pose(84, 84, Math.toRadians(45));
     private final Pose R1 = new Pose(120, 83.5, Math.toRadians(0));
 
@@ -46,20 +49,19 @@ public class SecondAuto extends OpMode {
 
     // ========================= Path Building =========================
     private void buildPaths() {
-        scorePreload = new Path(new BezierLine(startPose, scorePose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-
-        eatR1 = new Path(new BezierLine(scorePose, R1))
-            .setLinearHeadingInterpolation(
+        scorePreload = new Path(new BezierLine(startPose, scorePose));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+//
+        eatR1 = new Path(new BezierLine(scorePose, R1));
+        eatR1.setLinearHeadingInterpolation(
                 scorePose.getHeading(),
-                Math.toRadians(0),
-                0.4 // finish turn 40% into path, not at end
-            );
+                Math.toRadians(0)
+        );
          // .setConstantHeadingInterpolation(R1.getHeading()); // face intake direction entire path
          // .setLinearHeadingInterpolation(scorePose.getHeading(), R1.getHeading()); // normal. turns to late to intake correctly
 
-        scoreR1 = new Path(new BezierLine(R1, scorePose))
-                .setLinearHeadingInterpolation(R1.getHeading(), scorePose.getHeading());
+        scoreR1 = new Path(new BezierLine(R1, scorePose));
+        scoreR1.setLinearHeadingInterpolation(R1.getHeading(), scorePose.getHeading());
     }
 
     // ========================= Main Auto Logic =========================
@@ -72,7 +74,7 @@ public class SecondAuto extends OpMode {
 
             case SCORE_PRELOAD:
                 if (!follower.isBusy()) {
-                    if (actions.shootAuto(1.0, 1500, 3000)) { // spin-up 1500ms, index 3000ms
+                    if (actions.shootAuto(3000, 1500, 3000)) { // spin-up 1500ms, index 3000ms
                         transitionTo(AutoState.INTAKE_R1);
                     }
                 }
@@ -89,7 +91,7 @@ public class SecondAuto extends OpMode {
 
             case SCORE_R1:
                 if (!follower.isBusy()) {
-                    if (actions.shootAuto(1.0, 1500, 3000)) {
+                    if (actions.shootAuto(3000, 1500, 3000)) {
                         transitionTo(AutoState.DONE);
                     }
                 }
@@ -112,7 +114,6 @@ public class SecondAuto extends OpMode {
     private void transitionTo(AutoState next, long delayMs) {
         currentState = next;
         pathTimer.resetTimer();
-        pathTimer.setDelay(delayMs); // Optional.
     }
 
     // ========================= OpMode Lifecycle =========================
