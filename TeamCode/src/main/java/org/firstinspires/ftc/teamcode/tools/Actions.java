@@ -12,70 +12,33 @@ import com.pedropathing.util.Timer;
 public class Actions {
     MotorGroup outtakeMotors = new MotorGroup(outtakeMotor1, outtakeMotor2);
 
-    private final Timer actionTimer = new Timer();
-
-    private boolean isShooting = false;
-    private boolean shooterSpinningUp = false;
-
     // ========== Intake ==========
     public void intakeOn(double power) {
         intakeMotor.setPower(power);
     }
-
     public void intakeOff() {
         intakeMotor.setPower(0);
     }
 
-    // ========== Outtake / Shooter ==========
-    /**
-     * Starts shooter spin-up sequence.
-     * Call this before shoot() or use shootAuto() for automatic timing.
-     */
-    public void spinUpShooter(long velocity, double power) {
-        outtakeMotors.setVelocity(velocity, power);
-        shooterSpinningUp = true;
-        actionTimer.resetTimer();
+    // ========== Indexer ==========
+
+    public void indexOn(double power) {
+        indexingWheel.setPower(power);
+    }
+    public void indexOff() {
+        indexingWheel.setPower(0);
     }
 
-
+    // ========== Outtake / Shooter ==========
+    public void outtakeSpinUp(long TPS, double power) {
+        outtakeMotors.setVelocity(TPS, power);
+    }
     public void stopShooter() {
         outtakeMotors.setVelocity(0, 0);
-        shooterSpinningUp = false;
-        isShooting = false;
+    }
+    public void spinUpShooter(long velocity, double power) {
+        outtakeMotors.setVelocity(velocity, power);
     }
 
-    /**
-     * Shoots one ball. Make sure shooter is spun up
-     */
-    public void shoot() {
-        indexingWheel.setPower(0.9);
-        isShooting = true;
-        actionTimer.resetTimer();
-    }
-
-    public void stopIndex() {
-        indexingWheel.setPower(0);
-        isShooting = false;
-    }
-
-    /**
-     * Combined automatic shoot sequence:
-     * Spins up >> waits >> indexes >> stops.
-     * Returns true when finished.
-     */
-    public boolean shootAuto(long velocity, double power, long spinUpMs, long indexMs, long elapsedTime) {
-        long elapsed = elapsedTime; //|| actionTimer.getElapsedTime();
-
-        if (!shooterSpinningUp) {
-            spinUpShooter(velocity, power);
-        } else if (elapsed >= spinUpMs && !isShooting) {
-            shoot();
-        } else if (elapsed >= spinUpMs + indexMs) {
-            stopIndex();
-            stopShooter();
-            return true; // done
-        }
-
-        return false; // still running
-    }
+    // ========== Functions ==========
 }

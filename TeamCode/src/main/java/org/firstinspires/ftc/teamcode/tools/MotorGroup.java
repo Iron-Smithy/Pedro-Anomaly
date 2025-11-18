@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tools;
 
+import static org.firstinspires.ftc.teamcode.RobotHardware.outtakeMotor1;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
@@ -12,7 +14,6 @@ public class MotorGroup {
         this.motors = motors;
         this.motorsEx = null; // No need to initialize DcMotorEx array
     }
-
     // Constructor for DcMotorEx group
     public MotorGroup(DcMotorEx... motorsEx) {
         this.motorsEx = motorsEx;
@@ -96,23 +97,14 @@ public class MotorGroup {
         }
     }
 
-    // Get position range for regular motors (DcMotor)
-    public int[] getPositionRange() {
-        int max = Integer.MIN_VALUE;
-        int min = Integer.MAX_VALUE;
-        if (motors != null) {
-            for (DcMotor motor : motors) {
-                int pos = motor.getCurrentPosition();
-                if (pos > max) max = pos;
-                if (pos < min) min = pos;
-            }
-        } else if (motorsEx != null) {
-            for (DcMotorEx motorEx : motorsEx) {
-                int pos = motorEx.getCurrentPosition();
-                if (pos > max) max = pos;
-                if (pos < min) min = pos;
-            }
+    public long getVelocity() {
+        long avg = 0;
+        for (DcMotorEx motorEx : motorsEx) {
+            avg += motorEx.getVelocity();
         }
-        return new int[]{min, max};
+        return avg / motorsEx.length;
+    }
+    public boolean metVelocity(long target, long toleracnce) {
+        return getVelocity() > target - toleracnce;
     }
 }
