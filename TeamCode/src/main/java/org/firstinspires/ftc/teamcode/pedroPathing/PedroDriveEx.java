@@ -151,7 +151,7 @@ public class PedroDriveEx extends OpMode {
 
         // --- Intake / Outtake ---
         RobotHardware.intakeMotor.setPower(intakeDir);
-        outtakeMotors.setVelocity(outtakeTPS * outtakeDir, outtakeDir);
+        outtakeMotors.setVelocity(outtakeTPS * outtakeDir);
         RobotHardware.indexingWheel.setPower(gamepad1.a ? -indexingWheelDir : indexingWheelDir);
 
         // --- Debug Telemetry ---

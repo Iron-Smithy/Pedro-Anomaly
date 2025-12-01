@@ -26,7 +26,7 @@ public class AutonR extends OpMode {
 
     private Actions actions;
 
-    private long scoreShooterTPS = 0;
+    private long scoreShooterTPS = 2000;
     private long toleracnce = 50;
 
     // ========================= Path Definitions =========================
@@ -60,7 +60,7 @@ public class AutonR extends OpMode {
     private void buildPaths() {
         scorePreload = new Path(new BezierLine(startPose, scorePose));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-        scorePreload.setVelocityConstraint(0.85);
+        scorePreload.setVelocityConstraint(0.8);
 
         // row 1
         pickUpR1 = new Path(new BezierCurve(scorePose, row1CP, row1));
@@ -93,7 +93,7 @@ public class AutonR extends OpMode {
     private void updateAutonomous() {
         switch (currentState) {
             case START:
-                actions.spinUpShooter(2120, 1.0);
+                actions.outtakeSpinUp(scoreShooterTPS);
                 actions.intakeOn(-1);
 
                 follower.followPath(scorePreload);
@@ -126,7 +126,7 @@ public class AutonR extends OpMode {
                     follower.followPath(scoreR1);
                     transitionTo(AutoState.SCORE_R1);
 
-                    actions.outtakeSpinUp(scoreShooterTPS, 1);
+                    actions.outtakeSpinUp(scoreShooterTPS);
                 }
                 break;
             case GO_SCORE_R1:

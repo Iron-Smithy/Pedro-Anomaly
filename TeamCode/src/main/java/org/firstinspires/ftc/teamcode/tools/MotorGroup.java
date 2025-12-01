@@ -34,11 +34,10 @@ public class MotorGroup {
     }
 
     // Set velocity for DcMotorEx motors
-    public void setVelocity(long velocity, double power) {
+    public void setVelocity(long velocity) {
         if (motorsEx != null) {
             for (DcMotorEx motorEx : motorsEx) {
                 motorEx.setVelocity(velocity);
-                motorEx.setPower(power); // Ensures motor is running
             }
         }
     }

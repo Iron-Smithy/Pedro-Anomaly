@@ -30,15 +30,11 @@ public class Actions {
     }
 
     // ========== Outtake / Shooter ==========
-    public void outtakeSpinUp(long TPS, double power) {
-        outtakeMotors.setVelocity(TPS, power);
+    public void outtakeSpinUp(long TPS) {
+        outtakeMotors.setVelocity(TPS);
     }
     public void stopShooter() {
-        outtakeMotors.setVelocity(0, 0);
+        outtakeMotors.setVelocity(0);
     }
-    public void spinUpShooter(long velocity, double power) {
-        outtakeMotors.setVelocity(velocity, power);
-    }
-
     // ========== Functions ==========
 }
