@@ -12,35 +12,36 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
-import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
+import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
 @Autonomous(name = "AutonRE", group = "AAA")
 public class AutonRE extends OpMode {
     private Follower follower;
-    private Timer pathTimer, opmodeTimer, RunTimer;
+    private Timer pathTimer, opmodeTimer;
 
     private IntakeAction intake;
     private IndexAction indexer;
     private EjectorAction ejector;
     private OuttakeAction outtake;
 
-    private long scoreShooterTPS = 1050;
+    private long scoreShooterTPS = 1150;
     private long tolerance = 50;
 
     private long fireCount = 0;
 
     private final Pose startPose = new Pose(120, 127, Math.toRadians(37));
-    private final Pose scorePose = new Pose(100, 107, Math.toRadians(36));
-
-    private final Pose row1 = new Pose(130, 83.5, Math.toRadians(0));
+    private final Pose scorePose = new Pose(100, 107, Math.toRadians(47));
+    private final Pose row1 = new Pose(150, 83.5, Math.toRadians(0));
     private final Pose row1CP = new Pose(85, 80, Math.toRadians(0));
-    private final Pose row2 = new Pose(130, 59.5, Math.toRadians(0));
-    private final Pose row2CP = new Pose(71, 53, Math.toRadians(0));
+    private final Pose row2 = new Pose(150, 59, Math.toRadians(0));
+    private final Pose row2CP = new Pose(65, 55, Math.toRadians(0));
+    private final Pose row3 = new Pose(150, 36, Math.toRadians(0));
+    private final Pose row3CP = new Pose(72, 25, Math.toRadians(0));
 
-    private Path scorePreload, pickUpR1, scoreR1, pickUpR2, scoreR2;
+    private Path scorePreload, pickUpR1, scoreR1, pickUpR2, scoreR2, pickUpR3, scoreR3;
 
     private enum AutoState {
         START,
@@ -55,6 +56,10 @@ public class AutonRE extends OpMode {
         GO_SCORE_R2,
         SCORE_R2,
         SCORE_R2_SERVO,
+        PICKUP_R3,
+        GO_SCORE_R3,
+        SCORE_R3,
+        SCORE_R3_SERVO,
         DONE
     }
 
@@ -78,6 +83,13 @@ public class AutonRE extends OpMode {
 
         scoreR2 = new Path(new BezierCurve(row2, row2CP, scorePose));
         scoreR2.setLinearHeadingInterpolation(row2.getHeading(), scorePose.getHeading());
+
+        pickUpR3 = new Path(new BezierCurve(scorePose, row3CP, row3));
+        pickUpR3.setConstantHeadingInterpolation(row3.getHeading());
+        pickUpR3.setVelocityConstraint(0.2);
+
+        scoreR3 = new Path(new BezierCurve(row3, row3CP, scorePose));
+        scoreR3.setLinearHeadingInterpolation(row3.getHeading(), scorePose.getHeading());
     }
 
     private void updateAutonomous() {
@@ -91,7 +103,7 @@ public class AutonRE extends OpMode {
                 break;
 
             case GO_SCORE_PRELOAD:
-                if ((!follower.isBusy() && outtake.isAtTargetVelocity()) || pathTimer.getElapsedTime() >= 5000) {
+                if ((!follower.isBusy() && outtake.isAtTargetVelocity()) || pathTimer.getElapsedTime() >= 8000) {
                     transitionTo(AutoState.SCORE_PRELOAD);
                 }
                 break;
@@ -99,7 +111,7 @@ public class AutonRE extends OpMode {
                 if (outtake.isAtTargetVelocity()) indexer.runIn();
                 ejector.down();
                 if (fireCount < 3) {
-                    if (pathTimer.getElapsedTime() >= 750 && outtake.isAtTargetVelocity()) { // small delay between shots
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
                         ejector.up();
                         transitionTo(AutoState.SCORE_PRELOAD_SERVO);
                     }
@@ -118,13 +130,13 @@ public class AutonRE extends OpMode {
                 break;
 
             case PICKUP_R1:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 6000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     follower.followPath(scoreR1);
                     transitionTo(AutoState.GO_SCORE_R1);
                 }
                 break;
             case GO_SCORE_R1:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 6000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     transitionTo(AutoState.SCORE_R1);
                 }
                 break;
@@ -133,7 +145,7 @@ public class AutonRE extends OpMode {
                 if (outtake.isAtTargetVelocity()) indexer.runIn();
                 ejector.down();
                 if (fireCount < 3) {
-                    if (pathTimer.getElapsedTime() >= 750 && outtake.isAtTargetVelocity()) { // small delay between shots
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
                         ejector.up();
                         transitionTo(AutoState.SCORE_R1_SERVO);
                     }
@@ -152,13 +164,13 @@ public class AutonRE extends OpMode {
                 break;
 
             case PICKUP_R2:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 6000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     follower.followPath(scoreR2);
                     transitionTo(AutoState.GO_SCORE_R2);
                 }
                 break;
             case GO_SCORE_R2:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 4000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     transitionTo(AutoState.SCORE_R2);
                 }
                 break;
@@ -167,14 +179,15 @@ public class AutonRE extends OpMode {
                 if (outtake.isAtTargetVelocity()) indexer.runIn();
                 ejector.down();
                 if (fireCount < 3) {
-                    if (pathTimer.getElapsedTime() >= 750 && outtake.isAtTargetVelocity()) { // small delay between shots
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
                         ejector.up();
                         transitionTo(AutoState.SCORE_R2_SERVO);
                     }
                 } else {
                     fireCount = 0;
                     indexer.stop();
-                    transitionTo(AutoState.DONE);
+                    follower.followPath(pickUpR3);
+                    transitionTo(AutoState.PICKUP_R3);
                 }
                 break;
             case SCORE_R2_SERVO:
@@ -183,9 +196,45 @@ public class AutonRE extends OpMode {
                     transitionTo(AutoState.SCORE_R2);
                 }
                 break;
+            case PICKUP_R3:
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+                    follower.followPath(scoreR3);
+                    transitionTo(AutoState.GO_SCORE_R3);
+                }
+                break;
+            case GO_SCORE_R3:
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+                    transitionTo(AutoState.SCORE_R3);
+                }
+                break;
+
+            case SCORE_R3:
+                if (outtake.isAtTargetVelocity()) indexer.runIn();
+                ejector.down();
+                if (fireCount < 3) {
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
+                        ejector.up();
+                        transitionTo(AutoState.SCORE_R3_SERVO);
+                    }
+                } else {
+                    fireCount = 0;
+                    indexer.stop();
+                    transitionTo(AutoState.DONE);
+                }
+                break;
+            case SCORE_R3_SERVO:
+                if (pathTimer.getElapsedTime() >= 300) {
+                    fireCount++;
+                    transitionTo(AutoState.SCORE_R3);
+                }
+                break;
+
 
             case DONE:
                 outtake.stop();
+                indexer.stop();
+                intake.stop();
+                ejector.down();
                 break;
         }
     }

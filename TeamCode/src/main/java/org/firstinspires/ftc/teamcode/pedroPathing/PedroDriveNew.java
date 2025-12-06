@@ -45,7 +45,6 @@ public class PedroDriveNew extends OpMode {
     private ButtonHandler outtakeVelocityU = new ButtonHandler();
     private ButtonHandler outtakeVelocityD = new ButtonHandler();
     private ButtonHandler slowTrigger = new ButtonHandler();
-    private ButtonHandler robotCentricControl = new ButtonHandler();
     private ButtonHandler rotationReset = new ButtonHandler();
     double k = 2.0;
     double expKMinus1 = Math.exp(k) - 1; // Precompute at init;
@@ -65,7 +64,6 @@ public class PedroDriveNew extends OpMode {
         outtakeVelocityD.setOnPress(() -> outtakePow = Math.min(0.85, Math.max(0.05, outtakePow - 0.05)));
 
         slowTrigger.setOnPress(() -> slowMode = !slowMode);
-        robotCentricControl.setOnPress(() -> isRobotCentric = !isRobotCentric);
 
         outtakeAngleControlU.setOnPress(() -> outtakeAngle = 0.7);
         outtakeAngleControlD.setOnPress(() -> outtakeAngle = 0.3);
@@ -79,8 +77,7 @@ public class PedroDriveNew extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37), 0.8)) // 37 for red 180-37 for blue
                 .build();
     }
 
@@ -104,7 +101,6 @@ public class PedroDriveNew extends OpMode {
         outtakeVelocityU.update(gamepad1.dpad_up);
         outtakeVelocityD.update(gamepad1.dpad_down);
         slowTrigger.update(gamepad1.left_stick_button);
-        robotCentricControl.update(gamepad1.share);
         rotationReset.update(gamepad1.options);
         outtakeAngleControlU.update(gamepad1.dpad_left);
         outtakeAngleControlD.update(gamepad1.dpad_right);
@@ -121,6 +117,18 @@ public class PedroDriveNew extends OpMode {
             outtakePow = 0.75;
             outtakeAngle = 0.7;
         }
+
+
+        if (gamepad1.shareWasPressed()) {
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
+        }
+        if (automatedDrive && (gamepad1.psWasPressed() || !follower.isBusy())) {
+            follower.startTeleopDrive();
+            automatedDrive = false;
+        }
+
+
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
             //In case the drivers want to use a "slowMode" you can scale the vectors

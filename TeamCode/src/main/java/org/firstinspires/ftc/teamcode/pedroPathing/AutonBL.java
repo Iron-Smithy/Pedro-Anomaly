@@ -5,6 +5,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
+import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
 @Autonomous(name = "AutonBL", group = "AAA")
 public class AutonBL extends OpMode {
@@ -25,20 +27,22 @@ public class AutonBL extends OpMode {
     private EjectorAction ejector;
     private OuttakeAction outtake;
 
-    private long scoreShooterTPS = 1050;
+    private long scoreShooterTPS = 1100;
     private long tolerance = 50;
 
     private long fireCount = 0;
 
     private final Pose startPose = new Pose(144-120, 127, Math.toRadians(180-37));
-    private final Pose scorePose = new Pose(144-100, 107, Math.toRadians(180-36));
-
-    private final Pose row1 = new Pose(144-130, 83.5, Math.toRadians(180-0));
+    private final Pose scorePose = new Pose(144-100, 107, Math.toRadians(180-47));
+    private final Pose row1 = new Pose(144-145, 83.5, Math.toRadians(180-0));
     private final Pose row1CP = new Pose(144-85, 80, Math.toRadians(180-0));
-    private final Pose row2 = new Pose(144-130, 59.5, Math.toRadians(180-0));
-    private final Pose row2CP = new Pose(144-71, 53, Math.toRadians(180-0));
+    private final Pose row2 = new Pose(144-140, 57, Math.toRadians(180-0));
+    private final Pose row2CP =  new Pose(144-90, 57, Math.toRadians(180-0)); // new Pose(144-65, 55, Math.toRadians(180-0));
+    private final Pose row3 = new Pose(144-140, 36, Math.toRadians(180-0));
+    private final Pose row3CP = new Pose(144-72, 25, Math.toRadians(180-0));
+    private final Pose ExitPose = new Pose(144-120, 83.5, Math.toRadians(180-90));
 
-    private Path scorePreload, pickUpR1, scoreR1, pickUpR2, scoreR2;
+    private Path scorePreload, pickUpR1, scoreR1, pickUpR2Pre, pickUpR2, scoreR2, pickUpR3, scoreR3, Exit;
 
     private enum AutoState {
         START,
@@ -49,10 +53,16 @@ public class AutonBL extends OpMode {
         GO_SCORE_R1,
         SCORE_R1,
         SCORE_R1_SERVO,
+        PICKUP_R2_PRE,
         PICKUP_R2,
         GO_SCORE_R2,
         SCORE_R2,
         SCORE_R2_SERVO,
+        PICKUP_R3,
+        GO_SCORE_R3,
+        SCORE_R3,
+        SCORE_R3_SERVO,
+        Exit,
         DONE
     }
 
@@ -70,12 +80,23 @@ public class AutonBL extends OpMode {
         scoreR1 = new Path(new BezierLine(row1, scorePose));
         scoreR1.setLinearHeadingInterpolation(row1.getHeading(), scorePose.getHeading());
 
-        pickUpR2 = new Path(new BezierCurve(scorePose, row2CP, row2));
+        pickUpR2Pre = new Path(new BezierLine(scorePose, row2CP));
+        pickUpR2Pre.setConstantHeadingInterpolation(row2.getHeading());
+        pickUpR2Pre.setVelocityConstraint(0.2);
+
+        pickUpR2 = new Path(new BezierLine(row2CP, row2));
         pickUpR2.setConstantHeadingInterpolation(row2.getHeading());
         pickUpR2.setVelocityConstraint(0.2);
 
         scoreR2 = new Path(new BezierCurve(row2, row2CP, scorePose));
         scoreR2.setLinearHeadingInterpolation(row2.getHeading(), scorePose.getHeading());
+
+        pickUpR3 = new Path(new BezierCurve(scorePose, row3CP, row3));
+        pickUpR3.setConstantHeadingInterpolation(row3.getHeading());
+        pickUpR3.setVelocityConstraint(0.2);
+
+        scoreR3 = new Path(new BezierCurve(row3, row3CP, scorePose));
+        scoreR3.setLinearHeadingInterpolation(row3.getHeading(), scorePose.getHeading());
     }
 
     private void updateAutonomous() {
@@ -89,7 +110,7 @@ public class AutonBL extends OpMode {
                 break;
 
             case GO_SCORE_PRELOAD:
-                if ((!follower.isBusy() && outtake.isAtTargetVelocity()) || pathTimer.getElapsedTime() >= 5000) {
+                if ((!follower.isBusy() && outtake.isAtTargetVelocity()) || pathTimer.getElapsedTime() >= 8000) {
                     transitionTo(AutoState.SCORE_PRELOAD);
                 }
                 break;
@@ -97,7 +118,7 @@ public class AutonBL extends OpMode {
                 if (outtake.isAtTargetVelocity()) indexer.runIn();
                 ejector.down();
                 if (fireCount < 3) {
-                    if (pathTimer.getElapsedTime() >= 750 && outtake.isAtTargetVelocity()) { // small delay between shots
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
                         ejector.up();
                         transitionTo(AutoState.SCORE_PRELOAD_SERVO);
                     }
@@ -116,13 +137,13 @@ public class AutonBL extends OpMode {
                 break;
 
             case PICKUP_R1:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 6000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     follower.followPath(scoreR1);
                     transitionTo(AutoState.GO_SCORE_R1);
                 }
                 break;
             case GO_SCORE_R1:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 6000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     transitionTo(AutoState.SCORE_R1);
                 }
                 break;
@@ -131,15 +152,15 @@ public class AutonBL extends OpMode {
                 if (outtake.isAtTargetVelocity()) indexer.runIn();
                 ejector.down();
                 if (fireCount < 3) {
-                    if (pathTimer.getElapsedTime() >= 750  && outtake.isAtTargetVelocity()) { // small delay between shots
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
                         ejector.up();
                         transitionTo(AutoState.SCORE_R1_SERVO);
                     }
                 } else {
                     fireCount = 0;
                     indexer.stop();
-                    follower.followPath(pickUpR2);
-                    transitionTo(AutoState.PICKUP_R2);
+                    follower.followPath(pickUpR2Pre);
+                    transitionTo(AutoState.PICKUP_R2_PRE);
                 }
                 break;
             case SCORE_R1_SERVO:
@@ -149,14 +170,21 @@ public class AutonBL extends OpMode {
                 }
                 break;
 
+            case PICKUP_R2_PRE:
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+                    follower.followPath(pickUpR2);
+                    transitionTo(AutoState.PICKUP_R2);
+                }
+                break;
+
             case PICKUP_R2:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 6000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     follower.followPath(scoreR2);
                     transitionTo(AutoState.GO_SCORE_R2);
                 }
                 break;
             case GO_SCORE_R2:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 4000) {
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
                     transitionTo(AutoState.SCORE_R2);
                 }
                 break;
@@ -165,14 +193,15 @@ public class AutonBL extends OpMode {
                 if (outtake.isAtTargetVelocity()) indexer.runIn();
                 ejector.down();
                 if (fireCount < 3) {
-                    if (pathTimer.getElapsedTime() >= 750 && outtake.isAtTargetVelocity()) { // small delay between shots
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
                         ejector.up();
                         transitionTo(AutoState.SCORE_R2_SERVO);
                     }
                 } else {
                     fireCount = 0;
                     indexer.stop();
-                    transitionTo(AutoState.DONE);
+                    follower.followPath(Exit);
+                    transitionTo(AutoState.Exit); // SKIPS 3
                 }
                 break;
             case SCORE_R2_SERVO:
@@ -181,9 +210,49 @@ public class AutonBL extends OpMode {
                     transitionTo(AutoState.SCORE_R2);
                 }
                 break;
+            case PICKUP_R3:
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+                    follower.followPath(scoreR3);
+                    transitionTo(AutoState.GO_SCORE_R3);
+                }
+                break;
+            case GO_SCORE_R3:
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+                    transitionTo(AutoState.SCORE_R3);
+                }
+                break;
+
+            case SCORE_R3:
+                if (outtake.isAtTargetVelocity()) indexer.runIn();
+                ejector.down();
+                if (fireCount < 3) {
+                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
+                        ejector.up();
+                        transitionTo(AutoState.SCORE_R3_SERVO);
+                    }
+                } else {
+                    fireCount = 0;
+                    indexer.stop();
+                    transitionTo(AutoState.DONE);
+                }
+                break;
+            case SCORE_R3_SERVO:
+                if (pathTimer.getElapsedTime() >= 300) {
+                    fireCount++;
+                    transitionTo(AutoState.SCORE_R3);
+                }
+                break;
+            case Exit:
+                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+                    transitionTo(AutoState.DONE);
+                }
+                break;
 
             case DONE:
                 outtake.stop();
+                indexer.stop();
+                intake.stop();
+                ejector.down();
                 break;
         }
     }

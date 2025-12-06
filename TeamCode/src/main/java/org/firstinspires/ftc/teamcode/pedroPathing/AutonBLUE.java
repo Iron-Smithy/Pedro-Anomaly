@@ -1,0 +1,303 @@
+//package org.firstinspires.ftc.teamcode.pedroPathing;
+//
+//import com.pedropathing.follower.Follower;
+//import com.pedropathing.geometry.BezierCurve;
+//import com.pedropathing.geometry.BezierLine;
+//import com.pedropathing.geometry.Pose;
+//import com.pedropathing.paths.Path;
+//import com.pedropathing.util.Timer;
+//import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+//import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+//
+//import org.firstinspires.ftc.teamcode.RobotHardware;
+//import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
+//import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
+//import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
+//import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
+//
+//@Autonomous(name = "AutonBL", group = "AAA")
+//public class AutonBLUE extends OpMode {
+//    private Follower follower;
+//    private Timer pathTimer, opmodeTimer;
+//
+//    private IntakeAction intake;
+//    private IndexAction indexer;
+//    private EjectorAction ejector;
+//    private OuttakeAction outtake;
+//
+//    private long scoreShooterTPS = 1150;
+//    private long tolerance = 50;
+//
+//    private long fireCount = 0;
+//
+//    private final Pose startPose = new Pose(144-120, 127, Math.toRadians(180-37));
+//    private final Pose scorePose = new Pose(144-100, 107, Math.toRadians(180-47));
+//    private final Pose row1 = new Pose(144-145, 83.5, Math.toRadians(180-0));
+//    private final Pose row1CP = new Pose(144-85, 80, Math.toRadians(180-0));
+//    private final Pose row2 = new Pose(144-140, 59, Math.toRadians(180-0));
+//    private final Pose row2CP =  new Pose(144-65, 55, Math.toRadians(180-0)); // new Pose(144-65, 55, Math.toRadians(180-0));
+//    private final Pose row3 = new Pose(144-140, 36, Math.toRadians(180-0));
+//    private final Pose row3CP = new Pose(144-72, 25, Math.toRadians(180-0));
+//    private final Pose ExitPose = new Pose(144-120, 83.5, Math.toRadians(180-90));
+//
+//    private Path scorePreload, pickUpR1, scoreR1, pickUpR2, scoreR2, pickUpR3, scoreR3, Exit;
+//
+//    private enum AutoState {
+//        START,
+//        GO_SCORE_PRELOAD,
+//        SCORE_PRELOAD,
+//        SCORE_PRELOAD_SERVO,
+//        PICKUP_R1,
+//        GO_SCORE_R1,
+//        SCORE_R1,
+//        SCORE_R1_SERVO,
+//        PICKUP_R2,
+//        GO_SCORE_R2,
+//        SCORE_R2,
+//        SCORE_R2_SERVO,
+//        PICKUP_R3,
+//        GO_SCORE_R3,
+//        SCORE_R3,
+//        SCORE_R3_SERVO,
+//        Exit,
+//        DONE
+//    }
+//
+//    private AutoState currentState = AutoState.START;
+//
+//    private void buildPaths() {
+//        scorePreload = new Path(new BezierLine(startPose, scorePose));
+//        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+//        scorePreload.setVelocityConstraint(0.8);
+//
+//        pickUpR1 = new Path(new BezierCurve(scorePose, row1CP, row1));
+//        pickUpR1.setConstantHeadingInterpolation(row1.getHeading());
+//        pickUpR1.setVelocityConstraint(0.2);
+//
+//        scoreR1 = new Path(new BezierLine(row1, scorePose));
+//        scoreR1.setLinearHeadingInterpolation(row1.getHeading(), scorePose.getHeading());
+//
+//        pickUpR2 = new Path(new BezierCurve(scorePose, row2CP, row2));
+//        pickUpR2.setConstantHeadingInterpolation(row2.getHeading());
+//        pickUpR2.setVelocityConstraint(0.2);
+//
+//        scoreR2 = new Path(new BezierCurve(row2, row2CP, scorePose));
+//        scoreR2.setLinearHeadingInterpolation(row2.getHeading(), scorePose.getHeading());
+//
+//        pickUpR3 = new Path(new BezierCurve(scorePose, row3CP, row3));
+//        pickUpR3.setConstantHeadingInterpolation(row3.getHeading());
+//        pickUpR3.setVelocityConstraint(0.2);
+//
+//        scoreR3 = new Path(new BezierCurve(row3, row3CP, scorePose));
+//        scoreR3.setLinearHeadingInterpolation(row3.getHeading(), scorePose.getHeading());
+//    }
+//
+//    private void updateAutonomous() {
+//        switch (currentState) {
+//            case START:
+//                outtake.spinUp(scoreShooterTPS);
+//                intake.runIn();
+//                RobotHardware.outtakeAngleAdjust.setPosition(0.3);
+//                follower.followPath(scorePreload);
+//                transitionTo(AutoState.GO_SCORE_PRELOAD);
+//                break;
+//
+//            case GO_SCORE_PRELOAD:
+//                if ((!follower.isBusy() && outtake.isAtTargetVelocity()) || pathTimer.getElapsedTime() >= 8000) {
+//                    transitionTo(AutoState.SCORE_PRELOAD);
+//                }
+//                break;
+//            case SCORE_PRELOAD:
+//                if (outtake.isAtTargetVelocity()) indexer.runIn();
+//                ejector.down();
+//                if (fireCount < 3) {
+//                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
+//                        ejector.up();
+//                        transitionTo(AutoState.SCORE_PRELOAD_SERVO);
+//                    }
+//                } else {
+//                    fireCount = 0;
+//                    indexer.stop();
+//                    follower.followPath(pickUpR1);
+//                    transitionTo(AutoState.PICKUP_R1);
+//                }
+//                break;
+//            case SCORE_PRELOAD_SERVO:
+//                if (pathTimer.getElapsedTime() >= 300) {
+//                    fireCount++;
+//                    transitionTo(AutoState.SCORE_PRELOAD);
+//                }
+//                break;
+//
+//            case PICKUP_R1:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    follower.followPath(scoreR1);
+//                    transitionTo(AutoState.GO_SCORE_R1);
+//                }
+//                break;
+//            case GO_SCORE_R1:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    transitionTo(AutoState.SCORE_R1);
+//                }
+//                break;
+//
+//            case SCORE_R1:
+//                if (outtake.isAtTargetVelocity()) indexer.runIn();
+//                ejector.down();
+//                if (fireCount < 3) {
+//                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
+//                        ejector.up();
+//                        transitionTo(AutoState.SCORE_R1_SERVO);
+//                    }
+//                } else {
+//                    fireCount = 0;
+//                    indexer.stop();
+//                    follower.followPath(pickUpR2);
+//                    transitionTo(AutoState.PICKUP_R2);
+//                }
+//                break;
+//            case SCORE_R1_SERVO:
+//                if (pathTimer.getElapsedTime() >= 300) {
+//                    fireCount++;
+//                    transitionTo(AutoState.SCORE_R1);
+//                }
+//                break;
+//
+//            case PICKUP_R2:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    follower.followPath(scoreR2);
+//                    transitionTo(AutoState.GO_SCORE_R2);
+//                }
+//                break;
+//            case GO_SCORE_R2:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    transitionTo(AutoState.SCORE_R2);
+//                }
+//                break;
+//
+//            case SCORE_R2:
+//                if (outtake.isAtTargetVelocity()) indexer.runIn();
+//                ejector.down();
+//                if (fireCount < 3) {
+//                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
+//                        ejector.up();
+//                        transitionTo(AutoState.SCORE_R2_SERVO);
+//                    }
+//                } else {
+//                    fireCount = 0;
+//                    indexer.stop();
+//                    follower.followPath(Exit);
+//                    transitionTo(AutoState.Exit); // SKIPS 3
+//                }
+//                break;
+//            case SCORE_R2_SERVO:
+//                if (pathTimer.getElapsedTime() >= 300) {
+//                    fireCount++;
+//                    transitionTo(AutoState.SCORE_R2);
+//                }
+//                break;
+//            case PICKUP_R3:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    follower.followPath(scoreR3);
+//                    transitionTo(AutoState.GO_SCORE_R3);
+//                }
+//                break;
+//            case GO_SCORE_R3:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    transitionTo(AutoState.SCORE_R3);
+//                }
+//                break;
+//
+//            case SCORE_R3:
+//                if (outtake.isAtTargetVelocity()) indexer.runIn();
+//                ejector.down();
+//                if (fireCount < 3) {
+//                    if (pathTimer.getElapsedTime() >= 500 && outtake.isAtTargetVelocity()) { // small delay between shots
+//                        ejector.up();
+//                        transitionTo(AutoState.SCORE_R3_SERVO);
+//                    }
+//                } else {
+//                    fireCount = 0;
+//                    indexer.stop();
+//                    transitionTo(AutoState.DONE);
+//                }
+//                break;
+//            case SCORE_R3_SERVO:
+//                if (pathTimer.getElapsedTime() >= 300) {
+//                    fireCount++;
+//                    transitionTo(AutoState.SCORE_R3);
+//                }
+//                break;
+//            case Exit:
+//                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
+//                    transitionTo(AutoState.DONE);
+//                }
+//                break;
+//
+//            case DONE:
+//                outtake.stop();
+//                indexer.stop();
+//                intake.stop();
+//                ejector.down();
+//                break;
+//        }
+//    }
+//
+//    private void transitionTo(AutoState next) {
+//        currentState = next;
+//        pathTimer.resetTimer();
+//    }
+//
+//    @Override
+//    public void init() {
+//        pathTimer = new Timer();
+//        opmodeTimer = new Timer();
+//
+//        RobotHardware.init(hardwareMap);
+//        follower = Constants.createFollower(hardwareMap);
+//
+//        intake = new IntakeAction(hardwareMap);
+//        indexer = new IndexAction(hardwareMap);
+//        ejector = new EjectorAction(hardwareMap);
+//        outtake = new OuttakeAction(hardwareMap);
+//
+//        buildPaths();
+//        follower.setStartingPose(startPose);
+//    }
+//
+//    @Override
+//    public void start() {
+//        pathTimer.resetTimer();
+//        currentState = AutoState.START;
+//    }
+//
+//    @Override
+//    public void loop() {
+//        follower.update();
+//        intake.runIn();
+//        updateAutonomous();
+//
+//        telemetry.addLine("=== AutonR Debug ===");
+//        telemetry.addData("State", currentState);
+//        telemetry.addData("Follower Busy", follower.isBusy());
+//        telemetry.addData("Timer (ms)", pathTimer.getElapsedTime());
+//        telemetry.addLine("Pose:");
+//        telemetry.addData("x", "%.2f", follower.getPose().getX());
+//        telemetry.addData("y", "%.2f", follower.getPose().getY());
+//        telemetry.addData("heading", "%.2f°", Math.toDegrees(follower.getPose().getHeading()));
+//
+//        // show shooter velocity if available
+//        try {
+//            double shooterVel = RobotHardware.outtakeMotor.getVelocity();
+//            telemetry.addData("shooter TPS", "%.1f", shooterVel);
+//            telemetry.addData("shooter goal", scoreShooterTPS);
+//            telemetry.addData("atTarget", outtake.isAtTargetVelocity());
+//            telemetry.addData("fire count", fireCount);
+//            telemetry.addData("eject angle", ejector.paddle.getPosition());
+//        } catch (Exception e) {
+//            telemetry.addLine("Outtake motor velocity unavailable (check RobotHardware field).");
+//        }
+//
+//        telemetry.update();
+//    }
+//}
