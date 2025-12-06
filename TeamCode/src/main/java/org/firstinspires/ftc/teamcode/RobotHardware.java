@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class RobotHardware {
     public static DcMotor frontLeftMotor;
@@ -12,9 +13,11 @@ public class RobotHardware {
     public static DcMotor frontRightMotor;
     public static DcMotor backRightMotor;
     public static DcMotor intakeMotor;
-    public static DcMotorEx outtakeMotor1;
-    public static DcMotorEx outtakeMotor2;
-    public static CRServo indexingWheel;
+    public static DcMotorEx outtakeMotor;
+    public static Servo indexerPaddle;
+    public static CRServo indexerWheel0;
+    public static CRServo indexerWheel1;
+    public static Servo outtakeAngleAdjust;
 
     public static void init(HardwareMap hwMap) {
         frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
@@ -22,12 +25,13 @@ public class RobotHardware {
         frontRightMotor = hwMap.get(DcMotor.class, "frontRightMotor");
         backRightMotor = hwMap.get(DcMotor.class, "backRightMotor");
         intakeMotor = hwMap.get(DcMotor.class, "intakeMotor");
-        outtakeMotor1 = hwMap.get(DcMotorEx.class, "outtakeMotor1");
-        outtakeMotor2 = hwMap.get(DcMotorEx.class, "outtakeMotor2");
-        indexingWheel = hwMap.get(CRServo.class, "indexingWheel");
+        outtakeMotor = hwMap.get(DcMotorEx.class, "outtakeMotor");
+        indexerPaddle = hwMap.get(Servo.class, "indexerPaddle");
+        indexerWheel0 = hwMap.get(CRServo.class, "indexerWheel0");
+        indexerWheel1 = hwMap.get(CRServo.class, "indexerWheel1");
+        outtakeAngleAdjust = hwMap.get(Servo.class, "outtakeAngleAdjust");
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        outtakeMotor2.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 }
