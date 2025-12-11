@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.pedroPathing.Teleop;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -13,13 +13,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.tools.ButtonHandler;
 
 import java.util.function.Supplier;
 
 @Configurable
 @TeleOp
-public class PedroDriveNew extends OpMode {
+public class PedroDrive extends OpMode {
 
     private Follower follower;
     public static Pose startingPose; //See ExampleAuto to understand how to use this
@@ -77,7 +78,8 @@ public class PedroDriveNew extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37), 0.8)) // 37 for red 180-37 for blue
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
     }
 
@@ -116,16 +118,6 @@ public class PedroDriveNew extends OpMode {
         if (gamepad1.triangleWasPressed()) {
             outtakePow = 0.75;
             outtakeAngle = 0.7;
-        }
-
-
-        if (gamepad1.shareWasPressed()) {
-            follower.followPath(pathChain.get());
-            automatedDrive = true;
-        }
-        if (automatedDrive && (gamepad1.psWasPressed() || !follower.isBusy())) {
-            follower.startTeleopDrive();
-            automatedDrive = false;
         }
 
 

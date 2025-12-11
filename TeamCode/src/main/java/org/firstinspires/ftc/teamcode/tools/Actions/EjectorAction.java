@@ -15,25 +15,6 @@ public class EjectorAction {
     public EjectorAction(HardwareMap hardwareMap) {
         paddle = RobotHardware.indexerPaddle;
     }
-
-    public boolean run() { // dont work
-        if (!isInit) {
-            paddle.setPosition(MConstants.ejectorUp);
-            isInit = true;
-            isUp = true;
-            return false; // still running
-        }
-        if (isUp) {
-            // automatically move back down next loop
-            paddle.setPosition(MConstants.ejectorDown);
-            isUp = false;
-            return false; // still running
-        }
-        if (!isUp && paddle.getPosition() >= MConstants.ejectorDown + 0.1) {
-            return false;
-        }
-        return true; // finished
-    }
     public void up() {
         paddle.setPosition(MConstants.ejectorUp);
     }

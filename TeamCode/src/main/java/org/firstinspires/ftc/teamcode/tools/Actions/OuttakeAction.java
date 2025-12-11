@@ -17,10 +17,9 @@ public class OuttakeAction {
         motor.setDirection(DcMotorEx.Direction.REVERSE);
     }
 
-    public boolean spinUp(double tps) {
+    public void spinUp(double tps) {
         targetVelocity = tps;
         motor.setVelocity(tps);
-        return isAtTargetVelocity();
     }
 
     public boolean stop() {

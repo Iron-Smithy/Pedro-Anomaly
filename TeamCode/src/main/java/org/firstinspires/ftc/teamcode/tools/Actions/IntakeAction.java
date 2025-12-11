@@ -36,4 +36,9 @@ public class IntakeAction {
         currentPower = 0;
         return true;
     }
+
+    public void spin(double dir) {
+        intakeMotor.setPower(dir);
+        currentPower = 0;
+    }
 }
