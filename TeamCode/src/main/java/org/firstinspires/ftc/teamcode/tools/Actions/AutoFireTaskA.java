@@ -11,7 +11,7 @@ public class AutoFireTaskA {
 
     private final int BALLS_TO_FIRE = 3;
 
-    private final long ballFeedDelay = 350;
+    private final long ballFeedDelay = 450;
     private final long servoMoveTime = 300;
     private final long outtakeLaunchDelay = 175;
 
@@ -26,9 +26,9 @@ public class AutoFireTaskA {
 
     private State currentState = State.WAITING_FOR_FEED_START;
     private boolean active = false;
-    private long targetVel;
+    private long[] targetVel;
 
-    public AutoFireTaskA(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, long targetVel) {
+    public AutoFireTaskA(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, long[] targetVel) {
         this.shooter = shooter;
         this.indexer = indexer;
         this.intake = intake;
@@ -40,7 +40,7 @@ public class AutoFireTaskA {
         active = true;
         fireCount = 0;
         currentState = State.SPINNING_UP;
-        shooter.spinUp(targetVel);
+        shooter.spinUp(targetVel[fireCount]);
         ejector.down();
         intake.stop();
         indexer.stop();
@@ -97,6 +97,7 @@ public class AutoFireTaskA {
                         currentState = State.COMPLETE;
                     } else {
                         timer = now;
+                        shooter.spinUp(targetVel[fireCount]);
                         currentState = State.SPINNING_UP;
                     }
                 }

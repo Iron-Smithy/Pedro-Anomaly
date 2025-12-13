@@ -29,19 +29,23 @@ public class Auton_RED_p1 extends OpMode {
     private EjectorAction ejector;
     private OuttakeAction outtake;
 
-    private long scoreShooterTPS = 1100;
+    private long scoreShooterTPS = 1135;
+    private long[] scoreShooterTPSArray = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS};
+    private long[] scoreShooterTPSArrayFirst = {scoreShooterTPS + 35, scoreShooterTPS - 10, scoreShooterTPS - 5};
+
+
     private long tolerance = 25;
 
     private AutoFireTaskA fireTask = null;
 
     private final double RPreXpos = 90;
     private final Pose startPose = new Pose(/*144-*/120, 127, Math.toRadians(/*180-*/37)); // start location
-    private final Pose ScorePose = new Pose(/*144-*/100, 107, Math.toRadians(/*180-*/47)); // score location
+    private final Pose ScorePose = new Pose(/*144-*/100, 107, Math.toRadians(/*180-*/45)); // score location
     private final Pose R1PrePose = new Pose(/*144-*/RPreXpos, 87, Math.toRadians(/*180-*/0)); // row 1 collection pre location
     private final Pose R1CollectPose = new Pose(/*144-*/125, 87, Math.toRadians(/*180-*/0)); // row 1 balls inside robot location
     private final Pose ScoreR1CPPose = new Pose(/*144-*/100, 87, Math.toRadians(/*180-*/0)); // smooth back-out bezier control point
     private final Pose R2PrePose = new Pose(/*144-*/RPreXpos, 63, Math.toRadians(/*180-*/0)); // row 2 collection pre location
-    private final Pose R2CollectPose = new Pose(/*144-*/135, 63, Math.toRadians(/*180-*/0)); // row 3 balls inside robot location
+    private final Pose R2CollectPose = new Pose(/*144-*/130, 63, Math.toRadians(/*180-*/0)); // row 3 balls inside robot location
     private final Pose ScoreR2CPPose = new Pose(/*144-*/90, 55, Math.toRadians(/*180-*/0));  // smooth back-out bezier control point
     private final Pose R3PrePose = new Pose(/*144-*/RPreXpos, 39, Math.toRadians(/*180-*/0)); // row 3 collection pre location
     private final Pose R3CollectPose = new Pose(/*144-*/135, 39, Math.toRadians(/*180-*/0)); // row 3 balls inside robot location
@@ -59,6 +63,7 @@ public class Auton_RED_p1 extends OpMode {
 
         PICKUP_R2, // row 2
         GO_SCORE_R2,
+        GO_SCORE_R2_HOLD,
         SCORE_R2,
 
         PICKUP_R3, // row 3
@@ -89,7 +94,7 @@ public class Auton_RED_p1 extends OpMode {
         startToScore = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, ScorePose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), ScorePose.getHeading())
-                .setVelocityConstraint(0.6)
+                .setVelocityConstraint(0.5)
                 .build();
 
         // ========= ROW 1 =========
@@ -160,21 +165,24 @@ public class Auton_RED_p1 extends OpMode {
                 RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
 
                 follower.followPath(startToScore);
+                follower.setMaxPower(0.65);
                 transitionTo(AutoState.GO_SCORE_PRELOAD);
                 break;
 
             // SCORE PRELOAD
             case GO_SCORE_PRELOAD:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArrayFirst);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_PRELOAD);
                 }
                 break;
+
             case SCORE_PRELOAD:
                 fireTask.update();
                 if (fireTask.isActive()) {
                 } else {
+                    follower.setMaxPower(0.80);
                     intake.runIn();
                     follower.followPath(row1Pickup);
                     transitionTo(AutoState.PICKUP_R1);
@@ -192,7 +200,7 @@ public class Auton_RED_p1 extends OpMode {
                 break;
             case GO_SCORE_R1:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R1);
                 }
@@ -218,7 +226,13 @@ public class Auton_RED_p1 extends OpMode {
                 break;
             case GO_SCORE_R2:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    follower.followPath(row2Return);
+                    transitionTo(AutoState.GO_SCORE_R2_HOLD);
+                }
+                break;
+            case GO_SCORE_R2_HOLD:
+                if (pathTimer.getElapsedTime() > 300) {
+                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R2);
                 }
@@ -244,7 +258,7 @@ public class Auton_RED_p1 extends OpMode {
                 break;
             case GO_SCORE_R3:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R3);
                 }

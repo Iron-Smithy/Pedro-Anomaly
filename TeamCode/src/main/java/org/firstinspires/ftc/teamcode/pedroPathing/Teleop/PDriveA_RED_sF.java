@@ -84,6 +84,8 @@ public class PDriveA_RED_sF extends OpMode {
         intakeDirDown.setOnPress(() -> intakePow = (intakePow > 0 ? 0 : MConstants.intakePowerOut));
         intakeDirUp.setOnPress(() -> intakePow = (intakePow < 0 ? 0 : MConstants.intakePowerIn));
 
+        fieldCentricOffset = follower.getHeading();
+
         // Initialize auto-drive tasks
         driveCircle   = new AutoDriveTask(follower, new Pose(84, 84, Math.toRadians(47)));
         driveSquare   = new AutoDriveTask(follower, new Pose(108, 108, Math.toRadians(47)));
@@ -151,7 +153,7 @@ public class PDriveA_RED_sF extends OpMode {
 
             if (gamepad1.psWasPressed()) {
                 follower.setPose(new Pose(120, 127, Math.toRadians(37)));
-                fieldCentricOffset = follower.getHeading();
+                fieldCentricOffset = Math.toRadians(0);
             }
         }
 

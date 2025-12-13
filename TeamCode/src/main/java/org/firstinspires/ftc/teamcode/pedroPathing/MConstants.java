@@ -1,6 +1,11 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
+
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 // MConstants.java
 public class MConstants {
+    // Shooter PID
+    public static final PIDFCoefficients shooterCoeff = new PIDFCoefficients(0.01d, 0.00d, 0.0d, 0.00052d);
 
     // ========================= Intake =========================
     public static final double intakePowerIn = -1.0;   // pulls balls in

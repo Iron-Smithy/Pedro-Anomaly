@@ -25,10 +25,10 @@ public class PDriveA_BLUE_sF extends OpMode {
 
     /* DRIVE SYSTEM */
     private Follower follower;
-    public static Pose startingPose = new Pose(144-120, 127, Math.toRadians(180-37));
+    public static Pose startingPose = new Pose(144-125, 87, Math.toRadians(180-0));
 
     // Field-centric
-    private double fieldCentricOffset = 0;
+    private double fieldCentricOffset = Math.toRadians(180);
 
     // Drive shaping
     private final double k = 2.0;
@@ -83,6 +83,8 @@ public class PDriveA_BLUE_sF extends OpMode {
         outtakeVelocityDown.setOnPress(() -> outtakeSpeed = Math.max(outtakeSpeedMin, outtakeSpeed - 150));
         intakeDirDown.setOnPress(() -> intakePow = (intakePow > 0 ? 0 : MConstants.intakePowerOut));
         intakeDirUp.setOnPress(() -> intakePow = (intakePow < 0 ? 0 : MConstants.intakePowerIn));
+
+        fieldCentricOffset = follower.getHeading();
 
         // Initialize auto-drive tasks
         driveCircle   = new AutoDriveTask(follower, new Pose(144-84, 84, Math.toRadians(180-47)));
@@ -151,7 +153,7 @@ public class PDriveA_BLUE_sF extends OpMode {
 
             if (gamepad1.psWasPressed()) {
                 follower.setPose(new Pose(144-120, 127, Math.toRadians(180-37)));
-                fieldCentricOffset = follower.getHeading();
+                fieldCentricOffset = Math.toRadians(180);
             }
         }
 
