@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 import org.firstinspires.ftc.teamcode.tools.Actions.AutoDriveTask;
 import org.firstinspires.ftc.teamcode.tools.Actions.AutoFireTask;
 import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
@@ -21,11 +21,11 @@ import org.firstinspires.ftc.teamcode.tools.ButtonHandler;
 
 @Configurable
 @TeleOp
-public class PDriveARsF extends OpMode {
+public class PDriveA_BLUE_sF extends OpMode {
 
     /* DRIVE SYSTEM */
     private Follower follower;
-    public static Pose startingPose = new Pose(120, 127, Math.toRadians(37));
+    public static Pose startingPose = new Pose(144-120, 127, Math.toRadians(180-37));
 
     // Field-centric
     private double fieldCentricOffset = 0;
@@ -81,20 +81,21 @@ public class PDriveARsF extends OpMode {
 
         outtakeVelocityUp.setOnPress(() -> outtakeSpeed = Math.min(outtakeSpeedMax, outtakeSpeed + 150));
         outtakeVelocityDown.setOnPress(() -> outtakeSpeed = Math.max(outtakeSpeedMin, outtakeSpeed - 150));
-        intakeDirDown.setOnPress(() -> intakePow = (intakePow > 0 ? 0 : 1));
-        intakeDirUp.setOnPress(() -> intakePow = (intakePow < 0 ? 0 : -1));
+        intakeDirDown.setOnPress(() -> intakePow = (intakePow > 0 ? 0 : MConstants.intakePowerOut));
+        intakeDirUp.setOnPress(() -> intakePow = (intakePow < 0 ? 0 : MConstants.intakePowerIn));
 
         // Initialize auto-drive tasks
-        driveCircle   = new AutoDriveTask(follower, new Pose(84, 84, Math.toRadians(47)));
-        driveSquare   = new AutoDriveTask(follower, new Pose(108, 108, Math.toRadians(47)));
-        driveTriangle = new AutoDriveTask(follower, new Pose(84, 12, Math.toRadians(65)));
-        driveCross    = new AutoDriveTask(follower, new Pose(84, 132, Math.toRadians(7)));
+        driveCircle   = new AutoDriveTask(follower, new Pose(144-84, 84, Math.toRadians(180-47)));
+        driveSquare   = new AutoDriveTask(follower, new Pose(144-108, 108, Math.toRadians(180-47)));
+        driveTriangle = new AutoDriveTask(follower, new Pose(144-84, 12, Math.toRadians(180-65)));
+        driveCross    = new AutoDriveTask(follower, new Pose(144-84, 132, Math.toRadians(180-7)));
     }
 
     @Override
     public void start() {
-        follower.startTeleopDrive(true);
+        follower.startTeleopDrive();
         outtake.spinUp(outtakeSpeed);
+        ejector.down();
 //        outtake.stop();
     }
 
@@ -149,7 +150,8 @@ public class PDriveARsF extends OpMode {
             else intake.stop();
 
             if (gamepad1.psWasPressed()) {
-
+                follower.setPose(new Pose(144-120, 127, Math.toRadians(180-37)));
+                fieldCentricOffset = follower.getHeading();
             }
         }
 
@@ -158,17 +160,23 @@ public class PDriveARsF extends OpMode {
         // ----------------------------
         // AUTO-DRIVE BUTTONS
         // ----------------------------
-        if (gamepad1.circleWasPressed())   { outtakeSpeed = 1200; cancelAllDrives(); driveCircle.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
-        if (gamepad1.squareWasPressed())   { outtakeSpeed = 1100; cancelAllDrives(); driveSquare.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
-        if (gamepad1.triangleWasPressed()) { outtakeSpeed = 1650; cancelAllDrives(); driveTriangle.start();  RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
-        if (gamepad1.crossWasPressed())    { outtakeSpeed = 1300; cancelAllDrives(); driveCross.start();     RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
+        if (gamepad1.circleWasPressed())   { outtakeSpeed = 1200; cancelAllDrivesBut(driveCircle); driveCircle.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
+        if (gamepad1.squareWasPressed())   { outtakeSpeed = 1050; cancelAllDrivesBut(driveSquare); driveSquare.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
+        if (gamepad1.triangleWasPressed()) { outtakeSpeed = 1650; cancelAllDrivesBut(driveTriangle); driveTriangle.start();  RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
+        if (gamepad1.crossWasPressed())    { outtakeSpeed = 1150; cancelAllDrivesBut(driveCross); driveCross.start();     RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
 
         // ----------------------------
         // AUTO-FIRE BUTTON
         // ----------------------------
-        if (gamepad1.right_bumper && fireTask == null) {
-            fireTask = new AutoFireTask(outtake, indexer, ejector, intake, outtakeSpeed);
-            fireTask.start();
+        if (gamepad1.right_bumper) {
+            if (fireTask == null) {
+                fireTask = new AutoFireTask(outtake, indexer, ejector, intake, outtakeSpeed);
+                fireTask.start();
+            }
+        } else {
+            if (fireTask != null) {
+                fireTask.cancel();
+            }
         }
         if (gamepad1.optionsWasPressed()) {
             if (driveCircle.isActive())   driveCircle.cancel();
@@ -207,6 +215,20 @@ public class PDriveARsF extends OpMode {
         driveSquare.cancel();
         driveTriangle.cancel();
         driveCross.cancel();
+    }
+    private void cancelAllDrivesBut(AutoDriveTask exclude) {
+        if (exclude != driveCircle) {
+            driveCircle.cancel();
+        }
+        if (exclude != driveSquare) {
+            driveSquare.cancel();
+        }
+        if (exclude != driveTriangle) {
+            driveTriangle.cancel();
+        }
+        if (exclude != driveCross) {
+            driveCross.cancel();
+        }
     }
 
     private boolean anyDriveTaskActive() {

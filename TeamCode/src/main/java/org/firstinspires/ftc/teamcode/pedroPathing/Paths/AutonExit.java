@@ -1,4 +1,5 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Paths.old;
+// this auto drives forward to exit
+package org.firstinspires.ftc.teamcode.pedroPathing.Paths;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;

@@ -12,7 +12,7 @@ public class AutoDriveTask {
     private final Pose targetPose;
 
     private boolean active = false;
-    private boolean holding = false;
+//    private boolean holding = false;
 
     public AutoDriveTask(Follower follower, Pose targetPose) {
         this.follower = follower;
@@ -34,25 +34,27 @@ public class AutoDriveTask {
         );
 
         active = true;
-        holding = false;
+//        holding = false;
     }
 
     public void update() {
         if (!active) return;
 
         // Path finished → enter HOLD
-        if (!holding && !follower.isBusy()) {
-            follower.holdPoint(targetPose);
-            holding = true;
-        }
+//        if (!holding && !follower.isBusy() && active) {
+//            follower.holdPoint(targetPose);
+//            holding = true;
+//            follower.startTeleopDrive();
+//            return true;
+//        }
+//        return false;
     }
 
     public void cancel() {
         active = false;
-        holding = false;
+//        holding = false;
 
-        // THIS breaks the hold controller
-        follower.startTeleopDrive(true);
+        follower.startTeleopDrive();
     }
 
     public boolean isActive() {

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.tools.Actions;
 
-import com.pedropathing.util.Timer;
-
-public class AutoFireTask {
+public class AutoFireTaskA {
     private OuttakeAction shooter;
     private IndexAction indexer;
     private IntakeAction intake;
@@ -30,7 +28,7 @@ public class AutoFireTask {
     private boolean active = false;
     private long targetVel;
 
-    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, long targetVel) {
+    public AutoFireTaskA(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, long targetVel) {
         this.shooter = shooter;
         this.indexer = indexer;
         this.intake = intake;
@@ -43,6 +41,9 @@ public class AutoFireTask {
         fireCount = 0;
         currentState = State.SPINNING_UP;
         shooter.spinUp(targetVel);
+        ejector.down();
+        intake.stop();
+        indexer.stop();
     }
 
     public void update() {
@@ -67,6 +68,8 @@ public class AutoFireTask {
 
                 if (now - timer >= ballFeedDelay) {
                     ejector.up();
+                    intake.stop();
+                    indexer.stop();
                     timer = now;
                     currentState = State.EJECTOR_MOVING_UP;
                 }
@@ -94,7 +97,7 @@ public class AutoFireTask {
                         currentState = State.COMPLETE;
                     } else {
                         timer = now;
-                        currentState = State.WAITING_FOR_FEED_START;
+                        currentState = State.SPINNING_UP;
                     }
                 }
                 break;
