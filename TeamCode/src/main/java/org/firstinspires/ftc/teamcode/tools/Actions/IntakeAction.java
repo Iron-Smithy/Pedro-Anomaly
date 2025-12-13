@@ -9,36 +9,24 @@ import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
 public class IntakeAction {
     private final DcMotor intakeMotor;
-    private double currentPower = 0;
 
     public IntakeAction(HardwareMap hardwareMap) {
         intakeMotor = RobotHardware.intakeMotor;
     }
 
-    public boolean runIn() {
-        if (currentPower != MConstants.intakePowerIn) {
-            intakeMotor.setPower(MConstants.intakePowerIn);
-            currentPower = MConstants.intakePowerIn;
-        }
-        return true; // always "ready" because motor just spins
+    public void runIn() {
+        spin(MConstants.intakePowerIn);
     }
 
-    public boolean runOut() {
-        if (currentPower != MConstants.intakePowerOut) {
-            intakeMotor.setPower(MConstants.intakePowerOut);
-            currentPower = MConstants.intakePowerOut;
-        }
-        return true;
+    public void runOut() {
+        spin(MConstants.intakePowerOut);
     }
 
-    public boolean stop() {
-        intakeMotor.setPower(0);
-        currentPower = 0;
-        return true;
+    public void stop() {
+        spin(0);
     }
 
-    public void spin(double dir) {
-        intakeMotor.setPower(dir);
-        currentPower = 0;
+    public void spin(double power) {
+        intakeMotor.setPower(power);
     }
 }

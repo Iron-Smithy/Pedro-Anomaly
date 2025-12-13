@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.tools;
 
-import static org.firstinspires.ftc.teamcode.RobotHardware.outtakeMotor1;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;

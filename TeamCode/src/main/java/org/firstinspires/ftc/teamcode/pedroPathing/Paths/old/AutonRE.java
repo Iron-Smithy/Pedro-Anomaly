@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Paths;
+package org.firstinspires.ftc.teamcode.pedroPathing.Paths.old;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
 
-@Autonomous(name = "AutonBL", group = "AAA")
-public class AutonBL extends OpMode {
+@Autonomous(name = "AutonRE", group = "AAA")
+public class AutonRE extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
 
@@ -26,22 +26,21 @@ public class AutonBL extends OpMode {
     private EjectorAction ejector;
     private OuttakeAction outtake;
 
-    private long scoreShooterTPS = 1100;
+    private long scoreShooterTPS = 1150;
     private long tolerance = 50;
 
     private long fireCount = 0;
 
-    private final Pose startPose = new Pose(144-120, 127, Math.toRadians(180-37));
-    private final Pose scorePose = new Pose(144-100, 107, Math.toRadians(180-47));
-    private final Pose row1 = new Pose(144-145, 83.5, Math.toRadians(180-0));
-    private final Pose row1CP = new Pose(144-85, 80, Math.toRadians(180-0));
-    private final Pose row2 = new Pose(144-140, 57, Math.toRadians(180-0));
-    private final Pose row2CP =  new Pose(144-90, 57, Math.toRadians(180-0)); // new Pose(144-65, 55, Math.toRadians(180-0));
-    private final Pose row3 = new Pose(144-140, 36, Math.toRadians(180-0));
-    private final Pose row3CP = new Pose(144-72, 25, Math.toRadians(180-0));
-    private final Pose ExitPose = new Pose(144-120, 83.5, Math.toRadians(180-90));
+    private final Pose startPose = new Pose(120, 127, Math.toRadians(37));
+    private final Pose scorePose = new Pose(100, 107, Math.toRadians(47));
+    private final Pose row1 = new Pose(150, 83.5, Math.toRadians(0));
+    private final Pose row1CP = new Pose(85, 80, Math.toRadians(0));
+    private final Pose row2 = new Pose(150, 59, Math.toRadians(0));
+    private final Pose row2CP = new Pose(65, 55, Math.toRadians(0));
+    private final Pose row3 = new Pose(150, 36, Math.toRadians(0));
+    private final Pose row3CP = new Pose(72, 25, Math.toRadians(0));
 
-    private Path scorePreload, pickUpR1, scoreR1, pickUpR2Pre, pickUpR2, scoreR2, pickUpR3, scoreR3, Exit;
+    private Path scorePreload, pickUpR1, scoreR1, pickUpR2, scoreR2, pickUpR3, scoreR3;
 
     private enum AutoState {
         START,
@@ -52,7 +51,6 @@ public class AutonBL extends OpMode {
         GO_SCORE_R1,
         SCORE_R1,
         SCORE_R1_SERVO,
-        PICKUP_R2_PRE,
         PICKUP_R2,
         GO_SCORE_R2,
         SCORE_R2,
@@ -61,7 +59,6 @@ public class AutonBL extends OpMode {
         GO_SCORE_R3,
         SCORE_R3,
         SCORE_R3_SERVO,
-        Exit,
         DONE
     }
 
@@ -79,11 +76,7 @@ public class AutonBL extends OpMode {
         scoreR1 = new Path(new BezierLine(row1, scorePose));
         scoreR1.setLinearHeadingInterpolation(row1.getHeading(), scorePose.getHeading());
 
-        pickUpR2Pre = new Path(new BezierLine(scorePose, row2CP));
-        pickUpR2Pre.setConstantHeadingInterpolation(row2.getHeading());
-        pickUpR2Pre.setVelocityConstraint(0.2);
-
-        pickUpR2 = new Path(new BezierLine(row2CP, row2));
+        pickUpR2 = new Path(new BezierCurve(scorePose, row2CP, row2));
         pickUpR2.setConstantHeadingInterpolation(row2.getHeading());
         pickUpR2.setVelocityConstraint(0.2);
 
@@ -158,21 +151,14 @@ public class AutonBL extends OpMode {
                 } else {
                     fireCount = 0;
                     indexer.stop();
-                    follower.followPath(pickUpR2Pre);
-                    transitionTo(AutoState.PICKUP_R2_PRE);
+                    follower.followPath(pickUpR2);
+                    transitionTo(AutoState.PICKUP_R2);
                 }
                 break;
             case SCORE_R1_SERVO:
                 if (pathTimer.getElapsedTime() >= 300) {
                     fireCount++;
                     transitionTo(AutoState.SCORE_R1);
-                }
-                break;
-
-            case PICKUP_R2_PRE:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
-                    follower.followPath(pickUpR2);
-                    transitionTo(AutoState.PICKUP_R2);
                 }
                 break;
 
@@ -199,8 +185,8 @@ public class AutonBL extends OpMode {
                 } else {
                     fireCount = 0;
                     indexer.stop();
-                    follower.followPath(Exit);
-                    transitionTo(AutoState.Exit); // SKIPS 3
+                    follower.followPath(pickUpR3);
+                    transitionTo(AutoState.PICKUP_R3);
                 }
                 break;
             case SCORE_R2_SERVO:
@@ -241,11 +227,7 @@ public class AutonBL extends OpMode {
                     transitionTo(AutoState.SCORE_R3);
                 }
                 break;
-            case Exit:
-                if (!follower.isBusy() || pathTimer.getElapsedTime() >= 8000) {
-                    transitionTo(AutoState.DONE);
-                }
-                break;
+
 
             case DONE:
                 outtake.stop();

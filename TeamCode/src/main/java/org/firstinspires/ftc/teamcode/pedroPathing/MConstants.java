@@ -13,5 +13,9 @@ public class MConstants {
     // ========================= Ejector =========================
     public static final double ejectorDown = 0.0;      // rest position
     public static final double ejectorUp = 1.0;       // up position
+
+    // ========================= Outtake Flap ====================
+    public static final double flapDown = 0.7;
+    public static final double flapUp = 0.3;
 }
 

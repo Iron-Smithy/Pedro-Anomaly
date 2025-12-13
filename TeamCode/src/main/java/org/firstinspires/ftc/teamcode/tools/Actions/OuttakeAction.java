@@ -9,8 +9,10 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 public class OuttakeAction {
     private final DcMotorEx motor;
     private double targetVelocity = 0;
+    private long stableSince = -1;
+    private final long requiredStableTimeMs = 100;
 
-    private final double tolerance = 50; // adjustable TPS tolerance
+    private final double tolerance = 30; // adjustable TPS tolerance
 
     public OuttakeAction(HardwareMap hardwareMap) {
         motor = RobotHardware.outtakeMotor;
@@ -19,8 +21,10 @@ public class OuttakeAction {
 
     public void spinUp(double tps) {
         targetVelocity = tps;
+        stableSince = -1;
         motor.setVelocity(tps);
     }
+
 
     public boolean stop() {
         targetVelocity = 0;
@@ -28,7 +32,29 @@ public class OuttakeAction {
         return true;
     }
 
+//    public boolean isAtTargetVelocity() {
+//        return Math.abs(motor.getVelocity() - targetVelocity) <= tolerance;
+//    }
     public boolean isAtTargetVelocity() {
+        if (targetVelocity <= 0) return false;
         return Math.abs(motor.getVelocity() - targetVelocity) <= tolerance;
     }
+//    public boolean isAtTargetVelocity() {
+//        if (targetVelocity <= 0) {
+//            stableSince = -1;
+//            return false;
+//        }
+//
+//        double error = Math.abs(motor.getVelocity() - targetVelocity);
+//
+//        if (error <= tolerance) {
+//            if (stableSince < 0) {
+//                stableSince = System.currentTimeMillis();
+//            }
+//            return System.currentTimeMillis() - stableSince >= requiredStableTimeMs;
+//        } else {
+//            stableSince = -1;
+//            return false;
+//        }
+//    }
 }
