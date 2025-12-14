@@ -182,7 +182,7 @@ public class Auton_RED_p1 extends OpMode {
                 fireTask.update();
                 if (fireTask.isActive()) {
                 } else {
-                    follower.setMaxPower(0.80);
+                    follower.setMaxPower(0.75);
                     intake.runIn();
                     follower.followPath(row1Pickup);
                     transitionTo(AutoState.PICKUP_R1);
