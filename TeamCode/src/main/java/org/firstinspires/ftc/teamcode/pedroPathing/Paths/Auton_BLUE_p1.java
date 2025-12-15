@@ -42,7 +42,7 @@ public class Auton_BLUE_p1 extends OpMode {
     private final Pose startPose = new Pose(144-120, 127, Math.toRadians(180-37)); // start location
     private final Pose ScorePose = new Pose(144-100, 107, Math.toRadians(180-45)); // score location
     private final Pose R1PrePose = new Pose(144-RPreXpos, 87, Math.toRadians(180-0)); // row 1 collection pre location
-    private final Pose R1CollectPose = new Pose(144-125, 87, Math.toRadians(180-0)); // row 1 balls inside robot location
+    private final Pose R1CollectPose = new Pose(144-127, 87, Math.toRadians(180-0)); // row 1 balls inside robot location
     private final Pose ScoreR1CPPose = new Pose(144-100, 87, Math.toRadians(180-0)); // smooth back-out bezier control point
     private final Pose R2PrePose = new Pose(144-RPreXpos, 63, Math.toRadians(180-0)); // row 2 collection pre location
     private final Pose R2CollectPose = new Pose(144-130, 63, Math.toRadians(180-0)); // row 3 balls inside robot location
@@ -313,6 +313,7 @@ public class Auton_BLUE_p1 extends OpMode {
         outtake = new OuttakeAction(hardwareMap);
 
         ejector.up();
+        ejector.down();
 
         buildPaths();
         follower.setStartingPose(startPose);
@@ -322,8 +323,6 @@ public class Auton_BLUE_p1 extends OpMode {
     public void start() {
         pathTimer.resetTimer();
         currentState = AutoState.START;
-
-        ejector.down();
     }
 
     @Override
