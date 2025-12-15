@@ -32,6 +32,7 @@ public class Auton_RED_p1 extends OpMode {
     private long scoreShooterTPS = 1135;
     private long[] scoreShooterTPSArray = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS};
     private long[] scoreShooterTPSArrayFirst = {scoreShooterTPS + 35, scoreShooterTPS - 10, scoreShooterTPS - 5};
+    private long[] scoreShooterTPSArraySecond = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS + 5};
 
 
     private long tolerance = 25;
@@ -313,6 +314,7 @@ public class Auton_RED_p1 extends OpMode {
         outtake = new OuttakeAction(hardwareMap);
 
         ejector.up();
+        ejector.down();
 
         buildPaths();
         follower.setStartingPose(startPose);
@@ -322,8 +324,6 @@ public class Auton_RED_p1 extends OpMode {
     public void start() {
         pathTimer.resetTimer();
         currentState = AutoState.START;
-
-        ejector.down();
     }
 
     @Override

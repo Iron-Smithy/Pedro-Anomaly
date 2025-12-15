@@ -4,7 +4,11 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -18,6 +22,8 @@ import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
 import org.firstinspires.ftc.teamcode.tools.ButtonHandler;
+
+import java.util.function.Supplier;
 
 @Configurable
 @TeleOp
@@ -62,7 +68,10 @@ public class PDriveA_RED_sF extends OpMode {
     private AutoDriveTask driveSquare;
     private AutoDriveTask driveTriangle;
     private AutoDriveTask driveCross;
+    private AutoDriveTask drivePark;
     private AutoFireTask fireTask = null;
+
+    private Supplier<PathChain> park;
 
     @Override
     public void init() {
@@ -89,8 +98,10 @@ public class PDriveA_RED_sF extends OpMode {
         // Initialize auto-drive tasks
         driveCircle   = new AutoDriveTask(follower, new Pose(84, 84, Math.toRadians(47)));
         driveSquare   = new AutoDriveTask(follower, new Pose(108, 108, Math.toRadians(47)));
-        driveTriangle = new AutoDriveTask(follower, new Pose(84, 12, Math.toRadians(65)));
+        driveTriangle = new AutoDriveTask(follower, new Pose(84, 20, Math.toRadians(65)));
         driveCross    = new AutoDriveTask(follower, new Pose(84, 132, Math.toRadians(7)));
+        drivePark     = new AutoDriveTask(follower, new Pose (38.6, 40, Math.toRadians(90)));
+
     }
 
     @Override
@@ -164,8 +175,9 @@ public class PDriveA_RED_sF extends OpMode {
         // ----------------------------
         if (gamepad1.circleWasPressed())   { outtakeSpeed = 1200; cancelAllDrivesBut(driveCircle); driveCircle.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
         if (gamepad1.squareWasPressed())   { outtakeSpeed = 1050; cancelAllDrivesBut(driveSquare); driveSquare.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
-        if (gamepad1.triangleWasPressed()) { outtakeSpeed = 1650; cancelAllDrivesBut(driveTriangle); driveTriangle.start();  RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
+        if (gamepad1.triangleWasPressed()) { outtakeSpeed = 1590; cancelAllDrivesBut(driveTriangle); driveTriangle.start();  RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
         if (gamepad1.crossWasPressed())    { outtakeSpeed = 1150; cancelAllDrivesBut(driveCross); driveCross.start();     RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
+        if (gamepad1.touchpadWasPressed()) {                      cancelAllDrivesBut(drivePark); drivePark.start(); }
 
         // ----------------------------
         // AUTO-FIRE BUTTON
@@ -185,6 +197,7 @@ public class PDriveA_RED_sF extends OpMode {
             if (driveSquare.isActive())   driveSquare.cancel();
             if (driveTriangle.isActive()) driveTriangle.cancel();
             if (driveCross.isActive())    driveCross.cancel();
+            if (drivePark.isActive())     drivePark.cancel();
         }
 
         // ----------------------------
@@ -194,6 +207,7 @@ public class PDriveA_RED_sF extends OpMode {
         driveSquare.update();
         driveTriangle.update();
         driveCross.update();
+        drivePark.update();
 
         if (fireTask != null) {
             fireTask.update();
@@ -217,6 +231,7 @@ public class PDriveA_RED_sF extends OpMode {
         driveSquare.cancel();
         driveTriangle.cancel();
         driveCross.cancel();
+        drivePark.cancel();
     }
     private void cancelAllDrivesBut(AutoDriveTask exclude) {
         if (exclude != driveCircle) {
@@ -231,10 +246,13 @@ public class PDriveA_RED_sF extends OpMode {
         if (exclude != driveCross) {
             driveCross.cancel();
         }
+        if (exclude != drivePark) {
+            drivePark.cancel();
+        }
     }
 
     private boolean anyDriveTaskActive() {
-        return driveCircle.isActive() || driveSquare.isActive() || driveTriangle.isActive() || driveCross.isActive();
+        return driveCircle.isActive() || driveSquare.isActive() || driveTriangle.isActive() || driveCross.isActive() || drivePark.isActive();
     }
 
     private boolean autoFireActive() {
