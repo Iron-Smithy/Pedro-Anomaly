@@ -22,5 +22,10 @@ public class MConstants {
     // ========================= Outtake Flap ====================
     public static final double flapDown = 0.7;
     public static final double flapUp = 0.3;
+
+    // ========================= Outtake ==========================
+    public static final double SHOOTER_P = 0;
+    public static final double SHOOTER_KV = 0;
+    public static final double SHOOTER_KS = 0;
 }
 

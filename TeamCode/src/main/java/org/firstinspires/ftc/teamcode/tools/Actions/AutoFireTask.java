@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.tools.Actions;
 import com.pedropathing.util.Timer;
 
 public class AutoFireTask {
-    private OuttakeAction shooter;
+    public OuttakeAction shooter;
     private IndexAction indexer;
     private IntakeAction intake;
     private EjectorAction ejector;
@@ -13,7 +13,7 @@ public class AutoFireTask {
 
     private final int BALLS_TO_FIRE = 3;
 
-    private final long ballFeedDelay = 350;
+    private final long ballFeedDelay = 300;
     private final long servoMoveTime = 300;
     private final long outtakeLaunchDelay = 175;
 
@@ -117,5 +117,8 @@ public class AutoFireTask {
         indexer.stop();
         intake.stop();
         ejector.down();
+    }
+    public void spinUp(double tps) {
+        shooter.spinUp(tps);
     }
 }

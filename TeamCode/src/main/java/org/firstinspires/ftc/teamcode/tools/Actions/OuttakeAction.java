@@ -14,7 +14,6 @@ public class OuttakeAction {
     private final MotorEx motorSolver;
     private final PIDFController controller = new PIDFController(MConstants.shooterCoeff);
     private double targetVelocity = 0;
-    private long stableSince = -1;
     private final long requiredStableTimeMs = 100;
 
     private final double tolerance = 30; // adjustable TPS tolerance
@@ -28,7 +27,6 @@ public class OuttakeAction {
 
     public void spinUp(double tps) {
         targetVelocity = tps;
-        stableSince = -1;
 //        controller.setSetPoint(tps);
 //        if (tps == 0) {
 //            motorSolver.stopMotor();
@@ -51,5 +49,8 @@ public class OuttakeAction {
     public boolean isAtTargetVelocity() {
         if (targetVelocity <= 0) return false;
         return Math.abs(motor.getVelocity() - targetVelocity) <= tolerance;
+    }
+    private double getShooterPower() {
+        return (MConstants.SHOOTER_KV * targetVelocity) + (MConstants.SHOOTER_P * (targetVelocity - motor.getVelocity())) + MConstants.SHOOTER_KS;
     }
 }
