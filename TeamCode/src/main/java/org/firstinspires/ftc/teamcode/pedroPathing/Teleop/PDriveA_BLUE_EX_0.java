@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
-import org.firstinspires.ftc.teamcode.tools.Actions.AutoDriveTaskEX;
+//import org.firstinspires.ftc.teamcode.tools.Actions.AutoDriveTaskEX;
 import org.firstinspires.ftc.teamcode.tools.Actions.AutoFireTask;
 import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
@@ -31,10 +31,10 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
 
     /* DRIVE SYSTEM */
     private Follower follower;
-    public static Pose startingPose = new Pose(144-125, 87, Math.toRadians(180-0)); //new Pose(120, 127, Math.toRadians(37));
+    public static Pose startingPose = new Pose(144-120, 127, Math.toRadians(180-37)); //new Pose(120, 127, Math.toRadians(37));
 
     // Field-centric
-    private double fieldCentricOffset = 0;
+    private double fieldCentricOffset = Math.toRadians(180-0);
 
     // Drive shaping
     private final double k = 2.0;
@@ -64,18 +64,19 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
     private double intakePow = 0;
 
     /* AUTO TASKS */
-    private AutoDriveTaskEX driveCircle;
-    private AutoDriveTaskEX driveSquare;
-    private AutoDriveTaskEX driveTriangle;
-    private AutoDriveTaskEX driveCross;
-    private AutoDriveTaskEX drivePark;
+//    private AutoDriveTaskEX driveCircle;
+//    private AutoDriveTaskEX driveSquare;
+//    private AutoDriveTaskEX driveTriangle;
+//    private AutoDriveTaskEX driveCross;
+//    private AutoDriveTaskEX drivePark;
     private AutoFireTask fireTask = null;
 
     private Supplier<PathChain> park;
 
     // experimetnal ====================================================================================================================================================================================
     public static final Pose GOAL_POSE = new Pose(144-132, 136, 180-0);
-    public static double TURN_P = 0.9; // Increase if too slow, decrease if oscillating
+    public static double TURN_P_Close = 0.09; // Increase if too slow, decrease if oscillating
+    public static double TURN_P_Far = 0.045; // Increase if too slow, decrease if oscillating
     private TreeMap<Double, Long> speedMap = new TreeMap<>();
 
     @Override
@@ -93,34 +94,34 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
         ejector = new EjectorAction(hardwareMap);
         outtake = new OuttakeAction(hardwareMap);
 
-        outtakeVelocityUp.setOnPress(() -> outtakeSpeed = Math.min(outtakeSpeedMax, outtakeSpeed + 150));
-        outtakeVelocityDown.setOnPress(() -> outtakeSpeed = Math.max(outtakeSpeedMin, outtakeSpeed - 150));
+        outtakeVelocityUp.setOnPress(() -> RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown));
+        outtakeVelocityDown.setOnPress(() -> RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp));
         intakeDirDown.setOnPress(() -> intakePow = (intakePow > 0 ? 0 : MConstants.intakePowerOut));
         intakeDirUp.setOnPress(() -> intakePow = (intakePow < 0 ? 0 : MConstants.intakePowerIn));
 
         fieldCentricOffset = follower.getHeading();
 
         // Initialize auto-drive tasks
-        driveCircle   = new AutoDriveTaskEX(follower, new Pose(84, 84, Math.toRadians(47)));
-        driveSquare   = new AutoDriveTaskEX(follower, new Pose(108, 108, Math.toRadians(47)));
-        driveTriangle = new AutoDriveTaskEX(follower, new Pose(84, 20, Math.toRadians(65)));
-        driveCross    = new AutoDriveTaskEX(follower, new Pose(84, 132, Math.toRadians(7)));
-        drivePark     = new AutoDriveTaskEX(follower, new Pose (38.6, 40, Math.toRadians(90)));
+//        driveCircle   = new AutoDriveTaskEX(follower, new Pose(84, 84, Math.toRadians(47)));
+//        driveSquare   = new AutoDriveTaskEX(follower, new Pose(108, 108, Math.toRadians(47)));
+//        driveTriangle = new AutoDriveTaskEX(follower, new Pose(84, 20, Math.toRadians(65)));
+//        driveCross    = new AutoDriveTaskEX(follower, new Pose(84, 132, Math.toRadians(7)));
+//        drivePark     = new AutoDriveTaskEX(follower, new Pose (38.6, 40, Math.toRadians(90)));
 
         // experimetnal ====================================================================================================================================================================================
         // Format: speedMap.put(DistanceInches, MotorRPM);
 
         // Point 1: Right against the sub/wall
-        speedMap.put(10.0, 1500L); // TUNE ME!!!
+        speedMap.put(12.0 * 1, 850L); // TUNE ME!!!
         
         // Point 2: A normal shooting distance
-        speedMap.put(24.0, 1650L); // TUNE ME!!!
+        speedMap.put(12.0 * 5, 1150L); // TUNE ME!!!
         
         // Point 3: Mid-field
-        speedMap.put(48.0, 2100L); // TUNE ME!!!
+        speedMap.put(12.0 * 9, 1200L); // TUNE ME!!!
         
         // Point 4: Far shot
-        speedMap.put(72.0, 2900L); // TUNE ME!!!
+        speedMap.put(12.0 * 14, 1670L); // TUNE ME!!!
     }
 
     @Override
@@ -129,6 +130,11 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
         outtake.spinUp(outtakeSpeed);
         ejector.down();
 //        outtake.stop();
+
+        RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
+
+        follower.setPose(new Pose(144-120, 127, Math.toRadians(180-37)));
+        fieldCentricOffset = Math.toRadians(180-0);
     }
 
     @Override
@@ -139,7 +145,7 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
         // ----------------------------
         // MANUAL DRIVE
         // ----------------------------
-        if (!anyDriveTaskActive()) {
+        if (true) {//!anyDriveTaskActive()) {
             Pose currentPose = follower.getPose();
             double heading = currentPose.getHeading() - fieldCentricOffset;
             // double heading = follower.getHeading() - fieldCentricOffset;
@@ -155,6 +161,8 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
             boolean autoAimActive = gamepad1.right_trigger > 0.5;
 
             double distToGoal = Math.hypot(GOAL_POSE.getX() - currentPose.getX(), GOAL_POSE.getY() - currentPose.getY());
+            outtakeSpeed = getInterpolatedSpeed(distToGoal);
+            new AutoFireTask(outtake, indexer, ejector, intake, outtakeSpeed).spinUp(outtakeSpeed);
 
             if (autoAimActive) {
                 // A. Calculate the target angle using Trig (atan2)
@@ -171,10 +179,14 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
                 
                 // Override the manual 'turn' variable
                 // We use the negative sign if the robot turns the wrong way
-                turn = error * TURN_P; 
+                if (distToGoal < (8 * 12)) {
+                    turn = error * TURN_P_Close;
+                } else {
+                    turn = error * TURN_P_Far;
+                }
 
                 // D. Set Speed from the Map
-                outtakeSpeed = getInterpolatedSpeed(distToGoal);
+//                outtakeSpeed = getInterpolatedSpeed(distToGoal);
 
                 telemetry.addData("Auto-Aim", "ACTIVE");
                 telemetry.addData("Target Angle", Math.toDegrees(targetAngle));
@@ -219,8 +231,12 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
             else intake.stop();
 
             if (gamepad1.psWasPressed()) {
-                follower.setPose(new Pose(120, 127, Math.toRadians(37)));
-                fieldCentricOffset = Math.toRadians(0);
+                follower.setPose(new Pose(144-120, 144-127, Math.toRadians(180-37)));
+                fieldCentricOffset = Math.toRadians(180-0);
+            }
+            if (gamepad1.optionsWasPressed()) {
+                follower.setPose(new Pose(144-8, 144-8, Math.toRadians(180-0)));
+                fieldCentricOffset = Math.toRadians(180-0);
             }
         }
 
@@ -229,20 +245,20 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
         // ----------------------------
         // AUTO-DRIVE BUTTONS
         // ----------------------------
-        if (gamepad1.circle)    { outtakeSpeed = 1200; cancelAllDrivesBut(driveCircle);   driveCircle.start();   RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
-        else if (driveCircle.isActive())    { driveCircle.cancel();}
-
-        if (gamepad1.square)    { outtakeSpeed = 1050; cancelAllDrivesBut(driveSquare);   driveSquare.start();   RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
-        else if (driveSquare.isActive())    { driveCircle.cancel();}
-
-        if (gamepad1.triangle)  { outtakeSpeed = 1590; cancelAllDrivesBut(driveTriangle); driveTriangle.start(); RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
-        else if (driveTriangle.isActive())  { driveCircle.cancel();}
-
-        if (gamepad1.cross)     { outtakeSpeed = 1150; cancelAllDrivesBut(driveCross);    driveCross.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
-        else if (driveCross.isActive())     { driveCircle.cancel();}
-
-        if (gamepad1.touchpad)  { cancelAllDrivesBut(drivePark);     drivePark.start(); }
-        else if (drivePark.isActive())      { driveCircle.cancel();}
+//        if (gamepad1.circle)    { outtakeSpeed = 1200; cancelAllDrivesBut(driveCircle);   driveCircle.start();   RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
+//        else if (driveCircle.isActive())    { driveCircle.cancel();}
+//
+//        if (gamepad1.square)    { outtakeSpeed = 1050; cancelAllDrivesBut(driveSquare);   driveSquare.start();   RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
+//        else if (driveSquare.isActive())    { driveCircle.cancel();}
+//
+//        if (gamepad1.triangle)  { outtakeSpeed = 1590; cancelAllDrivesBut(driveTriangle); driveTriangle.start(); RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);}
+//        else if (driveTriangle.isActive())  { driveCircle.cancel();}
+//
+//        if (gamepad1.cross)     { outtakeSpeed = 1150; cancelAllDrivesBut(driveCross);    driveCross.start();    RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);}
+//        else if (driveCross.isActive())     { driveCircle.cancel();}
+//
+//        if (gamepad1.touchpad)  { cancelAllDrivesBut(drivePark);     drivePark.start(); }
+//        else if (drivePark.isActive())      { driveCircle.cancel();}
 
         // ----------------------------
         // AUTO-FIRE BUTTON
@@ -257,22 +273,22 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
                 fireTask.cancel();
             }
         }
-        if (gamepad1.optionsWasPressed()) {
-            if (driveCircle.isActive())   driveCircle.cancel();
-            if (driveSquare.isActive())   driveSquare.cancel();
-            if (driveTriangle.isActive()) driveTriangle.cancel();
-            if (driveCross.isActive())    driveCross.cancel();
-            if (drivePark.isActive())     drivePark.cancel();
-        }
+//        if (gamepad1.optionsWasPressed()) {
+//            if (driveCircle.isActive())   driveCircle.cancel();
+//            if (driveSquare.isActive())   driveSquare.cancel();
+//            if (driveTriangle.isActive()) driveTriangle.cancel();
+//            if (driveCross.isActive())    driveCross.cancel();
+//            if (drivePark.isActive())     drivePark.cancel();
+//        }
 
         // ----------------------------
         // UPDATE AUTO TASKS
         // ----------------------------
-        driveCircle.update();
-        driveSquare.update();
-        driveTriangle.update();
-        driveCross.update();
-        drivePark.update();
+//        driveCircle.update();
+//        driveSquare.update();
+//        driveTriangle.update();
+//        driveCross.update();
+//        drivePark.update();
 
         if (fireTask != null) {
             fireTask.update();
@@ -291,34 +307,34 @@ public class PDriveA_BLUE_EX_0 extends OpMode {
         telemetry.update();
     }
 
-    private void cancelAllDrives() {
-        driveCircle.cancel();
-        driveSquare.cancel();
-        driveTriangle.cancel();
-        driveCross.cancel();
-        drivePark.cancel();
-    }
-    private void cancelAllDrivesBut(AutoDriveTaskEX exclude) {
-        if (exclude != driveCircle) {
-            driveCircle.cancel();
-        }
-        if (exclude != driveSquare) {
-            driveSquare.cancel();
-        }
-        if (exclude != driveTriangle) {
-            driveTriangle.cancel();
-        }
-        if (exclude != driveCross) {
-            driveCross.cancel();
-        }
-        if (exclude != drivePark) {
-            drivePark.cancel();
-        }
-    }
-
-    private boolean anyDriveTaskActive() {
-        return driveCircle.isActive() || driveSquare.isActive() || driveTriangle.isActive() || driveCross.isActive() || drivePark.isActive();
-    }
+//    private void cancelAllDrives() {
+//        driveCircle.cancel();
+//        driveSquare.cancel();
+//        driveTriangle.cancel();
+//        driveCross.cancel();
+//        drivePark.cancel();
+//    }
+//    private void cancelAllDrivesBut(AutoDriveTaskEX exclude) {
+//        if (exclude != driveCircle) {
+//            driveCircle.cancel();
+//        }
+//        if (exclude != driveSquare) {
+//            driveSquare.cancel();
+//        }
+//        if (exclude != driveTriangle) {
+//            driveTriangle.cancel();
+//        }
+//        if (exclude != driveCross) {
+//            driveCross.cancel();
+//        }
+//        if (exclude != drivePark) {
+//            drivePark.cancel();
+//        }
+//    }
+//
+//    private boolean anyDriveTaskActive() {
+//        return driveCircle.isActive() || driveSquare.isActive() || driveTriangle.isActive() || driveCross.isActive() || drivePark.isActive();
+//    }
 
     private boolean autoFireActive() {
         return fireTask != null && fireTask.isActive();
