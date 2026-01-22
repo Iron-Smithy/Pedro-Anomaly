@@ -66,7 +66,7 @@ public class AutoFireTaskA {
                     intake.runIn();
                 }
 
-                if (now - timer >= ballFeedDelay) {
+                if (now - timer >= ballFeedDelay * (fireCount == 0 ? 3.50 : 1)) {
                     ejector.up();
                     intake.stop();
                     indexer.stop();

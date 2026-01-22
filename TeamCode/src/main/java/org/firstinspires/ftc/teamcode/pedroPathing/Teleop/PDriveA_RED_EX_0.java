@@ -30,10 +30,10 @@ import java.util.function.Supplier;
 public class PDriveA_RED_EX_0 extends OpMode {
     /* DRIVE SYSTEM */
     private Follower follower;
-    public static Pose startingPose = new Pose(/*144-*/120, 127, Math.toRadians(/*180-*/37)); //new Pose(120, 127, Math.toRadians(37));
+    public static Pose startingPose = new Pose(/*144-*/127, 87, Math.toRadians(/*180-*/0)); //new Pose(120, 127, Math.toRadians(37));
 
     // Field-centric
-    private double fieldCentricOffset = 0;
+    private double fieldCentricOffset = Math.toRadians(0);
 
     // Drive shaping
     private final double k = 2.0;
@@ -111,16 +111,19 @@ public class PDriveA_RED_EX_0 extends OpMode {
         // Format: speedMap.put(DistanceInches, MotorRPM);
 
         // Point 1: Right against the sub/wall
-        speedMap.put(12.0 * 1, 800L); // TUNE ME!!!
+        speedMap.put(12.0 * 1, 850L); // TUNE ME!!!
         
         // Point 2: A normal shooting distance
-        speedMap.put(12.0 * 5, 1100L); // TUNE ME!!!
-        
+        speedMap.put(12.0 * 5, 1130L); // TUNE ME!!!
+
         // Point 3: Mid-field
         speedMap.put(12.0 * 9, 1200L); // TUNE ME!!!
         
         // Point 4: Far shot
-        speedMap.put(12.0 * 14, 1600L); // TUNE ME!!!
+        speedMap.put(12.0 * 12, 1640L); // TUNE ME!!!
+
+        // Point 5: Far-est shot
+        speedMap.put(12.0 * 14, 1680L); // TUNE ME!!!
     }
 
     @Override
@@ -132,7 +135,7 @@ public class PDriveA_RED_EX_0 extends OpMode {
 
         RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
 
-        follower.setPose(new Pose(120, 127, Math.toRadians(37)));
+//        follower.setPose(startingPose);
         fieldCentricOffset = Math.toRadians(0);
     }
 
@@ -166,6 +169,7 @@ public class PDriveA_RED_EX_0 extends OpMode {
             if (autoAimActive) {
                 // A. Calculate the target angle using Trig (atan2)
                 // atan2(dy, dx) gives the absolute angle to the target
+
                 double targetAngle = Math.atan2(GOAL_POSE.getY() - currentPose.getY(), GOAL_POSE.getX() - currentPose.getX());
                 
                 // B. IMPORTANT: Pedro Pathing heading might need an offset depending on your robot's "front"
@@ -231,7 +235,8 @@ public class PDriveA_RED_EX_0 extends OpMode {
 
             if (gamepad1.psWasPressed()) {
                 follower.setPose(new Pose(120, 127, Math.toRadians(37)));
-                fieldCentricOffset = Math.toRadians(0);
+                fieldCentricOffset = startingPose.getHeading();
+//                fieldCentricOffset = Math.toRadians(37);
             }
             if (gamepad1.optionsWasPressed()) {
                 follower.setPose(new Pose(8, 8, Math.toRadians(0)));
@@ -297,12 +302,16 @@ public class PDriveA_RED_EX_0 extends OpMode {
         // ----------------------------
         // TELEMETRY
         // ----------------------------
+        Pose currentPose = follower.getPose();
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());
         telemetry.addData("Slow Mode %", slowModeMultiplier);
         telemetry.addData("Slow Mode Active", slowMode);
         telemetry.addData("Outtake Active", outtakeON);
         telemetry.addData("Outtake Speed", outtakeSpeed);
+        telemetry.addData("Distance", Math.hypot(GOAL_POSE.getX() - currentPose.getX(), GOAL_POSE.getY() - currentPose.getY()));
+        telemetry.addData("Angle", currentPose.getHeading());
+        telemetry.addData("Offset", fieldCentricOffset);
         telemetry.update();
     }
 

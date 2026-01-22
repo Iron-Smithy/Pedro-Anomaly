@@ -29,9 +29,9 @@ public class Auton_RED_p1 extends OpMode {
     private EjectorAction ejector;
     private OuttakeAction outtake;
 
-    private long scoreShooterTPS = 1135;
+    private long scoreShooterTPS = 1115;
     private long[] scoreShooterTPSArray = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS};
-    private long[] scoreShooterTPSArrayFirst = {scoreShooterTPS + 35, scoreShooterTPS - 10, scoreShooterTPS - 5};
+    private long[] scoreShooterTPSArrayFirst = {scoreShooterTPS - 35, scoreShooterTPS - 10, scoreShooterTPS - 5};
     private long[] scoreShooterTPSArraySecond = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS + 5};
 
 
@@ -163,7 +163,7 @@ public class Auton_RED_p1 extends OpMode {
             // START
             case START:
                 outtake.spinUp(scoreShooterTPS);
-                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
+                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
 
                 follower.followPath(startToScore);
                 follower.setMaxPower(0.65);
@@ -194,7 +194,8 @@ public class Auton_RED_p1 extends OpMode {
             // SCORE R1
             case PICKUP_R1:
                 if (!follower.isBusy()) {
-                    intake.stop();
+//                    intake.stop();
+                    intake.runInAt(0.25);
                     follower.followPath(row1Return);
                     transitionTo(AutoState.GO_SCORE_R1);
                 }
@@ -220,7 +221,8 @@ public class Auton_RED_p1 extends OpMode {
             // SCORE R2
             case PICKUP_R2:
                 if (!follower.isBusy()) {
-                    intake.stop();
+                    intake.runInAt(0.25);
+//                    intake.stop();
                     follower.followPath(row2Return);
                     transitionTo(AutoState.GO_SCORE_R2);
                 }

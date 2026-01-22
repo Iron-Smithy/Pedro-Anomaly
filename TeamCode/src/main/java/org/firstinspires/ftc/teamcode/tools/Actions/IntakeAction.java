@@ -18,6 +18,10 @@ public class IntakeAction {
         spin(MConstants.intakePowerIn);
     }
 
+    public void runInAt(double pow) {
+        spin(MConstants.intakePowerIn * pow);
+    }
+
     public void runOut() {
         spin(MConstants.intakePowerOut);
     }
