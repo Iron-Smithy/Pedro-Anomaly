@@ -30,22 +30,32 @@ public class ShooterAimHelper {
 
     public static ShooterAimHelper defaultRed() {
         TreeMap<Double, Long> map = new TreeMap<>();
-        map.put(12.0 * 1, 850L);
-        map.put(12.0 * 5, 1130L);
-        map.put(12.0 * 9, 1200L);
-        map.put(12.0 * 12, 1640L);
-        map.put(12.0 * 14, 1680L);
+        map.put(12.0, 850L); //good
+        map.put(60.0, 1130L); //good
+        map.put(72.0, 1200L); //good
+        map.put(84.0, 1250L); //good
+        map.put(96.0, 1370L); //good
+        map.put(108.0, 1450L); //maybe
+        map.put(120.0, 1460L); //maybe
+        map.put(132.0, 1470L);
+        map.put(144.0, 1480L);
+        map.put(168.0, 1490L);
         return new ShooterAimHelper(new Pose(132, 136, 0), 8 * 12, map);
     }
-    // public static ShooterAimHelper defaultBlue() { currently copy of red, uncomment and tune
-    //     TreeMap<Double, Long> map = new TreeMap<>();
-    //     map.put(12.0 * 1, 850L);
-    //     map.put(12.0 * 5, 1130L);
-    //     map.put(12.0 * 9, 1200L);
-    //     map.put(12.0 * 12, 1640L);
-    //     map.put(12.0 * 14, 1680L);
-    //     return new ShooterAimHelper(new Pose(132, 136, 0), 8 * 12, map);
-    // }
+    public static ShooterAimHelper defaultBlue() {
+        TreeMap<Double, Long> map = new TreeMap<>();
+        map.put(12.0, 850L); //decent
+        map.put(60.0, 1110L); //GOOD
+        map.put(72.0, 1160L); //GOOD
+        map.put(84.0, 1230L); //GOOD // values copied from red side table
+        map.put(96.0, 1300L); //decent
+        map.put(108.0, 1450L); //maybe
+        map.put(120.0, 1460L); //maybe
+        map.put(132.0, 1470L);
+        map.put(144.0, 1480L);
+        map.put(168.0, 1490L);
+        return new ShooterAimHelper(new Pose(132, 136, 0).mirror(), 8 * 12, map);
+    }
 
     public double getDistanceToGoal(Pose currentPose) {
         return Math.hypot(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY());

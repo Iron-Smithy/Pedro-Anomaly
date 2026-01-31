@@ -43,6 +43,8 @@ public class MConstants {
     /** Static friction / minimum power to move. */
     public static final double Turret_KS = 0.046; // 0.06
 
+    public static final double MAGIC = 183.90558;
+
     // ========================= Auto-aim heading PID =========================
     public static final double AIM_KP = 0.08;
     public static final double AIM_KI = 0.002;

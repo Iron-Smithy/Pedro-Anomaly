@@ -97,7 +97,7 @@ public class AutoFireTask {
                 if (ballReady || timeout) {
                     // Stop/slow intake and indexer so ejector can push ball into outtake without fighting
                     indexer.runIn();
-                    intake.runInAt(0.30);
+                    intake.runInAt(0.6);
                     ejector.up();
                     timer = now;
                     currentState = State.EJECTOR_UP;
@@ -125,10 +125,11 @@ public class AutoFireTask {
                 break;
 
             case COMPLETE:
-                indexer.stop();
-                intake.stop();
-                ejector.down();
-                active = false;
+//                indexer.runInAt(0.3);
+//                intake.runInAt(0.4);
+//                ejector.down();
+//                active = false;
+                cancel();
                 break;
         }
     }
@@ -139,8 +140,8 @@ public class AutoFireTask {
 
     public void cancel() {
         active = false;
-        indexer.stop();
-        intake.stop();
+        indexer.runInAt(0.1);
+        intake.runInAt(0.4);
         ejector.down();
     }
 

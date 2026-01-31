@@ -30,12 +30,12 @@ import org.firstinspires.ftc.teamcode.tools.Sensors.BallSensorArray;
 
 @Configurable
 @TeleOp
-public class RED_FEEDBACK extends OpMode {
+public class BLUE_FEEDBACK extends OpMode {
 
     // ----- Drive -----
     private Follower follower;
-    public static Pose startingPose = new Pose(127, 87, Math.toRadians(0));
-    private double fieldCentricOffset = Math.toRadians(0); // this working. but startingPose.getHeading(); may be more clear on intention
+    public static Pose startingPose = new Pose(144-127, 87, Math.toRadians(180-0));
+    private double fieldCentricOffset = startingPose.getHeading();
     private final double k = 2.0;
     private final double expKMinus1 = Math.exp(k) - 1;
     private boolean slowMode = false;
@@ -90,7 +90,7 @@ public class RED_FEEDBACK extends OpMode {
 
         ballSensors = new BallSensorArray();
 
-        aimHelper = ShooterAimHelper.defaultRed(); // MAKE SURE THIS IS THE PROPER SIDE AFTER MIRROR!!
+        aimHelper = ShooterAimHelper.defaultBlue(); // MAKE SURE THIS IS THE PROPER SIDE AFTER MIRROR!
 
         outtakeVelocityUp.setOnPress(() -> RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown));
         outtakeVelocityDown.setOnPress(() -> RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp));
@@ -109,7 +109,7 @@ public class RED_FEEDBACK extends OpMode {
         outtake.spinUp(outtakeSpeed);
         ejector.down();
         RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
-        fieldCentricOffset = Math.toRadians(0);
+        fieldCentricOffset = Math.toRadians(180-0);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class RED_FEEDBACK extends OpMode {
 
         double angleToTarget = Math.atan2(yDiff, xDiff);
         double targetAngle = angleToTarget;
-        double turretError = angleToTarget - heading;
+        double turretError = (angleToTarget - heading) + Math.PI;
         turretError = Math.atan2(Math.sin(turretError), Math.cos(turretError));
 
         if (turret_track_target) {
@@ -211,12 +211,12 @@ public class RED_FEEDBACK extends OpMode {
 
         // ----- Subsystems -----
         if (gamepad1.psWasPressed()) {
-            follower.setPose(new Pose(120, 127, Math.toRadians(37)));
+            follower.setPose(new Pose(144-120, 127, Math.toRadians(180-37)));
             fieldCentricOffset = startingPose.getHeading();
         }
         if (gamepad1.optionsWasPressed()) {
-            follower.setPose(new Pose(7.5, 8, Math.toRadians(0)));
-            fieldCentricOffset = Math.toRadians(0);
+            follower.setPose(new Pose(144-7.5, 8, Math.toRadians(180-0)));
+            fieldCentricOffset = Math.toRadians(180-0);
         }
         if (gamepad1.shareWasPressed()) fieldCentricOffset = follower.getHeading();
 

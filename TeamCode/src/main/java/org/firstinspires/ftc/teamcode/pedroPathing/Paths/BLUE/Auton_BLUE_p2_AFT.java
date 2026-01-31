@@ -1,5 +1,4 @@
-// untested 12 piece auto
-package org.firstinspires.ftc.teamcode.pedroPathing.Paths;
+package org.firstinspires.ftc.teamcode.pedroPathing.Paths.BLUE;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -9,18 +8,27 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
-import org.firstinspires.ftc.teamcode.tools.Actions.AutoFireTaskA;
+
+import org.firstinspires.ftc.teamcode.tools.Actions.AutoFireTask;
+
 import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
+import org.firstinspires.ftc.teamcode.tools.Actions.TurretAction;
+import org.firstinspires.ftc.teamcode.tools.Actions.BlockerAction;
 
-@Autonomous(name = "Auton_BLUE_push", group = "AAA")
-public class Auton_BLUE_pushGate extends OpMode {
+import org.firstinspires.ftc.teamcode.tools.Sensors.BallPosition;
+import org.firstinspires.ftc.teamcode.tools.Sensors.BallSensorArray;
+
+@Autonomous(name = "Auton_BLUE_p2_AFT", group = "AAA")
+public class Auton_BLUE_p2_AFT extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
 
@@ -28,31 +36,30 @@ public class Auton_BLUE_pushGate extends OpMode {
     private IndexAction indexer;
     private EjectorAction ejector;
     private OuttakeAction outtake;
+    private TurretAction turret;
+    private BlockerAction blocker;
 
-    private long scoreShooterTPS = 1135;
-    private long[] scoreShooterTPSArray = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS};
-    private long[] scoreShooterTPSArrayFirst = {scoreShooterTPS + 35, scoreShooterTPS - 10, scoreShooterTPS - 5};
+    private BallSensorArray ballSensors;
 
+    private final long scoreShooterTPS = 1050;
 
-    private long tolerance = 25;
+    private final long tolerance = 25;
 
-    private AutoFireTaskA fireTask = null;
+    private AutoFireTask fireTask = null;
 
     private final double RPreXpos = 85;
     private final Pose startPose = new Pose(144-120, 127, Math.toRadians(180-37)); // start location
     private final Pose ScorePose = new Pose(144-100, 107, Math.toRadians(180-45)); // score location
     private final Pose R1PrePose = new Pose(144-RPreXpos, 87, Math.toRadians(180-0)); // row 1 collection pre location
-    private final Pose R1CollectPose = new Pose(144-127, 87, Math.toRadians(180-0)); // row 1 balls inside robot location
+    private final Pose R1CollectPose = new Pose(144-123, 87, Math.toRadians(180-0)); // row 1 balls inside robot location
     private final Pose ScoreR1CPPose = new Pose(144-100, 87, Math.toRadians(180-0)); // smooth back-out bezier control point
     private final Pose R2PrePose = new Pose(144-RPreXpos, 63, Math.toRadians(180-0)); // row 2 collection pre location
-    private final Pose R2CollectPose = new Pose(144-130, 63, Math.toRadians(180-0)); // row 3 balls inside robot location
+    private final Pose R2CollectPose = new Pose(144-125, 63, Math.toRadians(180-0)); // row 3 balls inside robot location
     private final Pose ScoreR2CPPose = new Pose(144-90, 55, Math.toRadians(180-0));  // smooth back-out bezier control point
     private final Pose R3PrePose = new Pose(144-RPreXpos, 39, Math.toRadians(180-0)); // row 3 collection pre location
     private final Pose R3CollectPose = new Pose(144-135, 39, Math.toRadians(180-0)); // row 3 balls inside robot location
     private final Pose ScoreR3CPPose = new Pose(144-90, 30, Math.toRadians(180-0));  // smooth back-out bezier control point
     private final Pose ParkPose = new Pose(144-120, 127, Math.toRadians(180-37)); // start pose, make right
-    private final Pose GatePose = new Pose(144-128, 74, Math.toRadians(180-90));
-    private final Pose GateCP = new Pose(37, 78, Math.toRadians(0));
 
     private enum AutoState {
         START,
@@ -67,8 +74,6 @@ public class Auton_BLUE_pushGate extends OpMode {
         GO_SCORE_R2,
         GO_SCORE_R2_HOLD,
         SCORE_R2,
-
-        PUSH_GATE,
 
         PICKUP_R3, // row 3
         GO_SCORE_R3,
@@ -86,7 +91,6 @@ public class Auton_BLUE_pushGate extends OpMode {
     private PathChain row1Return;
 
     private PathChain row2Pickup;
-    private PathChain pushGate;
     private PathChain row2Return;
 
     private PathChain row3Pickup;
@@ -111,12 +115,6 @@ public class Auton_BLUE_pushGate extends OpMode {
                 .setVelocityConstraint(0.1)
                 .build();
 
-        pushGate = follower.pathBuilder()
-                .addPath(new BezierCurve(R1CollectPose, GateCP, GatePose))
-                .setLinearHeadingInterpolation(R1CollectPose.getHeading(), GatePose.getHeading())
-                .setVelocityConstraint(0.6)
-                .build();
-
         row1Return = follower.pathBuilder()
                 // You can still use control points by using the addPath method that takes multiple Poses
                 .addPath(new BezierCurve(R1CollectPose, ScoreR1CPPose, ScorePose))
@@ -135,7 +133,7 @@ public class Auton_BLUE_pushGate extends OpMode {
 
         row2Return = follower.pathBuilder()
                 .addPath(new BezierCurve(R2CollectPose, ScoreR2CPPose, ScorePose))
-                .setLinearHeadingInterpolation(GatePose.getHeading(), ScorePose.getHeading())
+                .setLinearHeadingInterpolation(R2CollectPose.getHeading(), ScorePose.getHeading())
                 .setVelocityConstraint(0.6)
                 .build();
 
@@ -158,7 +156,7 @@ public class Auton_BLUE_pushGate extends OpMode {
         park = follower.pathBuilder()
                 .addPath(new BezierLine(ScorePose, R1CollectPose))
                 .setLinearHeadingInterpolation(ScorePose.getHeading(), R1CollectPose.getHeading())
-                .setVelocityConstraint(0.6)
+                .setVelocityConstraint(0.7)
                 .build();
 //              .addPath(new BezierLine(ScorePose, startPose))
 //              .setLinearHeadingInterpolation(ScorePose.getHeading(), ParkPose.getHeading())
@@ -183,7 +181,9 @@ public class Auton_BLUE_pushGate extends OpMode {
             // SCORE PRELOAD
             case GO_SCORE_PRELOAD:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArrayFirst);
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS); // to take advantage of our brand new
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_PRELOAD);
                 }
@@ -193,31 +193,29 @@ public class Auton_BLUE_pushGate extends OpMode {
                 fireTask.update();
                 if (fireTask.isActive()) {
                 } else {
-                    follower.setMaxPower(0.75);
+                    follower.setMaxPower(0.65);
                     intake.runIn();
                     follower.followPath(row1Pickup);
                     transitionTo(AutoState.PICKUP_R1);
                     fireTask = null;
+                    blocker.out();
                 }
                 break;
 
             // SCORE R1
             case PICKUP_R1:
                 if (!follower.isBusy()) {
-                    intake.stop();
-                    follower.followPath(pushGate);
-                    transitionTo(AutoState.PUSH_GATE);
-                }
-                break;
-            case PUSH_GATE:
-                if (!follower.isBusy()) {
+                    indexer.runInAt(0.3);
+                    intake.runInAt(0.45);
                     follower.followPath(row1Return);
                     transitionTo(AutoState.GO_SCORE_R1);
                 }
                 break;
             case GO_SCORE_R1:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R1);
                 }
@@ -230,13 +228,15 @@ public class Auton_BLUE_pushGate extends OpMode {
                     follower.followPath(row2Pickup);
                     transitionTo(AutoState.PICKUP_R2);
                     fireTask = null;
+                    blocker.out();
                 }
                 break;
 
             // SCORE R2
             case PICKUP_R2:
                 if (!follower.isBusy()) {
-                    intake.stop();
+                    intake.runInAt(0.25);
+//                    intake.stop();
                     follower.followPath(row2Return);
                     transitionTo(AutoState.GO_SCORE_R2);
                 }
@@ -249,7 +249,9 @@ public class Auton_BLUE_pushGate extends OpMode {
                 break;
             case GO_SCORE_R2_HOLD:
                 if (pathTimer.getElapsedTime() > 300) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R2);
                 }
@@ -261,6 +263,7 @@ public class Auton_BLUE_pushGate extends OpMode {
                     intake.runIn();
                     follower.followPath(park); // row3Pickup
                     transitionTo(AutoState.EXIT); // PICKUP_R3
+                    blocker.out();
                     fireTask = null;
                 }
                 break;
@@ -275,7 +278,8 @@ public class Auton_BLUE_pushGate extends OpMode {
                 break;
             case GO_SCORE_R3:
                 if (!follower.isBusy()) {
-                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R3);
                 }
@@ -328,9 +332,18 @@ public class Auton_BLUE_pushGate extends OpMode {
         indexer = new IndexAction(hardwareMap);
         ejector = new EjectorAction(hardwareMap);
         outtake = new OuttakeAction(hardwareMap);
+        turret = new TurretAction(hardwareMap);
+        blocker = new BlockerAction(hardwareMap);
+
+        ballSensors = new BallSensorArray();
+
+        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
+        turret.runToTick((int) turret.center); // hold at 0
 
         ejector.up();
         ejector.down();
+
+        blocker.out();
 
         buildPaths();
         follower.setStartingPose(startPose);
@@ -345,6 +358,10 @@ public class Auton_BLUE_pushGate extends OpMode {
     @Override
     public void loop() {
         follower.update();
+
+        outtake.spinUp(scoreShooterTPS);
+        outtake.update();
+
         updateAutonomous();
 
         telemetry.addLine("=== AutonR Debug ===");

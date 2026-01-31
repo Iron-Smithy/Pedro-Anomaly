@@ -1,5 +1,4 @@
-// untested 12 piece auto
-package org.firstinspires.ftc.teamcode.pedroPathing.Paths;
+package org.firstinspires.ftc.teamcode.pedroPathing.Paths.RED;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -11,16 +10,20 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
+
 import org.firstinspires.ftc.teamcode.tools.Actions.AutoFireTaskA;
+
 import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
+import org.firstinspires.ftc.teamcode.tools.Actions.TurretAction;
 
-@Autonomous(name = "Auton_RED_p1", group = "AAA")
-public class Auton_RED_p1 extends OpMode {
+@Autonomous(name = "Auton_RED_p2", group = "AAB")
+public class Auton_RED_p2 extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
 
@@ -28,6 +31,7 @@ public class Auton_RED_p1 extends OpMode {
     private IndexAction indexer;
     private EjectorAction ejector;
     private OuttakeAction outtake;
+    private TurretAction turret;
 
     private long scoreShooterTPS = 1115;
     private long[] scoreShooterTPSArray = {scoreShooterTPS, scoreShooterTPS, scoreShooterTPS};
@@ -314,6 +318,9 @@ public class Auton_RED_p1 extends OpMode {
         indexer = new IndexAction(hardwareMap);
         ejector = new EjectorAction(hardwareMap);
         outtake = new OuttakeAction(hardwareMap);
+        turret = new TurretAction(hardwareMap);
+
+        turret.runToTick((int) turret.center); // 0
 
         ejector.up();
         ejector.down();

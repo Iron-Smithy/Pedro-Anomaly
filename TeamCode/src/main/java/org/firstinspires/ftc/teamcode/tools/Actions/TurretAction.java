@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.teamcode.tools.Actions;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
@@ -14,7 +15,7 @@ public class TurretAction {
     private final int rightTickMax = 265; // right most based on 3d printed limits
     private final double leftRadMax = -Math.PI / 2;
     private final double rightRadMax = Math.PI / 2;
-    private final int center = (leftTickMax + rightTickMax) / 2;
+    public final int center = (leftTickMax + rightTickMax) / 2;
 
     double deadZone = Math.PI / 4; // 2PI == full circle, PI is half, PI/2 == 1/4 PI/4 == 1/8
 
@@ -24,8 +25,8 @@ public class TurretAction {
 
     public TurretAction(HardwareMap hardwareMap) {
         motor = RobotHardware.turret;
-        motor.setDirection(DcMotor.Direction.FORWARD);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setDirection(DcMotor.Direction.REVERSE);
+//        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); Don't reset on initialization of action
     }
 
     public void update() {

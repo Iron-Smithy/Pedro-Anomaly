@@ -23,6 +23,7 @@ public class TurretController extends OpMode {
         RobotHardware.init(hardwareMap);
 
         turret = new TurretAction(hardwareMap);
+        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0);
     }
 
     @Override
