@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Paths.RED;
+package org.firstinspires.ftc.teamcode.pedroPathing.Paths.BLUE;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -24,11 +24,10 @@ import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.TurretAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.BlockerAction;
 
-import org.firstinspires.ftc.teamcode.tools.Sensors.BallPosition;
 import org.firstinspires.ftc.teamcode.tools.Sensors.BallSensorArray;
 
-@Autonomous(name = "Auton_RED_p2_AFT", group = "AAA")
-public class Auton_RED_p2_AFT extends OpMode {
+@Autonomous(name = "Auton_BLUE_12P", group = "AAA")
+public class Auton_BLUE_12P extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
 
@@ -41,25 +40,25 @@ public class Auton_RED_p2_AFT extends OpMode {
 
     private BallSensorArray ballSensors;
 
-    private final long scoreShooterTPS = 1115;
+    private final long scoreShooterTPS = 1035;
 
     private final long tolerance = 25;
 
     private AutoFireTask fireTask = null;
 
-    private final double RPreXpos = 90;
-    private final Pose startPose = new Pose(/*144-*/120, 127, Math.toRadians(/*180-*/37)); // start location
-    private final Pose ScorePose = new Pose(/*144-*/100, 107, Math.toRadians(/*180-*/45)); // score location
-    private final Pose R1PrePose = new Pose(/*144-*/RPreXpos, 87, Math.toRadians(/*180-*/0)); // row 1 collection pre location
-    private final Pose R1CollectPose = new Pose(/*144-*/123, 87, Math.toRadians(/*180-*/0)); // row 1 balls inside robot location
-    private final Pose ScoreR1CPPose = new Pose(/*144-*/100, 87, Math.toRadians(/*180-*/0)); // smooth back-out bezier control point
-    private final Pose R2PrePose = new Pose(/*144-*/RPreXpos, 63, Math.toRadians(/*180-*/0)); // row 2 collection pre location
-    private final Pose R2CollectPose = new Pose(/*144-*/125, 63, Math.toRadians(/*180-*/0)); // row 3 balls inside robot location
-    private final Pose ScoreR2CPPose = new Pose(/*144-*/90, 55, Math.toRadians(/*180-*/0));  // smooth back-out bezier control point
-    private final Pose R3PrePose = new Pose(/*144-*/RPreXpos, 39, Math.toRadians(/*180-*/0)); // row 3 collection pre location
-    private final Pose R3CollectPose = new Pose(/*144-*/135, 39, Math.toRadians(/*180-*/0)); // row 3 balls inside robot location
-    private final Pose ScoreR3CPPose = new Pose(/*144-*/90, 30, Math.toRadians(/*180-*/0));  // smooth back-out bezier control point
-    private final Pose ParkPose = new Pose(/*144-*/120, 127, Math.toRadians(/*180-*/37)); // start pose, make right
+    private final double RPreXpos = 85;
+    private final Pose startPose = new Pose(144-120, 127, Math.toRadians(180-37)); // start location
+    private final Pose ScorePose = new Pose(144-100, 107, Math.toRadians(180-45)); // score location
+    private final Pose R1PrePose = new Pose(144-RPreXpos, 87, Math.toRadians(180-0)); // row 1 collection pre location
+    private final Pose R1CollectPose = new Pose(144-123, 87, Math.toRadians(180-0)); // row 1 balls inside robot location
+    private final Pose ScoreR1CPPose = new Pose(144-100, 87, Math.toRadians(180-0)); // smooth back-out bezier control point
+    private final Pose R2PrePose = new Pose(144-RPreXpos, 63, Math.toRadians(180-0)); // row 2 collection pre location
+    private final Pose R2CollectPose = new Pose(144-125, 63, Math.toRadians(180-0)); // row 3 balls inside robot location
+    private final Pose ScoreR2CPPose = new Pose(144-90, 55, Math.toRadians(180-0));  // smooth back-out bezier control point
+    private final Pose R3PrePose = new Pose(144-RPreXpos, 39, Math.toRadians(180-0)); // row 3 collection pre location
+    private final Pose R3CollectPose = new Pose(144-135, 39, Math.toRadians(180-0)); // row 3 balls inside robot location
+    private final Pose ScoreR3CPPose = new Pose(144-90, 30, Math.toRadians(180-0));  // smooth back-out bezier control point
+    private final Pose ParkPose = new Pose(144-120, 127, Math.toRadians(180-37)); // start pose, make right
 
     private enum AutoState {
         START,
@@ -171,10 +170,11 @@ public class Auton_RED_p2_AFT extends OpMode {
             // START
             case START:
                 outtake.spinUp(scoreShooterTPS);
-                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
+                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
+
+                follower.setMaxPower(0.65);
 
                 follower.followPath(startToScore);
-                follower.setMaxPower(0.65);
                 transitionTo(AutoState.GO_SCORE_PRELOAD);
                 break;
 
@@ -193,9 +193,8 @@ public class Auton_RED_p2_AFT extends OpMode {
                 fireTask.update();
                 if (fireTask.isActive()) {
                 } else {
-                    follower.setMaxPower(0.65);
                     intake.runIn();
-                    follower.followPath(row1Pickup);
+                    follower.followPath(row1Pickup, 0.8, true);
                     transitionTo(AutoState.PICKUP_R1);
                     fireTask = null;
                     blocker.out();
@@ -207,7 +206,7 @@ public class Auton_RED_p2_AFT extends OpMode {
                 if (!follower.isBusy()) {
                     indexer.runInAt(0.3);
                     intake.runInAt(0.45);
-                    follower.followPath(row1Return);
+                    follower.followPath(row1Return, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_R1);
                 }
                 break;
@@ -225,7 +224,7 @@ public class Auton_RED_p2_AFT extends OpMode {
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
-                    follower.followPath(row2Pickup);
+                    follower.followPath(row2Pickup, 0.8, true);
                     transitionTo(AutoState.PICKUP_R2);
                     fireTask = null;
                     blocker.out();
@@ -237,18 +236,12 @@ public class Auton_RED_p2_AFT extends OpMode {
                 if (!follower.isBusy()) {
                     intake.runInAt(0.25);
 //                    intake.stop();
-                    follower.followPath(row2Return);
+                    follower.followPath(row2Return, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_R2);
                 }
                 break;
             case GO_SCORE_R2:
                 if (!follower.isBusy()) {
-                    follower.followPath(row2Return);
-                    transitionTo(AutoState.GO_SCORE_R2_HOLD);
-                }
-                break;
-            case GO_SCORE_R2_HOLD:
-                if (pathTimer.getElapsedTime() > 300) {
                     blocker.in();
 //                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
@@ -261,8 +254,8 @@ public class Auton_RED_p2_AFT extends OpMode {
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
-                    follower.followPath(park); // row3Pickup
-                    transitionTo(AutoState.EXIT); // PICKUP_R3
+                    follower.followPath(row3Pickup, 0.8, true); // row3Pickup
+                    transitionTo(AutoState.PICKUP_R3); // PICKUP_R3
                     blocker.out();
                     fireTask = null;
                 }
@@ -272,12 +265,13 @@ public class Auton_RED_p2_AFT extends OpMode {
             case PICKUP_R3:
                 if (!follower.isBusy()) {
                     intake.stop();
-                    follower.followPath(row3Return); // row3Return
+                    follower.followPath(row3Return, 0.7, true); // row3Return
                     transitionTo(AutoState.GO_SCORE_R3); //GO_SCORE_R3
                 }
                 break;
             case GO_SCORE_R3:
                 if (!follower.isBusy()) {
+                    blocker.in();
 //                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
@@ -289,11 +283,7 @@ public class Auton_RED_p2_AFT extends OpMode {
                 if (fireTask.isActive()) {
                 } else {
                     fireTask = null;
-                    follower.followPath(park);
-                    outtake.stop();
-                    indexer.stop();
-                    intake.stop();
-                    ejector.down();
+                    follower.followPath(park, 0.9, true);
                     transitionTo(AutoState.EXIT);
                 }
                 break;
@@ -305,6 +295,7 @@ public class Auton_RED_p2_AFT extends OpMode {
                     indexer.stop();
                     intake.stop();
                     ejector.down();
+                    blocker.out();
                     transitionTo(AutoState.DONE);
                 }
                 break;
