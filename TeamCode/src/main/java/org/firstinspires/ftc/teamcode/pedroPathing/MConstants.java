@@ -19,13 +19,41 @@ public class MConstants {
     public static final double ejectorDown = 0.0;      // rest position
     public static final double ejectorUp = 1.0;       // up position
 
+    // ========================= Ejector =========================
+    public static final double blockerIn = 0.5;      // rest position
+    public static final double blockerOut = 0.2;       // up position
+
     // ========================= Outtake Flap ====================
     public static final double flapDown = 0.7;
     public static final double flapUp = 0.3;
 
-    // ========================= Outtake ==========================
-    public static final double SHOOTER_P = 0;
-    public static final double SHOOTER_KV = 0;
-    public static final double SHOOTER_KS = 0;
+    // ========================= Outtake (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
+    /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
+    public static final double SHOOTER_KV = 0.0004; // 0.00052
+    /** Proportional on velocity error. Reduces oscillation, improves lock. */
+    public static final double SHOOTER_P = 0.012; // 0.012
+    /** Static friction / minimum power to move. */
+    public static final double SHOOTER_KS = 0.046; // 0.06
+
+    // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
+    /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
+    public static final double Turret_KV = 0.0004; // 0.00052
+    /** Proportional on velocity error. Reduces oscillation, improves lock. */
+    public static final double Turret_P = 0.012; // 0.012
+    /** Static friction / minimum power to move. */
+    public static final double Turret_KS = 0.046; // 0.06
+
+    // ========================= Auto-aim heading PID =========================
+    public static final double AIM_KP = 0.08;
+    public static final double AIM_KI = 0.002;
+    public static final double AIM_KD = 0.012;
+    /** Max turn power magnitude (0..1). */
+    public static final double AIM_MAX_OUTPUT = 0.85;
+    /** Anti-windup: cap integral contribution. */
+    public static final double AIM_MAX_INTEGRAL = 0.25;
+
+    // ========================= Ball sensors (Rev Color V3 distance) =========================
+    /** Distance (cm) below which a ball is considered present. Tune per sensor. */
+    public static final double[] BALL_DETECT_DISTANCE_CM = {2, 15, 2.7, 3};
 }
 

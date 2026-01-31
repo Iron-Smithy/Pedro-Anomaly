@@ -1,41 +1,66 @@
 package org.firstinspires.ftc.teamcode.tools.Actions;
 
-import com.pedropathing.util.Timer;
+import org.firstinspires.ftc.teamcode.tools.Sensors.BallSensorArray;
 
+/**
+ * Auto-fire state machine: spin up shooter, feed balls, and fire when each ball
+ * is at the launch position (sensor-based). Falls back to time-based if sensors unavailable.
+ */
 public class AutoFireTask {
-    public OuttakeAction shooter;
-    private IndexAction indexer;
-    private IntakeAction intake;
-    private EjectorAction ejector;
+    private final OuttakeAction shooter;
+    private final IndexAction indexer;
+    private final IntakeAction intake;
+    private final EjectorAction ejector;
+    private final BallSensorArray ballSensors;
 
     private long timer = 0;
     private int fireCount = 0;
+    private final int ballsToFire;
+    private final long targetVel;
 
-    private final int BALLS_TO_FIRE = 3;
-
-    private final long ballFeedDelay = 300;
-    private final long servoMoveTime = 300;
-    private final long outtakeLaunchDelay = 175;
+    /** Delay before starting first feed (ms). */
+    private final long initialFeedDelayMs;
+    /** Max time to wait for ball at launch before firing anyway (ms). */
+    private final long feedTimeoutMs;
+    /** Min time ejector is up before bringing down (ms). */
+    private final long ejectorUpMinMs;
+    /** Min time ejector is down before next cycle (ms). */
+    private final long ejectorDownMinMs;
 
     private enum State {
         SPINNING_UP,
-        WAITING_FOR_FEED_START,
-        EJECTOR_MOVING_UP,
-        WAITING_LAUNCH_DELAY,
-        EJECTOR_MOVING_DOWN,
+        FEEDING,
+        EJECTOR_UP,
+        EJECTOR_DOWN,
         COMPLETE
     }
 
-    private State currentState = State.WAITING_FOR_FEED_START;
+    private State currentState = State.FEEDING;
     private boolean active = false;
-    private long targetVel;
 
-    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, long targetVel) {
+    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector,
+                        IntakeAction intake, long targetVel) {
+        this(shooter, indexer, ejector, intake, null, targetVel, 3);
+    }
+
+    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector,
+                        IntakeAction intake, BallSensorArray ballSensors, long targetVel) {
+        this(shooter, indexer, ejector, intake, ballSensors, targetVel, 3);
+    }
+
+    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector,
+                        IntakeAction intake, BallSensorArray ballSensors, long targetVel, int ballsToFire) {
         this.shooter = shooter;
         this.indexer = indexer;
-        this.intake = intake;
         this.ejector = ejector;
+        this.intake = intake;
+        this.ballSensors = ballSensors;
         this.targetVel = targetVel;
+        this.ballsToFire = ballsToFire;
+        this.initialFeedDelayMs = 300;
+        this.feedTimeoutMs = 500;
+        this.ejectorUpMinMs = 300;
+        this.ejectorDownMinMs = this.ejectorUpMinMs - 20;
     }
 
     public void start() {
@@ -49,58 +74,57 @@ public class AutoFireTask {
         if (!active) return;
 
         long now = System.currentTimeMillis();
+        boolean sensorSaysReady = ballSensors != null && ballSensors.isLaunchReady();
 
         switch (currentState) {
 
             case SPINNING_UP:
                 if (shooter.isAtTargetVelocity()) {
                     timer = now;
-                    currentState = State.WAITING_FOR_FEED_START;
+                    currentState = State.FEEDING;
                 }
                 break;
 
-            case WAITING_FOR_FEED_START:
+            case FEEDING:
                 if (fireCount != 0) {
                     indexer.runIn();
                     intake.runIn();
                 }
+                boolean waitedLongEnough = (now - timer) >= initialFeedDelayMs;
+                boolean ballReady = sensorSaysReady || (ballSensors == null && waitedLongEnough);
+                boolean timeout = (now - timer) >= feedTimeoutMs;
 
-                if (now - timer >= ballFeedDelay) {
+                if (ballReady || timeout) {
+                    // Stop/slow intake and indexer so ejector can push ball into outtake without fighting
+                    indexer.runIn();
+                    intake.runInAt(0.30);
                     ejector.up();
                     timer = now;
-                    currentState = State.EJECTOR_MOVING_UP;
+                    currentState = State.EJECTOR_UP;
                 }
                 break;
 
-            case EJECTOR_MOVING_UP:
-                if (now - timer >= servoMoveTime) {
-                    timer = now;
-                    currentState = State.WAITING_LAUNCH_DELAY;
-                }
-                break;
-
-            case WAITING_LAUNCH_DELAY:
-                if (now - timer >= outtakeLaunchDelay) {
+            case EJECTOR_UP:
+                if (now - timer >= ejectorUpMinMs) {
                     ejector.down();
                     timer = now;
-                    currentState = State.EJECTOR_MOVING_DOWN;
+                    currentState = State.EJECTOR_DOWN;
                 }
                 break;
 
-            case EJECTOR_MOVING_DOWN:
-                if (now - timer >= servoMoveTime) {
+            case EJECTOR_DOWN:
+                if (now - timer >= ejectorDownMinMs) {
                     fireCount++;
-                    if (fireCount >= BALLS_TO_FIRE) {
+                    if (fireCount >= ballsToFire) {
                         currentState = State.COMPLETE;
                     } else {
                         timer = now;
-                        currentState = State.WAITING_FOR_FEED_START;
+                        currentState = State.FEEDING;
                     }
                 }
                 break;
 
             case COMPLETE:
-//                shooter.stop();
                 indexer.stop();
                 intake.stop();
                 ejector.down();
@@ -109,15 +133,17 @@ public class AutoFireTask {
         }
     }
 
-    public boolean isActive() { return active; }
+    public boolean isActive() {
+        return active;
+    }
 
     public void cancel() {
         active = false;
-//        shooter.stop();
         indexer.stop();
         intake.stop();
         ejector.down();
     }
+
     public void spinUp(double tps) {
         shooter.spinUp(tps);
     }

@@ -26,6 +26,14 @@ public class IndexAction {
         return true;
     }
 
+    public void runInAt(double pow) {
+        if (currentPower != MConstants.indexerPowerIn) {
+            wheel0.setPower(MConstants.intakePowerIn * pow);
+            wheel1.setPower(MConstants.intakePowerIn * pow);
+            currentPower = MConstants.intakePowerIn * pow;
+        }
+    }
+
     public boolean runOut() {
         if (currentPower != MConstants.indexerPowerOut) {
             wheel0.setPower(MConstants.indexerPowerOut);
