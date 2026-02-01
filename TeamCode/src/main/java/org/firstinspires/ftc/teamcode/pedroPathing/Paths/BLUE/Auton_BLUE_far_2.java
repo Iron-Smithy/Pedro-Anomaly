@@ -39,7 +39,7 @@ public class Auton_BLUE_far_2 extends OpMode {
 
     private BallSensorArray ballSensors;
 
-    private long scoreShooterTPS = 1470;
+    private long scoreShooterTPS = 1444;
 
     private long tolerance = 25;
 
@@ -48,7 +48,7 @@ public class Auton_BLUE_far_2 extends OpMode {
     private final Pose ScorePose = new Pose(54, 13, Math.toRadians(109)); // score location
     private final Pose R3PrePose = new Pose(45, 39, Math.toRadians(180)); // row 1 collection pre location
     private final Pose R3CollectPose = new Pose(9, 39, Math.toRadians(180)); // row 1 balls inside robot location
-    private final Pose RHuman = new Pose(9, 10, Math.toRadians(180)); // smooth back-out bezier control point
+    private final Pose RHuman = new Pose(9, 13, Math.toRadians(180)); // smooth back-out bezier control point
 
     private enum AutoState {
         START,
@@ -74,6 +74,7 @@ public class Auton_BLUE_far_2 extends OpMode {
     private PathChain row3Pickup;
     private PathChain rowHPickup;
     private PathChain rowHToScore;
+    private PathChain scoreToPark;
 
     private void buildPaths() {
         // ========= START → SCORE =========
@@ -109,6 +110,11 @@ public class Auton_BLUE_far_2 extends OpMode {
         rowHToScore = follower.pathBuilder()
                 .addPath(new BezierLine(RHuman, ScorePose))
                 .setLinearHeadingInterpolation(RHuman.getHeading(), ScorePose.getHeading())
+                .setVelocityConstraint(0.6)
+                .build();
+        scoreToPark = follower.pathBuilder()
+                .addPath(new BezierLine(ScorePose, startPose))
+                .setLinearHeadingInterpolation(ScorePose.getHeading(), startPose.getHeading())
                 .setVelocityConstraint(0.6)
                 .build();
     }
@@ -154,17 +160,17 @@ public class Auton_BLUE_far_2 extends OpMode {
             // SCORE R1
             case PICKUP_R3:
                 if (!follower.isBusy()) {
-                    intake.runInAt(0.65);
-                    follower.followPath(row3ToScore);
+                    intake.runInAt(0.8);
+                    follower.followPath(row3ToScore, 5, true);
                     transitionTo(AutoState.GO_SCORE_R3);
                 }
                 break;
             case GO_SCORE_R3:
                 if (!follower.isBusy()) {
                     blocker.in();
-                    turret.runToTick(turret.radToTick(Math.toRadians(-3)));
+                    turret.runToTick(turret.radToTick(Math.toRadians(-7.0))); // opposite. more (-) is right
 //                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS, 4);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R3);
                 }
@@ -184,30 +190,36 @@ public class Auton_BLUE_far_2 extends OpMode {
             // SCORE R2
             case PICKUP_RHuman:
                 if (!follower.isBusy()) {
-                    intake.runInAt(0.5);
-                    follower.followPath(rowHPickup);
+                    intake.runInAt(1.0);
+                    follower.followPath(rowHToScore);
                     transitionTo(AutoState.GO_SCORE_RHuman);
                 }
                 break;
             case GO_SCORE_RHuman:
                 if (!follower.isBusy()) {
-                    follower.followPath(rowHToScore);
+                    blocker.in();
+                    turret.runToTick(turret.radToTick(Math.toRadians(-6.5)));
+                    //                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
                     transitionTo(AutoState.SCORE_RHuman);
                 }
                 break;
             case SCORE_RHuman:
-                if (pathTimer.getElapsedTime() > 300) {
-                    blocker.in();
-//                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
-                    fireTask.start();
+                fireTask.update();
+                if (fireTask.isActive()) {
+                } else {
+                    intake.runIn();
+                    follower.followPath(scoreToPark);
                     transitionTo(AutoState.EXIT);
+                    fireTask = null;
+                    blocker.out();
                 }
                 break;
 
             // PARK
             case EXIT:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > 1000) {
+                if (!follower.isBusy()) {
                     outtake.stop();
                     indexer.stop();
                     intake.stop();
@@ -219,7 +231,6 @@ public class Auton_BLUE_far_2 extends OpMode {
 
             case DONE:
                 break;
-
         }
     }
 
@@ -246,7 +257,7 @@ public class Auton_BLUE_far_2 extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
-        turret.runToTick((int) turret.radToTick(Math.toRadians(3))); // right 4 degrees
+        turret.runToTick((int) turret.radToTick(Math.toRadians(3))); // right 3 degrees (+) left
 
         ejector.up();
         ejector.down();

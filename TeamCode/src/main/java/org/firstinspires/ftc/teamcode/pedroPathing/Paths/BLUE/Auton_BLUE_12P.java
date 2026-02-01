@@ -302,7 +302,6 @@ public class Auton_BLUE_12P extends OpMode {
 
             case DONE:
                 break;
-
         }
     }
 

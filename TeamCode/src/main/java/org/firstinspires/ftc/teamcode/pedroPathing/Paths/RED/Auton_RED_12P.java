@@ -295,7 +295,6 @@ public class Auton_RED_12P extends OpMode {
 
             case DONE:
                 break;
-
         }
     }
 
