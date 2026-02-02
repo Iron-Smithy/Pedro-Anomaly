@@ -11,15 +11,19 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
+
 import org.firstinspires.ftc.teamcode.tools.Actions.AutoFireTask;
-import org.firstinspires.ftc.teamcode.tools.Actions.BlockerAction;
+
 import org.firstinspires.ftc.teamcode.tools.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.OuttakeAction;
 import org.firstinspires.ftc.teamcode.tools.Actions.TurretAction;
+import org.firstinspires.ftc.teamcode.tools.Actions.BlockerAction;
+
 import org.firstinspires.ftc.teamcode.tools.Sensors.BallSensorArray;
 
 @Autonomous(name = "Auton_RED_12P", group = "AAA")
@@ -36,13 +40,13 @@ public class Auton_RED_12P extends OpMode {
 
     private BallSensorArray ballSensors;
 
-    private final long scoreShooterTPS = 1040;
+    private final long scoreShooterTPS = 1035;
 
     private final long tolerance = 25;
 
     private AutoFireTask fireTask = null;
 
-    private final double RPreXpos = 90;
+    private final double RPreXpos = 85;
     private final Pose startPose = new Pose(/*144-*/120, 127, Math.toRadians(/*180-*/37)); // start location
     private final Pose ScorePose = new Pose(/*144-*/100, 107, Math.toRadians(/*180-*/45)); // score location
     private final Pose R1PrePose = new Pose(/*144-*/RPreXpos, 87, Math.toRadians(/*180-*/0)); // row 1 collection pre location
@@ -200,7 +204,7 @@ public class Auton_RED_12P extends OpMode {
             case PICKUP_R1:
                 if (!follower.isBusy()) {
                     indexer.runInAt(0.3);
-                    intake.runInAt(0.50);
+                    intake.runInAt(0.45);
                     follower.followPath(row1Return, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_R1);
                 }
@@ -266,6 +270,7 @@ public class Auton_RED_12P extends OpMode {
                 break;
             case GO_SCORE_R3:
                 if (!follower.isBusy()) {
+                    blocker.in();
 //                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
@@ -289,6 +294,7 @@ public class Auton_RED_12P extends OpMode {
                     indexer.stop();
                     intake.stop();
                     ejector.down();
+                    blocker.out();
                     transitionTo(AutoState.DONE);
                 }
                 break;
@@ -321,7 +327,6 @@ public class Auton_RED_12P extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
-        turret.runToTick((int) turret.center); // hold at 0
 
         ejector.up();
         ejector.down();
@@ -336,6 +341,8 @@ public class Auton_RED_12P extends OpMode {
     public void start() {
         pathTimer.resetTimer();
         currentState = AutoState.START;
+
+        turret.runToTick((int) turret.center); // hold at 0
     }
 
     @Override

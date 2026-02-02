@@ -71,7 +71,6 @@ public class Auton_BLUE_12P extends OpMode {
 
         PICKUP_R2, // row 2
         GO_SCORE_R2,
-        GO_SCORE_R2_HOLD,
         SCORE_R2,
 
         PICKUP_R3, // row 3
@@ -234,7 +233,7 @@ public class Auton_BLUE_12P extends OpMode {
             // SCORE R2
             case PICKUP_R2:
                 if (!follower.isBusy()) {
-                    intake.runInAt(0.25);
+                    intake.runInAt(0.50);
 //                    intake.stop();
                     follower.followPath(row2Return, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_R2);
@@ -264,7 +263,7 @@ public class Auton_BLUE_12P extends OpMode {
             // SCORE R3
             case PICKUP_R3:
                 if (!follower.isBusy()) {
-                    intake.stop();
+                    intake.runInAt(0.5);
                     follower.followPath(row3Return, 0.7, true); // row3Return
                     transitionTo(AutoState.GO_SCORE_R3); //GO_SCORE_R3
                 }
@@ -328,7 +327,6 @@ public class Auton_BLUE_12P extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
-        turret.runToTick((int) turret.center); // hold at 0
 
         ejector.up();
         ejector.down();
@@ -343,6 +341,8 @@ public class Auton_BLUE_12P extends OpMode {
     public void start() {
         pathTimer.resetTimer();
         currentState = AutoState.START;
+
+        turret.runToTick((int) turret.center); // hold at 0
     }
 
     @Override

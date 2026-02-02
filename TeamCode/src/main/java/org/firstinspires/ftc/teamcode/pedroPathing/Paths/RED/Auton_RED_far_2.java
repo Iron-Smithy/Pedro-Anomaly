@@ -126,6 +126,8 @@ public class Auton_RED_far_2 extends OpMode {
                 outtake.spinUp(scoreShooterTPS);
                 RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
 
+                turret.runToTick((int) turret.radToTick(Math.toRadians(-3))); // right 3 degrees | (+) left
+
                 follower.followPath(startToScore);
                 follower.setMaxPower(0.65);
                 transitionTo(AutoState.GO_SCORE_PRELOAD);
@@ -159,14 +161,14 @@ public class Auton_RED_far_2 extends OpMode {
             case PICKUP_R3:
                 if (!follower.isBusy()) {
                     intake.runInAt(0.8);
-                    follower.followPath(row3ToScore, 5, true);
+                    follower.followPath(row3ToScore, 0.5, true);
                     transitionTo(AutoState.GO_SCORE_R3);
                 }
                 break;
             case GO_SCORE_R3:
                 if (!follower.isBusy()) {
                     blocker.in();
-                    turret.runToTick(turret.radToTick(Math.toRadians(7.0))); // opposite. more (-) is right
+                    turret.runToTick(turret.radToTick(Math.toRadians(6.0))); // opposite. more (-) is right
 //                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS, 4);
                     fireTask.start();
@@ -189,14 +191,14 @@ public class Auton_RED_far_2 extends OpMode {
             case PICKUP_RHuman:
                 if (!follower.isBusy()) {
                     intake.runInAt(1.0);
-                    follower.followPath(rowHToScore);
+                    follower.followPath(rowHToScore, 0.6, true);
                     transitionTo(AutoState.GO_SCORE_RHuman);
                 }
                 break;
             case GO_SCORE_RHuman:
                 if (!follower.isBusy()) {
                     blocker.in();
-                    turret.runToTick(turret.radToTick(Math.toRadians(6.5)));
+                    turret.runToTick(turret.radToTick(Math.toRadians(6)));
                     //                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArray);
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
@@ -255,7 +257,6 @@ public class Auton_RED_far_2 extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
-        turret.runToTick((int) turret.radToTick(Math.toRadians(-3))); // left 4 degrees
 
         ejector.up();
         ejector.down();

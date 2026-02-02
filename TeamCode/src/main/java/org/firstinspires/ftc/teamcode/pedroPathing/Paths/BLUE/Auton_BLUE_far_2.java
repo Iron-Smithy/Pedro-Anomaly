@@ -127,6 +127,7 @@ public class Auton_BLUE_far_2 extends OpMode {
             case START:
                 outtake.spinUp(scoreShooterTPS);
                 RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
+                turret.runToTick((int) turret.radToTick(Math.toRadians(2.5))); // left 3 degrees | (+) left
 
                 follower.followPath(startToScore);
                 follower.setMaxPower(0.65);
@@ -138,7 +139,7 @@ public class Auton_BLUE_far_2 extends OpMode {
                 if (!follower.isBusy()) {
                     blocker.in();
 //                    fireTask = new AutoFireTaskA(outtake, indexer, ejector, intake, scoreShooterTPSArrayFirst);
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS, 4);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_PRELOAD);
                 }
@@ -257,7 +258,6 @@ public class Auton_BLUE_far_2 extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
-        turret.runToTick((int) turret.radToTick(Math.toRadians(3))); // right 3 degrees (+) left
 
         ejector.up();
         ejector.down();
