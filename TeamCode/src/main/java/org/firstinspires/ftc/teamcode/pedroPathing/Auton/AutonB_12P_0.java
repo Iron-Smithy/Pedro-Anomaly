@@ -1,0 +1,404 @@
+package org.firstinspires.ftc.teamcode.pedroPathing.Auton;
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
+import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
+import org.firstinspires.ftc.teamcode.Actions.BlockerAction;
+import org.firstinspires.ftc.teamcode.Actions.EjectorAction;
+import org.firstinspires.ftc.teamcode.Actions.IndexAction;
+import org.firstinspires.ftc.teamcode.Actions.IntakeAction;
+import org.firstinspires.ftc.teamcode.Actions.OuttakeAction;
+import org.firstinspires.ftc.teamcode.Actions.TurretAction;
+import org.firstinspires.ftc.teamcode.Sensors.BallSensorArray;
+
+public class AutonB_12P_0 extends OpMode {
+    private Alliance alliance = Alliance.RED; // defualt
+
+    public void setAlliance(Alliance alliance) {
+        this.alliance = alliance;
+    }
+
+
+    private Follower follower;
+    private Timer pathTimer, opmodeTimer;
+
+    private IntakeAction intake;
+    private IndexAction indexer;
+    private EjectorAction ejector;
+    private OuttakeAction outtake;
+    private TurretAction turret;
+    private BlockerAction blocker;
+
+    private BallSensorArray ballSensors;
+
+    private final long scoreShooterTPS = 1035;
+
+    private final long tolerance = 25;
+
+    private AutoFireTask fireTask = null;
+
+    private final double RPreXpos = 85;
+    private final Pose startPoseRed = new Pose(120, 127, Math.toRadians(37)); // start location
+    private final Pose ScorePoseRed = new Pose(100, 107, Math.toRadians(45)); // score location
+    private final Pose R1PrePoseRed = new Pose(RPreXpos, 87, Math.toRadians(0)); // row 1 collection pre location
+    private final Pose R1CollectPoseRed = new Pose(123, 87, Math.toRadians(0)); // row 1 balls inside robot location
+    private final Pose ScoreR1CPPoseRed = new Pose(100, 87, Math.toRadians(0)); // smooth back-out bezier control point
+    private final Pose R2PrePoseRed = new Pose(RPreXpos, 63, Math.toRadians(0)); // row 2 collection pre location
+    private final Pose R2CollectPoseRed = new Pose(125, 63, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose ScoreR2CPPoseRed = new Pose(90, 55, Math.toRadians(0));  // smooth back-out bezier control point
+    private final Pose R3PrePoseRed = new Pose(RPreXpos, 39, Math.toRadians(0)); // row 3 collection pre location
+    private final Pose R3CollectPoseRed = new Pose(135, 39, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose ScoreR3CPPoseRed = new Pose(90, 30, Math.toRadians(0));  // smooth back-out bezier control point
+    private final Pose ParkPoseRed = new Pose(120, 127, Math.toRadians(37)); // start pose, make right
+
+    private enum AutoState {
+        START,
+        GO_SCORE_PRELOAD,
+        SCORE_PRELOAD,
+
+        PICKUP_R1, // row 1
+        GO_SCORE_R1,
+        SCORE_R1,
+
+        PICKUP_R2, // row 2
+        GO_SCORE_R2,
+        SCORE_R2,
+
+        PICKUP_R3, // row 3
+        GO_SCORE_R3,
+        SCORE_R3,
+
+        EXIT,
+        DONE
+    }
+
+    private AutoState currentState = AutoState.START;
+
+    private PathChain startToScore;
+
+    private PathChain row1Pickup;
+    private PathChain row1Return;
+
+    private PathChain row2Pickup;
+    private PathChain row2Return;
+
+    private PathChain row3Pickup;
+    private PathChain row3Return;
+
+    private PathChain park;
+
+    private void buildPaths() {
+        Pose startPose = pose(startPoseRed);
+        Pose scorePose = pose(ScorePoseRed);
+        Pose r1Pre = pose(R1PrePoseRed);
+        Pose r1Collect = pose(R1CollectPoseRed);
+        Pose scoreR1CP = pose(ScoreR1CPPoseRed);
+        Pose r2Pre = pose(R2PrePoseRed);
+        Pose r2Collect = pose(R2CollectPoseRed);
+        Pose scoreR2CP = pose(ScoreR2CPPoseRed);
+        Pose r3Pre = pose(R3PrePoseRed);
+        Pose r3Collect = pose(R3CollectPoseRed);
+        Pose scoreR3CP = pose(ScoreR3CPPoseRed);
+        Pose parkPose = pose(ParkPoseRed);
+
+        // ========= START → SCORE =========
+        startToScore = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, scorePose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
+                .setVelocityConstraint(0.5)
+                .build();
+
+        // ========= ROW 1 =========
+        row1Pickup = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, r1Pre))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), r1Pre.getHeading())
+                .addPath(new BezierLine(r1Pre, r1Collect))
+                .setConstantHeadingInterpolation(r1Collect.getHeading())
+                .setVelocityConstraint(0.1)
+                .build();
+
+        row1Return = follower.pathBuilder()
+                // You can still use control points by using the addPath method that takes multiple Poses
+                .addPath(new BezierCurve(r1Collect, scoreR1CP, scorePose))
+                .setLinearHeadingInterpolation(r1Collect.getHeading(), scorePose.getHeading())
+                .setVelocityConstraint(0.6)
+                .build();
+
+        // ========= ROW 2 =========
+        row2Pickup = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, r2Pre))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), r2Pre.getHeading())
+                .addPath(new BezierLine(r2Pre, r2Collect))
+                .setConstantHeadingInterpolation(r2Collect.getHeading())
+                .setVelocityConstraint(0.1)
+                .build();
+
+        row2Return = follower.pathBuilder()
+                .addPath(new BezierCurve(r2Collect, scoreR2CP, scorePose))
+                .setLinearHeadingInterpolation(r2Collect.getHeading(), scorePose.getHeading())
+                .setVelocityConstraint(0.6)
+                .build();
+
+        // ========= ROW 3 =========
+        row3Pickup = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, r3Pre))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), r3Pre.getHeading())
+                .addPath(new BezierLine(r3Pre, r3Collect))
+                .setConstantHeadingInterpolation(r3Collect.getHeading())
+                .setVelocityConstraint(0.1)
+                .build();
+
+        row3Return = follower.pathBuilder()
+                .addPath(new BezierCurve(r3Collect, scoreR3CP, scorePose))
+                .setLinearHeadingInterpolation(r3Collect.getHeading(), scorePose.getHeading())
+                .setVelocityConstraint(0.6)
+                .build();
+
+        // ========= Park =========
+        park = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, r1Collect))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), r1Collect.getHeading())
+                .setVelocityConstraint(0.7)
+                .build();
+//              .addPath(new BezierLine(ScorePose, startPose))
+//              .setLinearHeadingInterpolation(ScorePose.getHeading(), parkPose.getHeading())
+//              .setVelocityConstraint(0.6)
+//              .build();
+    }
+
+
+
+    private void updateAutonomous() {
+        switch (currentState) {
+            // START
+            case START:
+                outtake.spinUp(scoreShooterTPS);
+                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
+
+                follower.setMaxPower(0.65);
+
+                follower.followPath(startToScore);
+                transitionTo(AutoState.GO_SCORE_PRELOAD);
+                break;
+
+            // SCORE PRELOAD
+            case GO_SCORE_PRELOAD:
+                if (!follower.isBusy()) {
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS); // to take advantage of our brand new
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
+                    transitionTo(AutoState.SCORE_PRELOAD);
+                }
+                break;
+
+            case SCORE_PRELOAD:
+                fireTask.update();
+                if (fireTask.isActive()) {
+                } else {
+                    intake.runIn();
+                    follower.followPath(row1Pickup, 0.8, true);
+                    transitionTo(AutoState.PICKUP_R1);
+                    fireTask = null;
+                    blocker.out();
+                }
+                break;
+
+            // SCORE R1
+            case PICKUP_R1:
+                if (!follower.isBusy()) {
+                    indexer.runInAt(0.3);
+                    intake.runInAt(0.45);
+                    follower.followPath(row1Return, 0.7, true);
+                    transitionTo(AutoState.GO_SCORE_R1);
+                }
+                break;
+            case GO_SCORE_R1:
+                if (!follower.isBusy()) {
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
+                    transitionTo(AutoState.SCORE_R1);
+                }
+                break;
+            case SCORE_R1:
+                fireTask.update();
+                if (fireTask.isActive()) {
+                } else {
+                    intake.runIn();
+                    follower.followPath(row2Pickup, 0.8, true);
+                    transitionTo(AutoState.PICKUP_R2);
+                    fireTask = null;
+                    blocker.out();
+                }
+                break;
+
+            // SCORE R2
+            case PICKUP_R2:
+                if (!follower.isBusy()) {
+                    intake.runInAt(0.50);
+//                    intake.stop();
+                    follower.followPath(row2Return, 0.7, true);
+                    transitionTo(AutoState.GO_SCORE_R2);
+                }
+                break;
+            case GO_SCORE_R2:
+                if (!follower.isBusy()) {
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
+                    transitionTo(AutoState.SCORE_R2);
+                }
+                break;
+            case SCORE_R2:
+                fireTask.update();
+                if (fireTask.isActive()) {
+                } else {
+                    intake.runIn();
+                    follower.followPath(row3Pickup, 0.8, true); // row3Pickup
+                    transitionTo(AutoState.PICKUP_R3); // PICKUP_R3
+                    blocker.out();
+                    fireTask = null;
+                }
+                break;
+
+            // SCORE R3
+            case PICKUP_R3:
+                if (!follower.isBusy()) {
+                    intake.runInAt(0.5);
+                    follower.followPath(row3Return, 0.7, true); // row3Return
+                    transitionTo(AutoState.GO_SCORE_R3); //GO_SCORE_R3
+                }
+                break;
+            case GO_SCORE_R3:
+                if (!follower.isBusy()) {
+                    blocker.in();
+//                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, scoreShooterTPS);
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
+                    transitionTo(AutoState.SCORE_R3);
+                }
+                break;
+            case SCORE_R3:
+                fireTask.update();
+                if (fireTask.isActive()) {
+                } else {
+                    fireTask = null;
+                    follower.followPath(park, 0.9, true);
+                    transitionTo(AutoState.EXIT);
+                }
+                break;
+
+            // PARK
+            case EXIT:
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > 1000) {
+                    outtake.stop();
+                    indexer.stop();
+                    intake.stop();
+                    ejector.down();
+                    blocker.out();
+                    transitionTo(AutoState.DONE);
+                }
+                break;
+
+            case DONE:
+                break;
+        }
+    }
+
+    private void transitionTo(AutoState next) {
+        currentState = next;
+        pathTimer.resetTimer();
+    }
+
+    private Pose pose(Pose redPose) {
+        if (alliance == Alliance.RED) {
+            return redPose;
+        } else {
+            return redPose.mirror();
+        }
+    }
+
+    @Override
+    public void init() {
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+
+        RobotHardware.init(hardwareMap);
+        follower = Constants.createFollower(hardwareMap);
+
+        intake = new IntakeAction(hardwareMap);
+        indexer = new IndexAction(hardwareMap);
+        ejector = new EjectorAction(hardwareMap);
+        outtake = new OuttakeAction(hardwareMap);
+        turret = new TurretAction(hardwareMap);
+        blocker = new BlockerAction(hardwareMap);
+
+        ballSensors = new BallSensorArray();
+
+        turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
+
+        ejector.up();
+        ejector.down();
+
+        blocker.out();
+
+        buildPaths();
+        Pose startPose = pose(startPoseRed);
+        follower.setStartingPose(startPose);
+    }
+
+    @Override
+    public void start() {
+        pathTimer.resetTimer();
+        currentState = AutoState.START;
+
+        turret.runToTick((int) turret.center); // hold at 0
+    }
+
+    @Override
+    public void loop() {
+        follower.update();
+
+        outtake.spinUp(scoreShooterTPS);
+        outtake.update();
+
+        updateAutonomous();
+
+        telemetry.addData("Alliance", alliance);
+        telemetry.addData("State", currentState);
+        telemetry.addData("Follower Busy", follower.isBusy());
+        telemetry.addData("Timer (ms)", pathTimer.getElapsedTime());
+        telemetry.addLine("Pose:");
+        telemetry.addData("x", "%.2f", follower.getPose().getX());
+        telemetry.addData("y", "%.2f", follower.getPose().getY());
+        telemetry.addData("heading", "%.2f°", Math.toDegrees(follower.getPose().getHeading()));
+
+        // show shooter velocity if available
+        try {
+            double shooterVel = RobotHardware.outtakeMotor.getVelocity();
+            telemetry.addData("shooter TPS", "%.1f", shooterVel);
+            telemetry.addData("shooter goal", scoreShooterTPS);
+            telemetry.addData("atTarget", outtake.isAtTargetVelocity());
+//            telemetry.addData("fire count", fireCount);
+            telemetry.addData("eject angle", ejector.paddle.getPosition());
+        } catch (Exception e) {
+            telemetry.addLine("Outtake motor velocity unavailable (check RobotHardware field).");
+        }
+
+        telemetry.update();
+    }
+}

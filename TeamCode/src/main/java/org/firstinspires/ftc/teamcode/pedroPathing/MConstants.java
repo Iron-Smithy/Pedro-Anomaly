@@ -26,6 +26,7 @@ public class MConstants {
     // ========================= Outtake Flap ====================
     public static final double flapDown = 0.7;
     public static final double flapUp = 0.3;
+    public static final Double distToOpen = 41.0;
 
     // ========================= Outtake (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
@@ -56,6 +57,6 @@ public class MConstants {
 
     // ========================= Ball sensors (Rev Color V3 distance) =========================
     /** Distance (cm) below which a ball is considered present. Tune per sensor. */
-    public static final double[] BALL_DETECT_DISTANCE_CM = {2, 15, 2.7, 3};
+    public static final double[] BALL_DETECT_DISTANCE_CM = {2, 6, 2.7, 3};
 }
 
