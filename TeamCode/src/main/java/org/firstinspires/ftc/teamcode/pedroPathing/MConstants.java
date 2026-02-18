@@ -30,20 +30,15 @@ public class MConstants {
 
     // ========================= Outtake (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
-    public static final double SHOOTER_KV = 0.0004; // 0.00052
-    /** Proportional on velocity error. Reduces oscillation, improves lock. */
+    public static final double SHOOTER_KV = 0.00038; // 0.00052
+    /** Proportional on velocity error. Reduces oscillation, improves lock.*/
     public static final double SHOOTER_P = 0.012; // 0.012
-    /** Static friction / minimum power to move. */
-    public static final double SHOOTER_KS = 0.046; // 0.06
+    /**  Static friction / minimum power to move. */
+    public static final double SHOOTER_KS = 0.0455; // 0.06
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
-    /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
-    public static final double Turret_KV = 0.0004; // 0.00052
-    /** Proportional on velocity error. Reduces oscillation, improves lock. */
-    public static final double Turret_P = 0.012; // 0.012
-    /** Static friction / minimum power to move. */
-    public static final double Turret_KS = 0.046; // 0.06
-
+    public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
+            new com.pedropathing.control.PIDFCoefficients(0.05, 0, 0.0005, 0);
     public static final double MAGIC = 183.90558;
 
     // ========================= Auto-aim heading PID =========================

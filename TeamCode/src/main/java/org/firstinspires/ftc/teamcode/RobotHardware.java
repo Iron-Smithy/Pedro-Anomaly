@@ -21,7 +21,7 @@ public class RobotHardware {
     public static CRServo indexerWheel0;
     public static CRServo indexerWheel1;
     public static Servo outtakeAngleAdjust;
-    public static DcMotor turret;
+    public static DcMotorEx turret;
 
     public static Servo blocker;
 
@@ -54,7 +54,7 @@ public class RobotHardware {
         ballSensor2 = hwMap.get(DistanceSensor.class, "ball2");
         ballSensor3 = hwMap.get(DistanceSensor.class, "ball1");
 
-        turret = hwMap.get(DcMotor.class, "turretMotor");
+        turret = hwMap.get(DcMotorEx.class, "turretMotor");
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);

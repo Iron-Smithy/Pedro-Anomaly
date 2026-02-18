@@ -1,6 +1,8 @@
 // OuttakeAction.java
 package org.firstinspires.ftc.teamcode.Actions;
 
+import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -16,11 +18,7 @@ public class TurretAction {
     private final double rightRadMax = Math.PI / 2;
     public final int center = (leftTickMax + rightTickMax) / 2;
 
-    double deadZone = Math.PI / 4; // 2PI == full circle, PI is half, PI/2 == 1/4 PI/4 == 1/8
-
-    // 30 small gear
-    // 95 big gear
-    // 16:1 motor gear ratio
+    public PIDFController controller = new PIDFController(MConstants.turretPIDFCoefficent);
 
     public TurretAction(HardwareMap hardwareMap) {
         motor = RobotHardware.turret;
@@ -34,9 +32,12 @@ public class TurretAction {
     public void runToTick(int tick) {
         int limitedValues = limitTickValues(tick); // Math.max(leftTickMax, Math.min(rightTickMax, tick));
 
-        motor.setTargetPosition(limitedValues);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(1);
+        controller.setTargetPosition(limitedValues);
+        controller.run();
+
+//        motor.setTargetPosition(limitedValues);
+//        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        motor.setPower(1);
     }
 
     public boolean stop() {
