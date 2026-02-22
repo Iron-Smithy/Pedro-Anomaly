@@ -26,7 +26,6 @@ public class Motor_Tune extends OpMode {
 
     private DcMotorEx motor;
 
-
     public static double SHOOTER_P = 0.053; // 0.001;
     public static double SHOOTER_KV = 0.0004; // 1.0 / 3000.0;
     public static double SHOOTER_KS = 0.046; // 0.053;

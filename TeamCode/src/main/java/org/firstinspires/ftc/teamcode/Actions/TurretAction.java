@@ -17,7 +17,6 @@ public class TurretAction {
     private final double leftRadMax = -Math.PI / 2;
     private final double rightRadMax = Math.PI / 2;
     public final int center = (leftTickMax + rightTickMax) / 2;
-
     public PIDFController controller = new PIDFController(MConstants.turretPIDFCoefficent);
 
     public TurretAction(HardwareMap hardwareMap) {
@@ -26,16 +25,26 @@ public class TurretAction {
 //        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); Don't reset on initialization of action
     }
 
-    public void update() {
+    public void updatePIDF(com.pedropathing.control.PIDFCoefficients coefficients) {
+        this.controller.setCoefficients(coefficients);
+        this.controller.reset();
     }
-
     public void runToTick(int tick) {
-        int limitedValues = limitTickValues(tick); // Math.max(leftTickMax, Math.min(rightTickMax, tick));
+        int target = limitTickValues(tick);
 
-        controller.setTargetPosition(limitedValues);
-        controller.run();
+        // Update the internal target and current position
+        controller.setTargetPosition(target);
+        controller.updatePosition(motor.getCurrentPosition());
 
-//        motor.setTargetPosition(limitedValues);
+        // Execute the PIDF math to get the power value
+        // run() returns the double you need for the motor
+        double power = controller.run();
+
+        // Apply to the motor
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setPower(power);
+
+//        motor.setTargetPosition(target);
 //        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        motor.setPower(1);
     }

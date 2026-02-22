@@ -38,7 +38,7 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.05, 0, 0.0005, 0);
+            new com.pedropathing.control.PIDFCoefficients(0.01, 0, 0.0005, 0);
     public static final double MAGIC = 183.90558;
 
     // ========================= Auto-aim heading PID =========================
