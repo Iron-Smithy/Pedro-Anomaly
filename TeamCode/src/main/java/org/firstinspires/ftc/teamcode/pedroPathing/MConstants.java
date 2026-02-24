@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 // MConstants.java
@@ -38,7 +39,7 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.05, 0, 0.0005, 0);
+            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0002, 0);
     public static final double MAGIC = 183.90558;
 
     // ========================= Auto-aim heading PID =========================
@@ -53,5 +54,11 @@ public class MConstants {
     // ========================= Ball sensors (Rev Color V3 distance) =========================
     /** Distance (cm) below which a ball is considered present. Tune per sensor. */
     public static final double[] BALL_DETECT_DISTANCE_CM = {2, 6, 2.7, 3};
+
+    // ========================= POSE =========================
+    public static final Pose startPoseRed = new Pose(124, 87, Math.toRadians(0));
+    public static final Pose goalResetPoseRed = new Pose(120, 127, Math.toRadians(37));
+    public static final Pose humanPlayerPoseRed = new Pose(3, 19, 0);
+    public static final Pose goalPoseRed = new Pose(132, 136, 0);
 }
 

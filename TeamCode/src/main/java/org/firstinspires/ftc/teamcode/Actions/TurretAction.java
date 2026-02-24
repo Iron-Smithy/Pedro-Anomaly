@@ -30,12 +30,21 @@ public class TurretAction {
     }
 
     public void runToTick(int tick) {
-        int limitedValues = limitTickValues(tick); // Math.max(leftTickMax, Math.min(rightTickMax, tick));
+        int target = limitTickValues(tick);
 
-        controller.setTargetPosition(limitedValues);
-        controller.run();
+        // Update the internal target and current position
+        controller.setTargetPosition(target);
+        controller.updatePosition(motor.getCurrentPosition());
 
-//        motor.setTargetPosition(limitedValues);
+        // Execute the PIDF math to get the power value
+        // run() returns the double you need for the motor
+        double power = controller.run();
+
+        // Apply to the motor
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setPower(power);
+
+//        motor.setTargetPosition(target);
 //        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        motor.setPower(1);
     }

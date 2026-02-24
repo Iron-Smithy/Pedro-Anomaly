@@ -13,7 +13,6 @@ import java.util.TreeMap;
  */
 public class ShooterAimTask {
     private final Pose goalPose;
-    private final double closeDistanceInches;
     private final TreeMap<Double, Long> speedMap;
 
     // Heading PID state
@@ -21,10 +20,32 @@ public class ShooterAimTask {
     private double lastError = Double.NaN;
     private long lastTimeMs = 0;
 
-    public ShooterAimTask(Pose goalPose, double closeDistanceInches, TreeMap<Double, Long> speedMap) {
+    public ShooterAimTask(Pose goalPose, TreeMap<Double, Long> speedMap) {
         this.goalPose = goalPose;
-        this.closeDistanceInches = closeDistanceInches;
         this.speedMap = speedMap;
+    }
+
+    public static TreeMap<Double, Long> speedMap() {
+        TreeMap<Double, Long> map = new TreeMap<>();
+        map.put(12.0, 850L);
+        map.put(30.0, 960L); //open
+        map.put(40.0, 960L); //open
+        map.put(50.0, 1030L);
+        map.put(60.0, 1080L);
+        map.put(70.0, 1110L);
+        map.put(80.0, 1170L);
+        map.put(90.0, 1250L);
+        map.put(100.0, 1280L);
+        map.put(110.0, 1310L);
+        map.put(115.0, 1330L);
+        map.put(125.0, 1350L);
+        map.put(130.0, 1400L);
+        map.put(135.0, 1430L);
+        map.put(140.0, 1460L);
+        map.put(145.0, 1490L);
+        map.put(150.0, 1550L);
+
+        return map;
     }
 
     public static ShooterAimTask defaultRed() {
@@ -47,7 +68,7 @@ public class ShooterAimTask {
         map.put(145.0, 1490L);
         map.put(150.0, 1550L);
 
-        return new ShooterAimTask(new Pose(132, 136, 0), 8 * 12, map);
+        return new ShooterAimTask(new Pose(132, 136, 0), map);
     }
     public static ShooterAimTask defaultBlue() {
         TreeMap<Double, Long> map = new TreeMap<>();
@@ -69,7 +90,7 @@ public class ShooterAimTask {
         map.put(145.0, 1490L);
         map.put(150.0, 1550L);
 
-        return new ShooterAimTask(new Pose(132, 136, 0).mirror(), 8 * 12, map);
+        return new ShooterAimTask(new Pose(132, 136, 0).mirror(), map);
     }
 
     public double getDistanceToGoal(Pose currentPose) {

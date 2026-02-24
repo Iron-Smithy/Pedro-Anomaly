@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 // CONSTANTS
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
@@ -32,8 +33,13 @@ import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
 import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
 
 @Configurable
-@TeleOp
-public class RED_FEEDBACK_NEW extends OpMode {
+public class teleOp_B_0 extends OpMode {
+    private Alliance alliance = Alliance.RED; // defualt
+
+    public void setAlliance(Alliance alliance) {
+        this.alliance = alliance;
+    }
+
     private DriveTask driveTask;
 
     // ----- Telemetry -----
@@ -62,12 +68,25 @@ public class RED_FEEDBACK_NEW extends OpMode {
     final double PULSE_MS = 1;
     final double HOLD_DELAY_MS = 500;
 
+    private final Pose startPose = pose(MConstants.startPoseRed);
+    private final Pose goalRESET = pose(MConstants.goalResetPoseRed);
+    private final Pose humanRESET = pose(MConstants.humanPlayerPoseRed);
+    private final Pose goalPose = pose(MConstants.goalPoseRed);
+
+    private Pose pose(Pose redPose) {
+        if (alliance == Alliance.RED) {
+            return redPose;
+        } else {
+            return redPose.mirror();
+        }
+    }
 
     @Override
     public void init() {
         RobotHardware.init(hardwareMap);
         Follower follower = Constants.createFollower(hardwareMap);
-        driveTask = new DriveTask(new Pose(124, 87, Math.toRadians(0)), follower);
+
+        driveTask = new DriveTask(startPose, follower, goalRESET, humanRESET);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -80,7 +99,7 @@ public class RED_FEEDBACK_NEW extends OpMode {
 
         ballSensors = new BallSensorArray();
 
-        aimTask = ShooterAimTask.defaultRed(); // MAKE SURE THIS IS THE PROPER SIDE AFTER MIRROR!!
+        aimTask = new ShooterAimTask(goalPose, ShooterAimTask.speedMap());
     }
 
     @Override
@@ -201,7 +220,7 @@ public class RED_FEEDBACK_NEW extends OpMode {
 
         telemetry.addData("targetAngle angle (robot centric)", Math.toDegrees(limitedAngle));
         telemetry.addData("targetTick", tickRaw);
-        telemetry.addData("turret target Position", turret.motor.getTargetPosition());
+        telemetry.addData("turret target Position", turret.controller.getTargetPosition());
         telemetry.addData("real turret position", turret.motor.getCurrentPosition());
 
         for (BallPosition p : BallPosition.values()) { // for each sensor of the enum in ball position

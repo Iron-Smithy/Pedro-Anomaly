@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
@@ -38,17 +39,16 @@ public class AutonB_12P_0 extends OpMode {
     private OuttakeAction outtake;
     private TurretAction turret;
     private BlockerAction blocker;
-
     private BallSensorArray ballSensors;
 
     private final long scoreShooterTPS = 1035;
-
     private final long tolerance = 25;
 
     private AutoFireTask fireTask = null;
+    private ShooterAimTask aimTask;
 
     private final double RPreXpos = 85;
-    private final Pose startPoseRed = new Pose(120, 127, Math.toRadians(37)); // start location
+    private final Pose startPoseRed = MConstants.startPoseRed; // start location
     private final Pose ScorePoseRed = new Pose(100, 107, Math.toRadians(45)); // score location
     private final Pose R1PrePoseRed = new Pose(RPreXpos, 87, Math.toRadians(0)); // row 1 collection pre location
     private final Pose R1CollectPoseRed = new Pose(123, 87, Math.toRadians(0)); // row 1 balls inside robot location
@@ -81,6 +81,8 @@ public class AutonB_12P_0 extends OpMode {
         EXIT,
         DONE
     }
+
+    private final Pose goalPose = pose(new Pose(132, 136, 0));
 
     private AutoState currentState = AutoState.START;
 
@@ -163,10 +165,9 @@ public class AutonB_12P_0 extends OpMode {
                 .setLinearHeadingInterpolation(scorePose.getHeading(), r1Collect.getHeading())
                 .build();
     }
-
-
-
     private void updateAutonomous() {
+        Pose currentPose = follower.getPose();
+
         switch (currentState) {
             // START
             case START:
@@ -179,6 +180,9 @@ public class AutonB_12P_0 extends OpMode {
 
             // SCORE PRELOAD
             case GO_SCORE_PRELOAD:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
+
                 if (!follower.isBusy()) {
                     blocker.in();// to take advantage of our brand new
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
@@ -188,7 +192,10 @@ public class AutonB_12P_0 extends OpMode {
                 break;
 
             case SCORE_PRELOAD:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
                 fireTask.update();
+
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
@@ -209,6 +216,9 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case GO_SCORE_R1:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
+
                 if (!follower.isBusy()) {
                     blocker.in();
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
@@ -217,7 +227,10 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case SCORE_R1:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
                 fireTask.update();
+
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
@@ -238,6 +251,9 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case GO_SCORE_R2:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
+
                 if (!follower.isBusy()) {
                     blocker.in();
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
@@ -246,7 +262,10 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case SCORE_R2:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
                 fireTask.update();
+
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
@@ -266,6 +285,9 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case GO_SCORE_R3:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                aimAtTarget(currentPose);
+
                 if (!follower.isBusy()) {
                     blocker.in();
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
@@ -274,7 +296,9 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case SCORE_R3:
+                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
                 fireTask.update();
+
                 if (fireTask.isActive()) {
                 } else {
                     fireTask = null;
@@ -328,6 +352,8 @@ public class AutonB_12P_0 extends OpMode {
         turret = new TurretAction(hardwareMap);
         blocker = new BlockerAction(hardwareMap);
 
+        aimTask = new ShooterAimTask(goalPose, ShooterAimTask.speedMap());
+
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
@@ -354,7 +380,6 @@ public class AutonB_12P_0 extends OpMode {
     public void loop() {
         follower.update();
 
-        outtake.spinUp(scoreShooterTPS);
         outtake.update();
 
         updateAutonomous();
@@ -381,5 +406,16 @@ public class AutonB_12P_0 extends OpMode {
         }
 
         telemetry.update();
+    }
+    public void aimAtTarget(Pose currentPose) {
+        Pose goalPose = aimTask.getGoalPose();
+        double xDiff = (goalPose.getX() - currentPose.getX());
+        double yDiff = (goalPose.getY() -  currentPose.getY());
+        double targetAngle = Math.atan2(yDiff, xDiff);
+        double turretError = targetAngle - follower.getHeading();
+        double wrappedAngle = turret.calculateWrapAngles(turretError);
+        double limitedAngle = turret.limitRadValues(wrappedAngle);
+        int tickRaw = turret.radToTick(limitedAngle);
+        turret.runToTick(tickRaw);
     }
 }

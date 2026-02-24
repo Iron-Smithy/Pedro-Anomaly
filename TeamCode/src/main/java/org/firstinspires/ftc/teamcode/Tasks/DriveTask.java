@@ -13,6 +13,8 @@ public class DriveTask {
     private final Follower follower;
 
     private Pose startingPose;
+    private Pose goalRESET;
+    private Pose humanRESET;
     private double fieldCentricOffset;
 
     private boolean slowMode = false;
@@ -22,8 +24,10 @@ public class DriveTask {
     private final double k = 2.0;
     private final double expKMinus1 = Math.exp(k) - 1;
 
-    public DriveTask(Pose startingPose, Follower follower) {
+    public DriveTask(Pose startingPose, Follower follower, Pose goalRESET, Pose humanRESET) {
         this.startingPose = startingPose;
+        this.goalRESET = goalRESET;
+        this.humanRESET = humanRESET;
         this.follower = follower;
 
         follower.setStartingPose(startingPose != null ? startingPose : new Pose());
@@ -85,12 +89,12 @@ public class DriveTask {
         // Pose Reset Buttons
         // ---------------------------
         if (gamepad.psWasPressed()) {
-            follower.setPose(new Pose(120, 127, Math.toRadians(37)));
+            follower.setPose(goalRESET);
             fieldCentricOffset = 0;
         }
 
         if (gamepad.optionsWasPressed()) {
-            follower.setPose(new Pose(5, 17, 0));
+            follower.setPose(humanRESET);
             fieldCentricOffset = 0;
         }
 
