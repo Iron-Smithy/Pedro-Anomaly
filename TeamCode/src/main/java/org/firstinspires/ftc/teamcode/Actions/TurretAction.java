@@ -17,7 +17,6 @@ public class TurretAction {
     private final double leftRadMax = -Math.PI / 2;
     private final double rightRadMax = Math.PI / 2;
     public final int center = (leftTickMax + rightTickMax) / 2;
-
     public PIDFController controller = new PIDFController(MConstants.turretPIDFCoefficent);
 
     public TurretAction(HardwareMap hardwareMap) {
@@ -26,9 +25,10 @@ public class TurretAction {
 //        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); Don't reset on initialization of action
     }
 
-    public void update() {
+    public void updatePIDF(com.pedropathing.control.PIDFCoefficients coefficients) {
+        this.controller.setCoefficients(coefficients);
+        this.controller.reset();
     }
-
     public void runToTick(int tick) {
         int target = limitTickValues(tick);
 
