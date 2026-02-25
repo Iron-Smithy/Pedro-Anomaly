@@ -68,11 +68,17 @@ public class teleOp_B_0 extends OpMode {
     final double PULSE_MS = 1;
     final double HOLD_DELAY_MS = 500;
 
-    private final Pose startPose = pose(MConstants.startPoseRed);
-    private final Pose goalRESET = pose(MConstants.goalResetPoseRed);
-    private final Pose humanRESET = pose(MConstants.humanPlayerPoseRed);
-    private final Pose goalPose = pose(MConstants.goalPoseRed);
+    private Pose startPose;
+    private Pose goalRESET;
+    private Pose humanRESET;
+    private Pose goalPose;
 
+    private void doPoseMath() {
+         startPose = pose(MConstants.startPoseRed);
+         goalRESET = pose(MConstants.goalResetPoseRed);
+         humanRESET = pose(MConstants.humanPlayerPoseRed);
+         goalPose = pose(MConstants.goalPoseRed);
+    }
     private Pose pose(Pose redPose) {
         if (alliance == Alliance.RED) {
             return redPose;
@@ -86,7 +92,9 @@ public class teleOp_B_0 extends OpMode {
         RobotHardware.init(hardwareMap);
         Follower follower = Constants.createFollower(hardwareMap);
 
-        driveTask = new DriveTask(startPose, follower, goalRESET, humanRESET);
+        doPoseMath();
+
+        driveTask = new DriveTask(startPose, follower, goalRESET, humanRESET, alliance);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -104,7 +112,7 @@ public class teleOp_B_0 extends OpMode {
 
     @Override
     public void start() {
-        driveTask.startTeleOp();
+//        driveTask.startTeleOp();
         outtake.spinUp(outtakeSpeed);
         ejector.down();
         RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
@@ -211,6 +219,11 @@ public class teleOp_B_0 extends OpMode {
                 driveTask.getPose().getY(),
                 Math.toDegrees(driveTask.getPose().getHeading())
         );
+
+        telemetry.addData("Alliance", alliance);
+        telemetry.addData("Is Red Alliance", alliance == Alliance.RED);
+        telemetry.addData("Goal Pose", goalPose);
+        telemetry.addData("Start Pose", startPose);
 
         telemetry.addData("turret error", turretError);
 

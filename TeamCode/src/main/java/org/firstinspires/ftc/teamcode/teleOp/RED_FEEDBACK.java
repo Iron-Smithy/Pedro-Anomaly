@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 // CONSTANTS
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
@@ -72,7 +73,7 @@ public class RED_FEEDBACK extends OpMode {
     public void init() {
         RobotHardware.init(hardwareMap);
         Follower follower = Constants.createFollower(hardwareMap);
-        driveTask = new DriveTask(new Pose(124, 87, Math.toRadians(0)), follower, goalRESET, humanRESET);
+        driveTask = new DriveTask(new Pose(124, 87, Math.toRadians(0)), follower, goalRESET, humanRESET, Alliance.RED);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 

@@ -6,6 +6,7 @@ import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class DriveTask {
@@ -15,6 +16,7 @@ public class DriveTask {
     private Pose startingPose;
     private Pose goalRESET;
     private Pose humanRESET;
+    private Alliance alliance;
     private double fieldCentricOffset;
 
     private boolean slowMode = false;
@@ -24,13 +26,14 @@ public class DriveTask {
     private final double k = 2.0;
     private final double expKMinus1 = Math.exp(k) - 1;
 
-    public DriveTask(Pose startingPose, Follower follower, Pose goalRESET, Pose humanRESET) {
+    public DriveTask(Pose startingPose, Follower follower, Pose goalRESET, Pose humanRESET, Alliance alliance) {
         this.startingPose = startingPose;
         this.goalRESET = goalRESET;
         this.humanRESET = humanRESET;
         this.follower = follower;
+        this.alliance = alliance;
 
-        follower.setStartingPose(startingPose != null ? startingPose : new Pose());
+        follower.setStartingPose(startingPose);
         follower.update();
 
         fieldCentricOffset = follower.getHeading();
@@ -38,7 +41,7 @@ public class DriveTask {
 
     public void startTeleOp() {
         follower.startTeleopDrive();
-        fieldCentricOffset = 0;
+        fieldCentricOffset = startingPose.getHeading();
     }
 
     public void update(Gamepad gamepad) {
@@ -53,7 +56,7 @@ public class DriveTask {
         // ---------------------------
         double y = -gamepad.left_stick_y;
         double x = gamepad.left_stick_x;
-        double turn = gamepad.right_stick_x / 2;
+        double turn = gamepad.right_stick_x * 0.70; // 70% from 100%
 
         slowMode = gamepad.left_stick_button;
 
@@ -90,12 +93,12 @@ public class DriveTask {
         // ---------------------------
         if (gamepad.psWasPressed()) {
             follower.setPose(goalRESET);
-            fieldCentricOffset = 0;
+            fieldCentricOffset = alliance == Alliance.RED ? 0 : Math.toRadians(180);
         }
 
         if (gamepad.optionsWasPressed()) {
             follower.setPose(humanRESET);
-            fieldCentricOffset = 0;
+            fieldCentricOffset = alliance == Alliance.RED ? 0 : Math.toRadians(180);
         }
 
         if (gamepad.shareWasPressed()) {
