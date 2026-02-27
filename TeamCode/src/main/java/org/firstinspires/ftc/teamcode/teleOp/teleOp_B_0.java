@@ -170,7 +170,7 @@ public class teleOp_B_0 extends OpMode {
 
             blocker.out();
 
-            // ----- intake
+            // ----- intake -----
 //            if (gamepad1.left_bumper) intake.runIn(); // old code before pulse
 //            else if (gamepad1.left_trigger > 0.25) {
 //                intake.runOut();
@@ -198,7 +198,7 @@ public class teleOp_B_0 extends OpMode {
             lastTrigger = currentTrigger;
 
 
-            // ----- indexer
+            // ----- indexer -----
             if (gamepad1.right_trigger > 0.25) {
                 indexer.runIn();
             } else {
@@ -242,7 +242,6 @@ public class teleOp_B_0 extends OpMode {
                 ballSensors.hasBallAt(p) + " (" + ballSensors.getDistanceCm(p) + "cm)"
             );
         }
-
 
         telemetry.update();
     }

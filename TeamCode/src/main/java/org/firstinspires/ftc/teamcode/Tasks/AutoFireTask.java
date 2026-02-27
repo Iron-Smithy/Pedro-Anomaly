@@ -31,7 +31,7 @@ public class AutoFireTask {
     /** Min time ejector is down before next cycle (ms). */
     private final long ejectorDownMinMs;
 
-    private enum State {
+    private enum State { // firing logic steps
         SPINNING_UP,
         FEEDING,
         EJECTOR_UP,
@@ -77,20 +77,20 @@ public class AutoFireTask {
     public void update() {
         if (!active) return;
 
-        long now = System.currentTimeMillis();
-        boolean sensorSaysReady = ballSensors != null && ballSensors.isLaunchReady();
+        long now = System.currentTimeMillis(); // get current computer time
+        boolean sensorSaysReady = ballSensors != null && ballSensors.isLaunchReady(); // does the ball eject sensor detect a ball?
 
         switch (currentState) {
 
             case SPINNING_UP:
-                if (shooter.isAtTargetVelocity()) {
+                if (shooter.isAtTargetVelocity()) { // wait until meet target velocity
                     timer = now;
                     currentState = State.FEEDING;
                 }
                 break;
 
             case FEEDING:
-                if (fireCount != 0) {
+                if (fireCount != 0) { // if is not the first ball index ball into eject position
                     indexer.runIn();
                     intake.runIn();
                 }
@@ -98,7 +98,7 @@ public class AutoFireTask {
                 boolean ballReady = sensorSaysReady || (ballSensors == null && waitedLongEnough);
                 boolean timeout = (now - timer) >= feedTimeoutMs;
 
-                if (ballReady || timeout) {
+                if (ballReady || timeout) { // if there is a ball in position, fire. else wait for one but fire after a set time in case of detection issues
                     // Stop/slow intake and indexer so ejector can push ball into outtake without fighting
                     indexer.runIn();
                     intake.runInAt(0.6);
@@ -109,7 +109,7 @@ public class AutoFireTask {
                 break;
 
             case EJECTOR_UP:
-                if (now - timer >= ejectorUpMinMs) {
+                if (now - timer >= ejectorUpMinMs) { // wait for the ejector to reach the up position
                     ejector.down();
                     timer = now;
                     currentState = State.EJECTOR_DOWN;
@@ -117,11 +117,11 @@ public class AutoFireTask {
                 break;
 
             case EJECTOR_DOWN:
-                if (now - timer >= ejectorDownMinMs) {
+                if (now - timer >= ejectorDownMinMs) { // wait for the ejector to reach the down position
                     fireCount++;
-                    if (fireCount >= ballsToFire) {
+                    if (fireCount >= ballsToFire) { // if shoot all the balls finish,
                         currentState = State.COMPLETE;
-                    } else {
+                    } else { // else restart firing process
                         timer = now;
                         currentState = State.FEEDING;
                     }

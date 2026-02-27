@@ -12,8 +12,8 @@ import java.util.TreeMap;
  * KP*error + KI*integral + KD*derivative for fast, smooth turn with less oscillation.
  */
 public class ShooterAimTask {
-    private final Pose goalPose;
-    private final TreeMap<Double, Long> speedMap;
+    private final Pose goalPose; // location of the thing we're shooting at
+    private final TreeMap<Double, Long> speedMap; // the correct motor speeds to shoot a goal at set distances
 
     // Heading PID state
     private double integral = 0;
@@ -48,7 +48,7 @@ public class ShooterAimTask {
         return map;
     }
 
-    public static ShooterAimTask defaultRed() {
+    public static ShooterAimTask defaultRed() { // Deprecated
         TreeMap<Double, Long> map = new TreeMap<>();
         map.put(12.0, 850L);
         map.put(30.0, 960L); //open
@@ -70,7 +70,7 @@ public class ShooterAimTask {
 
         return new ShooterAimTask(new Pose(132, 136, 0), map);
     }
-    public static ShooterAimTask defaultBlue() {
+    public static ShooterAimTask defaultBlue() {// Deprecated
         TreeMap<Double, Long> map = new TreeMap<>();
         map.put(12.0, 850L);
         map.put(30.0, 960L); //open
@@ -93,7 +93,7 @@ public class ShooterAimTask {
         return new ShooterAimTask(new Pose(132, 136, 0).mirror(), map);
     }
 
-    public double getDistanceToGoal(Pose currentPose) {
+    public double getDistanceToGoal(Pose currentPose) { // Math to get the distance to the goal.
         return Math.hypot(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY());
     }
 
@@ -101,7 +101,7 @@ public class ShooterAimTask {
      * Turn correction for auto-aim using heading PID (KP, KI, KD from MConstants).
      * Call resetHeadingPID() when driver releases aim to clear integral.
      */
-    public double getTurnCorrection(Pose currentPose) {
+    public double getTurnCorrection(Pose currentPose) { // Unused experimental code, WE DO NOT USE THIS CURRENTLY
         double targetAngle = Math.atan2(
                 goalPose.getY() - currentPose.getY(),
                 goalPose.getX() - currentPose.getX());
