@@ -24,12 +24,7 @@ public class TurretAction {
         motor.setDirection(DcMotor.Direction.REVERSE);
 //        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); Don't reset on initialization of action
     }
-
-    public void updatePIDF(com.pedropathing.control.PIDFCoefficients coefficients) {
-        this.controller.setCoefficients(coefficients);
-        this.controller.reset();
-    }
-    public void runToTick(int tick) {
+    public void runToTick(int tick) { // go to position using custom PID
         int target = limitTickValues(tick);
 
         // Update the internal target and current position
@@ -43,10 +38,6 @@ public class TurretAction {
         // Apply to the motor
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motor.setPower(power);
-
-//        motor.setTargetPosition(target);
-//        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        motor.setPower(1);
     }
 
     public boolean stop() {
@@ -54,10 +45,10 @@ public class TurretAction {
         return true;
     }
 
-    public int limitTickValues(int tick) {
+    public int limitTickValues(int tick) { // a software limit to help prevent turret from turning to much
         return Math.max(leftTickMax, Math.min(rightTickMax, tick));
     }
-    public double limitRadValues(double Angle) {
+    public double limitRadValues(double Angle) { // a software limit to help prevent turret from turning to much
         return Math.max(leftRadMax, Math.min(rightRadMax, Angle));
     }
     public int radToTick(double angle) {

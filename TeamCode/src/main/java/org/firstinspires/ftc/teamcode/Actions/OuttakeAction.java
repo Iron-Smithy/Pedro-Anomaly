@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
  */
 public class OuttakeAction {
     public final DcMotorEx motor;
-    private double targetVelocity = 0;
+    public double targetVelocity = 0;
     private final double tolerance = 30; // TPS tolerance for "at speed"
 
     public OuttakeAction(HardwareMap hardwareMap) {

@@ -26,7 +26,7 @@ public class DriveTask {
     private final double k = 2.0;
     private final double expKMinus1 = Math.exp(k) - 1;
 
-    public DriveTask(Pose startingPose, Follower follower, Pose goalRESET, Pose humanRESET, Alliance alliance) {
+    public DriveTask(Pose startingPose, Follower follower, Pose goalRESET, Pose humanRESET, Alliance alliance) { // get all relevant alliance specific poses
         this.startingPose = startingPose;
         this.goalRESET = goalRESET;
         this.humanRESET = humanRESET;
@@ -56,17 +56,17 @@ public class DriveTask {
         // ---------------------------
         double y = -gamepad.left_stick_y;
         double x = gamepad.left_stick_x;
-        double turn = gamepad.right_stick_x * 0.70; // 70% from 100%
+        double turn = gamepad.right_stick_x * 0.70; // 70% from 100% turn power
 
         slowMode = gamepad.left_stick_button;
 
         // ---------------------------
         // Exponential shaping
         // ---------------------------
-        double driveY = shapeInput(y);
+        double driveY = shapeInput(y); // math that emphasizes small joystick movements as small robot movements
         double driveX = shapeInput(x);
 
-        if (slowMode) {
+        if (slowMode) { // if slow mode reduce speed by a multiple
             driveX *= slowModeMultiplier;
             driveY *= slowModeMultiplier;
             turn *= slowModeMultiplier;
@@ -81,7 +81,7 @@ public class DriveTask {
         // ---------------------------
         // Mecanum power normalization
         // ---------------------------
-        double denom = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(turn), 1);
+        double denom = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(turn), 1); // motors cannot spin faster than 100%, math used to maintain speed ratios between wheels when at max motor power
 
         RobotHardware.frontLeftMotor.setPower((rotY + rotX + turn) / denom);
         RobotHardware.backLeftMotor.setPower((rotY - rotX + turn) / denom);
@@ -91,17 +91,17 @@ public class DriveTask {
         // ---------------------------
         // Pose Reset Buttons
         // ---------------------------
-        if (gamepad.psWasPressed()) {
+        if (gamepad.psWasPressed()) { // on the PS controller looks like a little house
             follower.setPose(goalRESET);
             fieldCentricOffset = alliance == Alliance.RED ? 0 : Math.toRadians(180);
         }
 
-        if (gamepad.optionsWasPressed()) {
+        if (gamepad.optionsWasPressed()) { // the button labeled options
             follower.setPose(humanRESET);
             fieldCentricOffset = alliance == Alliance.RED ? 0 : Math.toRadians(180);
         }
 
-        if (gamepad.shareWasPressed()) {
+        if (gamepad.shareWasPressed()) { // the button labeled share
             fieldCentricOffset = follower.getHeading();
         }
     }

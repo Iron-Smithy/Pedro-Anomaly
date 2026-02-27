@@ -22,7 +22,7 @@ public class BallSensorArray {
             this.thresholdCm = thresholdCm;
         }
 
-        boolean hasBall() {
+        boolean hasBall() { // returns true if an object is detected withing a threshold distance
             if (sensor == null) return false;
             try {
                 double cm = sensor.getDistance(DistanceUnit.CM);
@@ -32,7 +32,7 @@ public class BallSensorArray {
             }
         }
 
-        double distanceCm() {
+        double distanceCm() { // gets distance of a sensor
             if (sensor == null) return Double.NaN;
             try {
                 return sensor.getDistance(DistanceUnit.CM);
@@ -45,7 +45,7 @@ public class BallSensorArray {
     private final EnumMap<BallPosition, BallSensor> sensors =
             new EnumMap<>(BallPosition.class);
 
-    public BallSensorArray() {
+    public BallSensorArray() { // defines the locations of different ball sensors
         sensors.put(BallPosition.FUNNEL_LEFT,
                 new BallSensor(RobotHardware.ballSensor0, MConstants.BALL_DETECT_DISTANCE_CM[0]));
         sensors.put(BallPosition.FUNNEL_RIGHT,
