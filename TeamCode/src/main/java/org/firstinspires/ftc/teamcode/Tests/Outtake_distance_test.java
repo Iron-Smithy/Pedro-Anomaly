@@ -193,7 +193,7 @@ public class Outtake_distance_test extends OpMode {
         }
 
         if (fireTask != null) {
-            fireTask.update();
+            fireTask.update(outtakeSpeed);
             if (!fireTask.isActive()) fireTask = null;
         }
 

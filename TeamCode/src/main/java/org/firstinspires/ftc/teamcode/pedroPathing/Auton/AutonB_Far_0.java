@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.Actions.OuttakeAction;
 import org.firstinspires.ftc.teamcode.Actions.TurretAction;
 import org.firstinspires.ftc.teamcode.Sensors.BallSensorArray;
 
-public class AutonB_12P_0 extends OpMode {
+public class AutonB_Far_0 extends OpMode {
     private Alliance alliance = Alliance.RED; // defualt
 
     public void setAlliance(Alliance alliance) {
@@ -41,80 +41,63 @@ public class AutonB_12P_0 extends OpMode {
     private BlockerAction blocker;
     private BallSensorArray ballSensors;
 
-    private final long scoreShooterTPS = 1035;
+    private final long scoreShooterTPS = 1444;
     private final long tolerance = 25;
 
     private AutoFireTask fireTask = null; // A task is a program that uses multiple actions to perform an action sequence, this one contains the artifact shooting logic
     private ShooterAimTask aimTask; // this task contains the logic pertaining to outtake speed and turret direction
 
-    private final double RPreXpos = 85;
-    private final Pose startPoseRed = MConstants.startPoseRed; // start location
-    private final Pose ScorePoseRed = new Pose(100, 107, Math.toRadians(45)); // score location
-    private final Pose R1PrePoseRed = new Pose(RPreXpos, 87, Math.toRadians(0)); // row 1 collection pre location
-    private final Pose R1CollectPoseRed = new Pose(123, 87, Math.toRadians(0)); // row 1 balls inside robot location
-    private final Pose ScoreR1CPPoseRed = new Pose(100, 87, Math.toRadians(0)); // smooth back-out bezier control point
-    private final Pose R2PrePoseRed = new Pose(RPreXpos, 63, Math.toRadians(0)); // row 2 collection pre location
-    private final Pose R2CollectPoseRed = new Pose(123, 63, Math.toRadians(0)); // row 3 balls inside robot location
-    private final Pose ScoreR2CPPoseRed = new Pose(90, 55, Math.toRadians(0));  // smooth back-out bezier control point
-    private final Pose R3PrePoseRed = new Pose(RPreXpos, 39, Math.toRadians(0)); // row 3 collection pre location
-    private final Pose R3CollectPoseRed = new Pose(127, 39, Math.toRadians(0)); // row 3 balls inside robot location
-    private final Pose ScoreR3CPPoseRed = new Pose(90, 30, Math.toRadians(0));  // smooth back-out bezier control point
-    private final Pose ParkPoseRed = new Pose(120, 127, Math.toRadians(37)); // start pose, make right
+    private final Pose startPoseRed = new Pose(96, 7, Math.toRadians(90)); // start location
+    private final Pose ScorePoseRed = new Pose(90, 13, Math.toRadians(45)); // score location
+    private final Pose R3PrePoseRed = new Pose(99, 35, Math.toRadians(0)); // row 1 collection pre location
+    private final Pose R3CollectPoseRed = new Pose(130, 35, Math.toRadians(0)); // row 1 balls inside robot location
+    private final Pose RHumanRed = new Pose(135, 9, Math.toRadians(0));
+    private final Pose backUpRed = new Pose(128, 9, Math.toRadians(0)); //so can re-smash into wall
+    private final Pose FarParkPoseRed = new Pose(110, 15, Math.toRadians(0));
+    private Pose goalPose;
 
-    private enum AutoState { // Auton step sequence
+
+
+    private enum AutoState {
         START,
         GO_SCORE_PRELOAD,
         SCORE_PRELOAD,
-
-        PICKUP_R1, // row 1
-        GO_SCORE_R1,
-        SCORE_R1,
-
-        PICKUP_R2, // row 2
-        GO_SCORE_R2,
-        SCORE_R2,
 
         PICKUP_R3, // row 3
         GO_SCORE_R3,
         SCORE_R3,
 
+        PICKUP_RHuman, // row H
+        GO_SCORE_RHuman,
+        SCORE_RHuman,
+
         EXIT,
         DONE
     }
-
-//    private final Pose goalPose = pose(new Pose(132, 136, 0));
-    private Pose goalPose;
 
     private AutoState currentState = AutoState.START;
 
     private PathChain startToScore;
 
-    private PathChain row1Pickup;
-    private PathChain row1Return;
-
-    private PathChain row2Pickup;
-    private PathChain row2Return;
-
     private PathChain row3Pickup;
     private PathChain row3Return;
+
+    private PathChain rowRHPickup;
+    private PathChain rowRHReturn;
 
     private PathChain park;
 
     private void buildPaths() { // this function adapts poses to the proper alliance side, then generates the paths the robot should follow during autonomous
         Pose startPose = pose(startPoseRed);
         Pose scorePose = pose(ScorePoseRed);
-        Pose r1Pre = pose(R1PrePoseRed);
-        Pose r1Collect = pose(R1CollectPoseRed);
-        Pose scoreR1CP = pose(ScoreR1CPPoseRed);
-        Pose r2Pre = pose(R2PrePoseRed);
-        Pose r2Collect = pose(R2CollectPoseRed);
-        Pose scoreR2CP = pose(ScoreR2CPPoseRed);
         Pose r3Pre = pose(R3PrePoseRed);
         Pose r3Collect = pose(R3CollectPoseRed);
-        Pose scoreR3CP = pose(ScoreR3CPPoseRed);
-        Pose parkPose = pose(ParkPoseRed);
+        Pose RHuman = pose(RHumanRed);
+        Pose backUp = pose(backUpRed);
+        Pose FarPark = pose(FarParkPoseRed);
 
         goalPose = pose(MConstants.goalPoseRed);
+
 
         // ========= START → SCORE =========
         startToScore = follower.pathBuilder()
@@ -123,48 +106,37 @@ public class AutonB_12P_0 extends OpMode {
                 .build();
 
         // ========= ROW 1 =========
-        row1Pickup = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, r1Pre))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), r1Pre.getHeading())
-                .addPath(new BezierLine(r1Pre, r1Collect)) // a second path is added onto the last one making a path chain, multiple paths executed as one.
-                .setConstantHeadingInterpolation(r1Collect.getHeading())
-                .build();
-
-        row1Return = follower.pathBuilder()
-                .addPath(new BezierCurve(r1Collect, scoreR1CP, scorePose))
-                .setLinearHeadingInterpolation(r1Collect.getHeading(), scorePose.getHeading())
-                .build();
-
-        // ========= ROW 2 =========
-        row2Pickup = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, r2Pre))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), r2Pre.getHeading())
-                .addPath(new BezierLine(r2Pre, r2Collect))
-                .setConstantHeadingInterpolation(r2Collect.getHeading())
-                .build();
-
-        row2Return = follower.pathBuilder()
-                .addPath(new BezierCurve(r2Collect, scoreR2CP, scorePose))
-                .setLinearHeadingInterpolation(r2Collect.getHeading(), scorePose.getHeading())
-                .build();
-
-        // ========= ROW 3 =========
         row3Pickup = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, r3Pre))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), r3Pre.getHeading())
-                .addPath(new BezierLine(r3Pre, r3Collect))
+                .addPath(new BezierLine(r3Pre, r3Collect)) // a second path is added onto the last one making a path chain, multiple paths executed as one.
                 .setConstantHeadingInterpolation(r3Collect.getHeading())
                 .build();
 
         row3Return = follower.pathBuilder()
-                .addPath(new BezierCurve(r3Collect, scoreR3CP, scorePose))
+                .addPath(new BezierLine(r3Collect, scorePose))
                 .setLinearHeadingInterpolation(r3Collect.getHeading(), scorePose.getHeading())
+                .build();
+
+        // ========= ROW RH =========
+        rowRHPickup = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, RHuman))
+                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(RHuman, backUp))
+                .setConstantHeadingInterpolation(RHuman.getHeading())
+                .addPath(new BezierLine(backUp, RHuman))
+                .setConstantHeadingInterpolation(RHuman.getHeading())
+                .build();
+
+        rowRHReturn = follower.pathBuilder()
+                .addPath(new BezierLine(RHuman, scorePose))
+                .setLinearHeadingInterpolation(RHuman.getHeading(), scorePose.getHeading())
                 .build();
 
         // ========= Park =========
         park = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, r1Collect))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), r1Collect.getHeading())
+                .addPath(new BezierLine(scorePose, FarPark))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), FarPark.getHeading())
                 .build();
     }
     private void updateAutonomous() {
@@ -175,9 +147,9 @@ public class AutonB_12P_0 extends OpMode {
             // START
             case START:
                 outtake.spinUp(scoreShooterTPS); // spin up outtake about the right speed for shooting
-                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
+                RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
 
-                follower.followPath(startToScore); // follow the path startToScore
+                follower.followPath(startToScore, 0.7, true); // follow the path startToScore
                 transitionTo(AutoState.GO_SCORE_PRELOAD); // then go to the next logic step
                 break;
 
@@ -202,93 +174,24 @@ public class AutonB_12P_0 extends OpMode {
                 if (fireTask.isActive()) {
                 } else { // once firetask has finished
                     intake.runIn(); // turn on intake to get ready to intake
-                    follower.followPath(row1Pickup, true);
-                    transitionTo(AutoState.PICKUP_R1);
+                    follower.followPath(row3Pickup, true);
+                    transitionTo(AutoState.PICKUP_R3);
                     fireTask = null; // destroy old firetask
                     blocker.out(); // prevent balls from exiting early
                 }
                 break;
 
             // SCORE R1
-            case PICKUP_R1:
+            case PICKUP_R3:
                 if (!follower.isBusy()) { // once finished collecting objects
                     indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
                     intake.runInAt(0.45); // slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
-                    follower.followPath(row1Return, true);
-                    transitionTo(AutoState.GO_SCORE_R1);
-                }
-                break;
-            case GO_SCORE_R1:
-                outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
-
-                if (!follower.isBusy()) {
-                    blocker.in();
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
-                    fireTask.start();
-                    transitionTo(AutoState.SCORE_R1);
-                }
-                break;
-            case SCORE_R1:
-                outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
-                fireTask.update(outtakeSpeed);
-
-                if (fireTask.isActive()) {
-                } else {
-                    intake.runIn();
-                    follower.followPath(row2Pickup, true);
-                    transitionTo(AutoState.PICKUP_R2);
-                    fireTask = null;
-                    blocker.out();
-                }
-                break;
-
-            // SCORE R2
-            case PICKUP_R2:
-                if (!follower.isBusy()) {
-                    intake.runInAt(0.50);
-//                    intake.stop();
-                    follower.followPath(row2Return, true);
-                    transitionTo(AutoState.GO_SCORE_R2);
-                }
-                break;
-            case GO_SCORE_R2:
-                outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
-
-                if (!follower.isBusy()) {
-                    blocker.in();
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
-                    fireTask.start();
-                    transitionTo(AutoState.SCORE_R2);
-                }
-                break;
-            case SCORE_R2:
-                outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
-                fireTask.update(outtakeSpeed);
-
-                if (fireTask.isActive()) {
-                } else {
-                    intake.runIn();
-                    follower.followPath(row3Pickup, true); // row3Pickup
-                    transitionTo(AutoState.PICKUP_R3); // PICKUP_R3
-                    blocker.out();
-                    fireTask = null;
-                }
-                break;
-
-            // SCORE R3
-            case PICKUP_R3:
-                if (!follower.isBusy()) {
-                    intake.runInAt(0.5);
-                    follower.followPath(row3Return, true); // row3Return
-                    transitionTo(AutoState.GO_SCORE_R3); //GO_SCORE_R3
+                    follower.followPath(row3Return, 0.7, true);
+                    transitionTo(AutoState.GO_SCORE_R3);
                 }
                 break;
             case GO_SCORE_R3:
-                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                outtake.spinUp(outtakeSpeed);
                 aimAtTarget(currentPose);
 
                 if (!follower.isBusy()) {
@@ -300,13 +203,51 @@ public class AutonB_12P_0 extends OpMode {
                 break;
             case SCORE_R3:
                 outtake.spinUp(outtakeSpeed);
+                aimAtTarget(currentPose);
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
                 } else {
+                    intake.runIn();
+                    follower.followPath(rowRHPickup, true);
+                    transitionTo(AutoState.PICKUP_RHuman);
                     fireTask = null;
-                    follower.followPath(park, true);
-                    transitionTo(AutoState.EXIT);
+                    blocker.out();
+                }
+                break;
+
+            // SCORE RHuman
+            case PICKUP_RHuman:
+                if (!follower.isBusy()) {
+                    intake.runInAt(0.50);
+//                    intake.stop();
+                    follower.followPath(rowRHReturn, 0.7, true);
+                    transitionTo(AutoState.GO_SCORE_RHuman);
+                }
+                break;
+            case GO_SCORE_RHuman:
+                outtake.spinUp(outtakeSpeed);
+                aimAtTarget(currentPose);
+
+                if (!follower.isBusy()) {
+                    blocker.in();
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
+                    transitionTo(AutoState.SCORE_RHuman);
+                }
+                break;
+            case SCORE_RHuman:
+                outtake.spinUp(outtakeSpeed);
+                aimAtTarget(currentPose);
+                fireTask.update(outtakeSpeed);
+
+                if (fireTask.isActive()) {
+                } else {
+                    intake.runIn();
+                    follower.followPath(park, true); // scoreToPark
+                    transitionTo(AutoState.EXIT); // EXIT
+                    blocker.out();
+                    fireTask = null;
                 }
                 break;
 

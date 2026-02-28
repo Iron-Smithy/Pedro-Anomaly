@@ -20,7 +20,7 @@ public class AutoFireTask {
     private long timer = 0;
     private int fireCount = 0;
     private final int ballsToFire;
-    private final long targetVel;
+    private long targetVel;
 
     /** Delay before starting first feed (ms). */
     private final long initialFeedDelayMs;
@@ -74,8 +74,9 @@ public class AutoFireTask {
         shooter.spinUp(targetVel);
     }
 
-    public void update() {
+    public void update(long targetVel) {
         if (!active) return;
+        this.targetVel = targetVel;
 
         long now = System.currentTimeMillis(); // get current computer time
         boolean sensorSaysReady = ballSensors != null && ballSensors.isLaunchReady(); // does the ball eject sensor detect a ball?

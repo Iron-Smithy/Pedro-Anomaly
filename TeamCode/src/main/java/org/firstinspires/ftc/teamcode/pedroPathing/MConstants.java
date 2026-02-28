@@ -39,7 +39,7 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0002, 0); // turret overshoot, keep increasing D until it disappears
+            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0); // turret overshoot, keep increasing D until it disappears
     // original PIDF (0.006, 0, 0.0002, 0)                                                 // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
                                                                                            // Tune F to overcome friction
     public static final double MAGIC = 183.90558;
@@ -58,9 +58,8 @@ public class MConstants {
     public static final double[] BALL_DETECT_DISTANCE_CM = {2, 6, 2.7, 3};
 
     // ========================= POSE =========================
-    public static final Pose startPoseRed = new Pose(124, 92, Math.toRadians(0));
-    public static final Pose goalResetPoseRed = new Pose(118, 127, Math.toRadians(40));
-    public static final Pose humanPlayerPoseRed = new Pose(8.75, 13, 0);
-    public static final Pose goalPoseRed = new Pose(132, 136, 0);
+    public static final Pose startPoseRed = new Pose(125, 88.5, Math.toRadians(0));
+    public static final Pose goalResetPoseRed = new Pose(120, 124.5, Math.toRadians(40));
+    public static final Pose humanPlayerPoseRed = new Pose(8.75, 9.5, 0);
+    public static final Pose goalPoseRed = new Pose(135, 135, 0);
 }
-

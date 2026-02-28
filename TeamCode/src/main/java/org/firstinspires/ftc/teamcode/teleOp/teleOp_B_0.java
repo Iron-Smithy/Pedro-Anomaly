@@ -133,11 +133,6 @@ public class teleOp_B_0 extends OpMode {
 
         if (gamepad1.triangleWasPressed()) should_turret_track_target = !should_turret_track_target;
 
-        // ----- Auto-aim: shooter at distance-based speed; one button turns to face target -----
-        outtakeSpeed = aimTask.getTargetSpeed(currentPose);
-        outtake.spinUp(outtakeSpeed);
-        outtake.update(); // Run shooter PID every loop for stable speed
-
         Pose goalPose = aimTask.getGoalPose();
         double xDiff = (goalPose.getX() - currentPose.getX());
         double yDiff = (goalPose.getY() -  currentPose.getY());
@@ -206,9 +201,14 @@ public class teleOp_B_0 extends OpMode {
             }
         }
         if (fireTask != null) {
-            fireTask.update();
+            fireTask.update(outtakeSpeed);
             if (!fireTask.isActive()) fireTask = null;
         }
+
+        // ----- Auto-aim: shooter at distance-based speed; one button turns to face target -----
+        outtakeSpeed = aimTask.getTargetSpeed(currentPose);
+        outtake.spinUp(outtakeSpeed);
+        outtake.update(); // Run shooter PID every loop for stable speed
 
         // ----- Telemetry -----
         telemetryM.debug("position", driveTask.getPose());

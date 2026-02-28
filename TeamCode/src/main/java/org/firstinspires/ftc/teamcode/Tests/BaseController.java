@@ -53,7 +53,7 @@ public class BaseController extends OpMode {
     private Pose goalPose;
 
     private void doPoseMath() {
-        startPose = pose(new Pose(72, 137.25, Math.toRadians(270)));
+        startPose = pose(new Pose(72, 137, Math.toRadians(270)));
         goalRESET = pose(MConstants.goalResetPoseRed);
         humanRESET = pose(MConstants.humanPlayerPoseRed);
         goalPose = pose(MConstants.goalPoseRed);
@@ -89,10 +89,10 @@ public class BaseController extends OpMode {
         Pose currentPose = driveTask.getPose();
         telemetryM.update();
 
-        RobotHardware.frontLeftMotor.setPower(gamepad2.left_stick_x);
-        RobotHardware.backLeftMotor.setPower(gamepad2.left_stick_y);
-        RobotHardware.frontRightMotor.setPower(gamepad2.right_stick_x);
-        RobotHardware.backRightMotor.setPower(gamepad2.right_stick_y);
+//        RobotHardware.frontLeftMotor.setPower(gamepad2.left_stick_x);
+//        RobotHardware.backLeftMotor.setPower(gamepad2.left_stick_y);
+//        RobotHardware.frontRightMotor.setPower(gamepad2.right_stick_x);
+//        RobotHardware.backRightMotor.setPower(gamepad2.right_stick_y);
 
         // ----- Telemetry -----
         telemetryM.debug("position", driveTask.getPose());

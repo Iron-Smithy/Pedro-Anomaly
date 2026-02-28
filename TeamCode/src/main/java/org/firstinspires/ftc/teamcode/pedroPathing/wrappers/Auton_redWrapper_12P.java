@@ -1,6 +1,9 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Auton;
+package org.firstinspires.ftc.teamcode.pedroPathing.wrappers;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
+import org.firstinspires.ftc.teamcode.pedroPathing.Auton.AutonB_12P_0;
 
 // Simple wrapper for AutonB_12P_0 that sets the alliance to RED.
 // The alliance variable determines which mirrored autonomous path is used.
