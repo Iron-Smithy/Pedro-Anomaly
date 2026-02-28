@@ -49,10 +49,12 @@ public class AutonB_Far_0 extends OpMode {
 
     private final Pose startPoseRed = new Pose(96, 7, Math.toRadians(90)); // start location
     private final Pose ScorePoseRed = new Pose(90, 13, Math.toRadians(45)); // score location
-    private final Pose R3PrePoseRed = new Pose(99, 35, Math.toRadians(0)); // row 1 collection pre location
-    private final Pose R3CollectPoseRed = new Pose(130, 35, Math.toRadians(0)); // row 1 balls inside robot location
-    private final Pose RHumanRed = new Pose(135, 9, Math.toRadians(0));
-    private final Pose backUpRed = new Pose(128, 9, Math.toRadians(0)); //so can re-smash into wall
+    private final Pose R3PrePoseRed = new Pose(99, 36, Math.toRadians(0)); // row 3 collection pre location
+    private final Pose R3CollectPoseRed = new Pose(125, 36, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose R2PrePoseRed = new Pose(99, 60, Math.toRadians(0)); // row 2 collection pre location
+    private final Pose R2CollectPoseRed = new Pose(125, 60, Math.toRadians(0)); // row 2 balls inside robot location
+    private final Pose RHumanRed = new Pose(125, 9, Math.toRadians(0));
+    private final Pose backUpRed = new Pose(115, 9, Math.toRadians(0)); //so can re-smash into wall
     private final Pose FarParkPoseRed = new Pose(110, 15, Math.toRadians(0));
     private Pose goalPose;
 
@@ -66,6 +68,10 @@ public class AutonB_Far_0 extends OpMode {
         PICKUP_R3, // row 3
         GO_SCORE_R3,
         SCORE_R3,
+
+        PICKUP_R2, // row 2
+        GO_SCORE_R2,
+        SCORE_R2,
 
         PICKUP_RHuman, // row H
         GO_SCORE_RHuman,
@@ -82,6 +88,9 @@ public class AutonB_Far_0 extends OpMode {
     private PathChain row3Pickup;
     private PathChain row3Return;
 
+    private PathChain row2Pickup;
+    private PathChain row2Return;
+
     private PathChain rowRHPickup;
     private PathChain rowRHReturn;
 
@@ -92,6 +101,8 @@ public class AutonB_Far_0 extends OpMode {
         Pose scorePose = pose(ScorePoseRed);
         Pose r3Pre = pose(R3PrePoseRed);
         Pose r3Collect = pose(R3CollectPoseRed);
+        Pose r2Pre = pose(R2PrePoseRed);
+        Pose r2Collect = pose(R2CollectPoseRed);
         Pose RHuman = pose(RHumanRed);
         Pose backUp = pose(backUpRed);
         Pose FarPark = pose(FarParkPoseRed);
@@ -105,7 +116,7 @@ public class AutonB_Far_0 extends OpMode {
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading()) // setHeadingInterpolation will turn the robot during its path
                 .build();
 
-        // ========= ROW 1 =========
+        // ========= ROW 3 =========
         row3Pickup = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, r3Pre))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), r3Pre.getHeading())
@@ -116,6 +127,19 @@ public class AutonB_Far_0 extends OpMode {
         row3Return = follower.pathBuilder()
                 .addPath(new BezierLine(r3Collect, scorePose))
                 .setLinearHeadingInterpolation(r3Collect.getHeading(), scorePose.getHeading())
+                .build();
+
+        // ========= ROW 2 =========
+        row2Pickup = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, r2Pre))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), r2Pre.getHeading())
+                .addPath(new BezierLine(r2Pre, r2Collect)) // a second path is added onto the last one making a path chain, multiple paths executed as one.
+                .setConstantHeadingInterpolation(r2Collect.getHeading())
+                .build();
+
+        row2Return = follower.pathBuilder()
+                .addPath(new BezierLine(r2Collect, scorePose))
+                .setLinearHeadingInterpolation(r2Collect.getHeading(), scorePose.getHeading())
                 .build();
 
         // ========= ROW RH =========
@@ -160,6 +184,7 @@ public class AutonB_Far_0 extends OpMode {
 
                 if (!follower.isBusy()) { // once the robot has reached the target position
                     blocker.in();
+                    intake.runInAt(0.3); // Added this in case not indexing fast?
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS); // set up a new shooting program
                     fireTask.start(); // start shooting
                     transitionTo(AutoState.SCORE_PRELOAD); // go to next logic step
@@ -181,11 +206,12 @@ public class AutonB_Far_0 extends OpMode {
                 }
                 break;
 
-            // SCORE R1
+            // SCORE R3
             case PICKUP_R3:
                 if (!follower.isBusy()) { // once finished collecting objects
-                    indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
-                    intake.runInAt(0.45); // slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
+//                    indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
+                    indexer.stop(); // to not drain battery
+                    intake.runInAt(0.3); // was .45. slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
                     follower.followPath(row3Return, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_R3);
                 }
@@ -196,12 +222,50 @@ public class AutonB_Far_0 extends OpMode {
 
                 if (!follower.isBusy()) {
                     blocker.in();
+                    indexer.runInAt(0.3); // just in case
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R3);
                 }
                 break;
             case SCORE_R3:
+                outtake.spinUp(outtakeSpeed);
+                aimAtTarget(currentPose);
+                fireTask.update(outtakeSpeed);
+
+                if (fireTask.isActive()) {
+                } else {
+                    intake.runIn();
+                    follower.followPath(row2Pickup, true);
+                    transitionTo(AutoState.PICKUP_R2);
+                    fireTask = null;
+                    blocker.out();
+                }
+                break;
+
+            // SCORE R2
+            case PICKUP_R2:
+                if (!follower.isBusy()) { // once finished collecting objects
+//                    indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
+                    indexer.stop(); // to not drain battery
+                    intake.runInAt(0.3); // was .45. slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
+                    follower.followPath(row2Return, 0.7, true);
+                    transitionTo(AutoState.GO_SCORE_R2);
+                }
+                break;
+            case GO_SCORE_R2:
+                outtake.spinUp(outtakeSpeed);
+                aimAtTarget(currentPose);
+
+                if (!follower.isBusy()) {
+                    blocker.in();
+                    indexer.runInAt(0.3); // just in case
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
+                    fireTask.start();
+                    transitionTo(AutoState.SCORE_R2);
+                }
+                break;
+            case SCORE_R2:
                 outtake.spinUp(outtakeSpeed);
                 aimAtTarget(currentPose);
                 fireTask.update(outtakeSpeed);
@@ -219,8 +283,9 @@ public class AutonB_Far_0 extends OpMode {
             // SCORE RHuman
             case PICKUP_RHuman:
                 if (!follower.isBusy()) {
-                    intake.runInAt(0.50);
-//                    intake.stop();
+//                    intake.runInAt(0.50);
+                    intake.stop(); // to leave behind any extra balls
+                    indexer.stop(); // to not drain battery
                     follower.followPath(rowRHReturn, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_RHuman);
                 }
@@ -231,6 +296,7 @@ public class AutonB_Far_0 extends OpMode {
 
                 if (!follower.isBusy()) {
                     blocker.in();
+                    indexer.runInAt(0.3); // just in case
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_RHuman);

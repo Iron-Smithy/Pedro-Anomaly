@@ -48,18 +48,24 @@ public class AutonB_12P_0 extends OpMode {
     private ShooterAimTask aimTask; // this task contains the logic pertaining to outtake speed and turret direction
 
     private final double RPreXpos = 85;
-    private final Pose startPoseRed = MConstants.startPoseRed; // start location
+    private final Pose startPoseRed = MConstants.goalResetPoseRed; // start location (up  against the goal)
     private final Pose ScorePoseRed = new Pose(100, 107, Math.toRadians(45)); // score location
     private final Pose R1PrePoseRed = new Pose(RPreXpos, 87, Math.toRadians(0)); // row 1 collection pre location
     private final Pose R1CollectPoseRed = new Pose(123, 87, Math.toRadians(0)); // row 1 balls inside robot location
     private final Pose ScoreR1CPPoseRed = new Pose(100, 87, Math.toRadians(0)); // smooth back-out bezier control point
-    private final Pose R2PrePoseRed = new Pose(RPreXpos, 63, Math.toRadians(0)); // row 2 collection pre location
-    private final Pose R2CollectPoseRed = new Pose(123, 63, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose R2PrePoseRed = new Pose(RPreXpos, 60, Math.toRadians(0)); // row 2 collection pre location
+    private final Pose R2CollectPoseRed = new Pose(132, 60, Math.toRadians(0)); // row 2 balls inside robot location
     private final Pose ScoreR2CPPoseRed = new Pose(90, 55, Math.toRadians(0));  // smooth back-out bezier control point
-    private final Pose R3PrePoseRed = new Pose(RPreXpos, 39, Math.toRadians(0)); // row 3 collection pre location
-    private final Pose R3CollectPoseRed = new Pose(127, 39, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose R3PrePoseRed = new Pose(RPreXpos, 36, Math.toRadians(0)); // row 3 collection pre location
+    private final Pose R3CollectPoseRed = new Pose(132, 36, Math.toRadians(0)); // row 3 balls inside robot location
     private final Pose ScoreR3CPPoseRed = new Pose(90, 30, Math.toRadians(0));  // smooth back-out bezier control point
-    private final Pose ParkPoseRed = new Pose(120, 127, Math.toRadians(37)); // start pose, make right
+    private final Pose ParkPoseRed = new Pose(125, 88.5, Math.toRadians(0)); // start pose, make right
+
+    // gate auto: preload, 2nd spike, gate once, 1st spike
+    // OR preload, 2nd spike but hit the lever , gate once, 1st spike
+    // need a auto that hits the gate
+    // gate: 130.5, 59.5, H35
+    // then back up to 130.5, 55, H35
 
     private enum AutoState { // Auton step sequence
         START,
