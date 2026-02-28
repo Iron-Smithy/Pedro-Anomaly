@@ -1,0 +1,20 @@
+Each auto is a singular file which can be mirrored by changing the alliance variable before initialization.
+
+to allow for the selection of both auton alliances, wrappers files were made to represent both possible states.
+
+The naming convention for files and folders:
+    AutonB represents a base auto file
+
+    Auton_[Blue/Red]Wrapper_... = the wrapper for that alliance auton
+
+    Far or Close determines the starting location of the Auton
+
+    after the starting location the order of the ball collection and scoring is listed:
+      * P = Shoots Preload
+      * 1, 2, 3 = index numbers we have assigned the rows/spikes
+      * H = Human player ball collection
+      * G = gate
+
+    the order of those symbols in the name determines which and what order actions that file performs.
+
+    Then a final number to determine file version when necessary
