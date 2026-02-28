@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.Auton;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -22,7 +21,7 @@ import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
-public class AutonB_FarGate_0 extends OpMode {
+public class AutonB_Far_P3HH_0 extends OpMode {
     private Alliance alliance = Alliance.RED; // defualt
 
     public void setAlliance(Alliance alliance) {
@@ -32,6 +31,8 @@ public class AutonB_FarGate_0 extends OpMode {
 
     private Follower follower; // PedroPathing path calculator/solver
     private Timer pathTimer, opmodeTimer; // it's a timer
+
+    private int rowHumanCompletionCount = 0;
 
     private IntakeAction intake; // each action is a program that handles its respective robot mechanism
     private IndexAction indexer;
@@ -53,10 +54,8 @@ public class AutonB_FarGate_0 extends OpMode {
     private final Pose R3CollectPoseRed = new Pose(125, 36, Math.toRadians(0)); // row 3 balls inside robot location
     private final Pose R2PrePoseRed = new Pose(99, 60, Math.toRadians(0)); // row 2 collection pre location
     private final Pose R2CollectPoseRed = new Pose(125, 60, Math.toRadians(0)); // row 2 balls inside robot location
-    private final Pose gateHitPoseRed = new Pose(124, 70, Math.toRadians(0));
-    private final Pose gateHitBackUpCPPoseRed = new Pose(115, 65, Math.toRadians(0));
     private final Pose RHumanRed = new Pose(125, 9, Math.toRadians(0));
-    private final Pose backUpRed = new Pose(124, 9, Math.toRadians(0)); //so can re-smash into wall
+    private final Pose backUpRed = new Pose(120, 9, Math.toRadians(0)); //so can re-smash into wall
     private final Pose FarParkPoseRed = new Pose(110, 15, Math.toRadians(0));
     private Pose goalPose;
 
@@ -70,12 +69,6 @@ public class AutonB_FarGate_0 extends OpMode {
         PICKUP_R3, // row 3
         GO_SCORE_R3,
         SCORE_R3,
-
-        PICKUP_R2, // row 2
-        HIT_GATE,
-        HIT_GATE_HOLD,
-        GO_SCORE_R2,
-        SCORE_R2,
 
         PICKUP_RHuman, // row H
         GO_SCORE_RHuman,
@@ -92,10 +85,6 @@ public class AutonB_FarGate_0 extends OpMode {
     private PathChain row3Pickup;
     private PathChain row3Return;
 
-    private PathChain row2Pickup;
-    private PathChain row2toGateHit;
-    private PathChain row2Return;
-
     private PathChain rowRHPickup;
     private PathChain rowRHReturn;
 
@@ -106,16 +95,11 @@ public class AutonB_FarGate_0 extends OpMode {
         Pose scorePose = pose(ScorePoseRed);
         Pose r3Pre = pose(R3PrePoseRed);
         Pose r3Collect = pose(R3CollectPoseRed);
-        Pose r2Pre = pose(R2PrePoseRed);
-        Pose r2Collect = pose(R2CollectPoseRed);
         Pose RHuman = pose(RHumanRed);
         Pose backUp = pose(backUpRed);
         Pose FarPark = pose(FarParkPoseRed);
 
-        Pose gateHitPose = pose(gateHitPoseRed);
-        Pose gateHitBackUpCPPose = pose(gateHitBackUpCPPoseRed);
-
-        goalPose = pose(MConstants.goalPoseRed);
+        goalPose = pose(new Pose(140, 135, 0));
 
 
         // ========= START → SCORE =========
@@ -135,24 +119,6 @@ public class AutonB_FarGate_0 extends OpMode {
         row3Return = follower.pathBuilder()
                 .addPath(new BezierLine(r3Collect, scorePose))
                 .setLinearHeadingInterpolation(r3Collect.getHeading(), scorePose.getHeading())
-                .build();
-
-        // ========= ROW 2 =========
-        row2Pickup = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, r2Pre))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), r2Pre.getHeading())
-                .addPath(new BezierLine(r2Pre, r2Collect)) // a second path is added onto the last one making a path chain, multiple paths executed as one.
-                .setConstantHeadingInterpolation(r2Collect.getHeading())
-                .build();
-
-        row2toGateHit = follower.pathBuilder()
-                .addPath(new BezierCurve(r2Collect, gateHitBackUpCPPose, gateHitPose))
-                .setConstantHeadingInterpolation(r2Collect.getHeading())
-                .build();
-
-        row2Return = follower.pathBuilder()
-                .addPath(new BezierLine(gateHitPose, scorePose))
-                .setLinearHeadingInterpolation(gateHitPose.getHeading(), scorePose.getHeading())
                 .build();
 
         // ========= ROW RH =========
@@ -249,62 +215,6 @@ public class AutonB_FarGate_0 extends OpMode {
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
-                    follower.followPath(row2Pickup, true);
-                    transitionTo(AutoState.PICKUP_R2);
-                    fireTask = null;
-                    blocker.out();
-                }
-                break;
-
-            // SCORE R2
-            case PICKUP_R2:
-                if (!follower.isBusy()) { // once finished collecting objects
-//                    indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
-                    indexer.stop(); // to not drain battery
-                    intake.runInAt(0.3); // was .45. slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
-                    follower.followPath(row2toGateHit, true);
-                    transitionTo(AutoState.HIT_GATE);
-                }
-                break;
-            case HIT_GATE:
-                if (!follower.isBusy()) { // once finished hitting gate
-                    indexer.stop(); // to not drain battery
-//                    intake.runInAt(0.3); // was .45. slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
-                    intake.stop(); // added this
-                    transitionTo(AutoState.HIT_GATE_HOLD);
-                } else if (pathTimer.getElapsedTime() > 3000) {
-                    indexer.stop(); // to not drain battery
-//                    intake.runInAt(0.3);
-                    follower.followPath(row2Return, 0.7, true);
-                    transitionTo(AutoState.GO_SCORE_R2);
-                }
-                break;
-            case HIT_GATE_HOLD:
-                if (pathTimer.getElapsedTime() > 1000) {
-                    follower.followPath(row2Return, 0.7, true);
-                    transitionTo(AutoState.GO_SCORE_R2);
-                }
-                break;
-            case GO_SCORE_R2:
-                outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
-
-                if (!follower.isBusy()) {
-                    blocker.in();
-                    indexer.runInAt(0.3); // just in case
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
-                    fireTask.start();
-                    transitionTo(AutoState.SCORE_R2);
-                }
-                break;
-            case SCORE_R2:
-                outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
-                fireTask.update(outtakeSpeed);
-
-                if (fireTask.isActive()) {
-                } else {
-                    intake.runIn();
                     follower.followPath(rowRHPickup, true);
                     transitionTo(AutoState.PICKUP_RHuman);
                     fireTask = null;
@@ -341,11 +251,20 @@ public class AutonB_FarGate_0 extends OpMode {
 
                 if (fireTask.isActive()) {
                 } else {
-                    intake.runIn();
-                    follower.followPath(park, true); // scoreToPark
-                    transitionTo(AutoState.EXIT); // EXIT
-                    blocker.out();
-                    fireTask = null;
+                    rowHumanCompletionCount++;
+                    if (rowHumanCompletionCount >= 2) { // if has completed 2 cycles finish
+                        intake.runIn();
+                        follower.followPath(park, true); // scoreToPark
+                        transitionTo(AutoState.EXIT); // EXIT
+                        blocker.out();
+                        fireTask = null;
+                    } else { // else restart loop
+                        intake.runIn();
+                        follower.followPath(rowRHPickup, true);
+                        transitionTo(AutoState.PICKUP_RHuman);
+                        fireTask = null;
+                        blocker.out();
+                    }
                 }
                 break;
 

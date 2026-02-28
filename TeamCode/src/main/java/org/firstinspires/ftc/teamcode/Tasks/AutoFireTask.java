@@ -52,8 +52,7 @@ public class AutoFireTask {
         this(shooter, indexer, ejector, intake, ballSensors, targetVel, 3);
     }
 
-    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector,
-                        IntakeAction intake, BallSensorArray ballSensors, long targetVel, int ballsToFire) {
+    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, BallSensorArray ballSensors, long targetVel, int ballsToFire) {
         this.shooter = shooter;
         this.indexer = indexer;
         this.ejector = ejector;
