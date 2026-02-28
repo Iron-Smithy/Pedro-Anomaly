@@ -9,20 +9,20 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
-import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
 import org.firstinspires.ftc.teamcode.Actions.BlockerAction;
 import org.firstinspires.ftc.teamcode.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.Actions.OuttakeAction;
 import org.firstinspires.ftc.teamcode.Actions.TurretAction;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.Sensors.BallSensorArray;
+import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
+import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
-public class AutonB_Far_0 extends OpMode {
+public class AutonB_FarGate_0 extends OpMode {
     private Alliance alliance = Alliance.RED; // defualt
 
     public void setAlliance(Alliance alliance) {
@@ -53,8 +53,10 @@ public class AutonB_Far_0 extends OpMode {
     private final Pose R3CollectPoseRed = new Pose(125, 36, Math.toRadians(0)); // row 3 balls inside robot location
     private final Pose R2PrePoseRed = new Pose(99, 60, Math.toRadians(0)); // row 2 collection pre location
     private final Pose R2CollectPoseRed = new Pose(125, 60, Math.toRadians(0)); // row 2 balls inside robot location
+    private final Pose gateHitPoseRed = new Pose(124, 70, Math.toRadians(0));
+    private final Pose gateHitBackUpCPPoseRed = new Pose(115, 65, Math.toRadians(0));
     private final Pose RHumanRed = new Pose(125, 9, Math.toRadians(0));
-    private final Pose backUpRed = new Pose(120, 9, Math.toRadians(0)); //so can re-smash into wall
+    private final Pose backUpRed = new Pose(124, 9, Math.toRadians(0)); //so can re-smash into wall
     private final Pose FarParkPoseRed = new Pose(110, 15, Math.toRadians(0));
     private Pose goalPose;
 
@@ -70,6 +72,8 @@ public class AutonB_Far_0 extends OpMode {
         SCORE_R3,
 
         PICKUP_R2, // row 2
+        HIT_GATE,
+        HIT_GATE_HOLD,
         GO_SCORE_R2,
         SCORE_R2,
 
@@ -89,6 +93,7 @@ public class AutonB_Far_0 extends OpMode {
     private PathChain row3Return;
 
     private PathChain row2Pickup;
+    private PathChain row2toGateHit;
     private PathChain row2Return;
 
     private PathChain rowRHPickup;
@@ -106,6 +111,9 @@ public class AutonB_Far_0 extends OpMode {
         Pose RHuman = pose(RHumanRed);
         Pose backUp = pose(backUpRed);
         Pose FarPark = pose(FarParkPoseRed);
+
+        Pose gateHitPose = pose(gateHitPoseRed);
+        Pose gateHitBackUpCPPose = pose(gateHitBackUpCPPoseRed);
 
         goalPose = pose(MConstants.goalPoseRed);
 
@@ -137,9 +145,14 @@ public class AutonB_Far_0 extends OpMode {
                 .setConstantHeadingInterpolation(r2Collect.getHeading())
                 .build();
 
+        row2toGateHit = follower.pathBuilder()
+                .addPath(new BezierCurve(r2Collect, gateHitBackUpCPPose, gateHitPose))
+                .setConstantHeadingInterpolation(r2Collect.getHeading())
+                .build();
+
         row2Return = follower.pathBuilder()
-                .addPath(new BezierLine(r2Collect, scorePose))
-                .setLinearHeadingInterpolation(r2Collect.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(gateHitPose, scorePose))
+                .setLinearHeadingInterpolation(gateHitPose.getHeading(), scorePose.getHeading())
                 .build();
 
         // ========= ROW RH =========
@@ -249,6 +262,25 @@ public class AutonB_Far_0 extends OpMode {
 //                    indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
                     indexer.stop(); // to not drain battery
                     intake.runInAt(0.3); // was .45. slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
+                    follower.followPath(row2toGateHit, true);
+                    transitionTo(AutoState.HIT_GATE);
+                }
+                break;
+            case HIT_GATE:
+                if (!follower.isBusy()) { // once finished hitting gate
+                    indexer.stop(); // to not drain battery
+//                    intake.runInAt(0.3); // was .45. slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
+                    intake.stop(); // added this
+                    transitionTo(AutoState.HIT_GATE_HOLD);
+                } else if (pathTimer.getElapsedTime() > 3000) {
+                    indexer.stop(); // to not drain battery
+//                    intake.runInAt(0.3);
+                    follower.followPath(row2Return, 0.7, true);
+                    transitionTo(AutoState.GO_SCORE_R2);
+                }
+                break;
+            case HIT_GATE_HOLD:
+                if (pathTimer.getElapsedTime() > 1000) {
                     follower.followPath(row2Return, 0.7, true);
                     transitionTo(AutoState.GO_SCORE_R2);
                 }

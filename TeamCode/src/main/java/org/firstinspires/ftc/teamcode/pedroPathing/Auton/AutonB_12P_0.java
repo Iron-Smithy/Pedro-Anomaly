@@ -294,7 +294,7 @@ public class AutonB_12P_0 extends OpMode {
                 }
                 break;
             case GO_SCORE_R3:
-                outtake.spinUp(aimTask.getTargetSpeed(currentPose));
+                outtake.spinUp(outtakeSpeed);
                 aimAtTarget(currentPose);
 
                 if (!follower.isBusy()) {
