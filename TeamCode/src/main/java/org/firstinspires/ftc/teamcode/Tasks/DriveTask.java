@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Tasks;
 
+import android.accessibilityservice.MagnificationConfig;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
@@ -8,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
 public class DriveTask {
 
@@ -36,7 +39,7 @@ public class DriveTask {
         follower.setStartingPose(startingPose);
         follower.update();
 
-        fieldCentricOffset = follower.getHeading();
+        fieldCentricOffset = pose(MConstants.startPoseRed).getHeading();
     }
 
     public void startTeleOp() {
@@ -114,6 +117,14 @@ public class DriveTask {
 
     public Pose getPose() {
         return follower.getPose();
+    }
+
+    private Pose pose(Pose redPose) {
+        if (alliance == Alliance.RED) {
+            return redPose;
+        } else {
+            return redPose.mirror();
+        }
     }
 
     public Vector getVelocity() {

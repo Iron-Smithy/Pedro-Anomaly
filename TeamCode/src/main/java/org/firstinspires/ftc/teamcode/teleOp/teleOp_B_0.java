@@ -74,7 +74,7 @@ public class teleOp_B_0 extends OpMode {
     private Pose goalPose;
 
     private void doPoseMath() {
-         startPose = pose(MConstants.startPoseRed);
+         startPose = pose(new Pose(100-4, 107+4, Math.toRadians(45)));
          goalRESET = pose(MConstants.goalResetPoseRed);
          humanRESET = pose(MConstants.humanPlayerPoseRed);
          goalPose = pose(MConstants.goalPoseRed);

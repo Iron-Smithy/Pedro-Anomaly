@@ -285,8 +285,8 @@ public class AutonB_Close_P2G1_0 extends OpMode {
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
-                    follower.followPath(park, true);
-                    transitionTo(AutoState.EXIT);
+//                    follower.followPath(park, true);
+                    transitionTo(AutoState.DONE);
                     fireTask = null;
                     blocker.out();
                 }

@@ -55,26 +55,16 @@ public class AutonB_Close_P2GG_0 extends OpMode {
     private final Pose R2CollectPoseRed = new Pose(132, 60, Math.toRadians(0)); // row 2 balls inside robot location
     private final Pose ScoreR2CPPoseRed = new Pose(90, 55, Math.toRadians(0));  // smooth back-out bezier control point
     private final Pose gateHitPoseRed = new Pose(132, 70, Math.toRadians(0));
-    private final Pose gateHitBackUpCPPoseRed = new Pose(122, 67, Math.toRadians(0));
+    private final Pose gateHitBackUpCPPoseRed = new Pose(119, 67, Math.toRadians(0));
     private final Pose ParkPoseRed = new Pose(125, 88.5, Math.toRadians(0)); // start pose, make right
 
     private final Pose GateCyclePoseRed = new Pose(132.5, 60, Math.toRadians(40));
-    private final Pose GateCyclePoseCPRed = new Pose(100, 60, Math.toRadians(0));
-
-    // gate auto: preload, 2nd spike, gate once, 1st spike
-    // OR preload, 2nd spike but hit the lever , gate once, 1st spike
-    // need a auto that hits the gate
-    // gate: 130.5, 59.5, H35
-    // then back up to 130.5, 55, H35
+    private final Pose GateCyclePoseCPRed = new Pose(94, 60, Math.toRadians(0));
 
     private enum AutoState { // Auton step sequence
         START,
         GO_SCORE_PRELOAD,
         SCORE_PRELOAD,
-
-        PICKUP_R1, // row 1
-        GO_SCORE_R1,
-        SCORE_R1,
 
         PICKUP_R2, // row 2
         HIT_GATE,
@@ -262,14 +252,16 @@ public class AutonB_Close_P2GG_0 extends OpMode {
             case PUSH_GATE:
                 if (!follower.isBusy()) { // once finished collecting objects
                     indexer.runInAt(0.3); // indexer spin in (speed changer don't work :( )
-                    intake.runInAt(0.45); // slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
+                    intake.runInAt(0.6); // slow intake to put less pressure on intake, motors, blockers etc. but keep spinning to catch balls not fully in
                     follower.followPath(gatePickup, true);
                     transitionTo(AutoState.GATE_COLLECT_WAIT);
                 }
                 break;
             case GATE_COLLECT_WAIT:
-                if (pathTimer.getElapsedTime() > 3000) {
+                if (pathTimer.getElapsedTime() > 4000) {
+                    follower.followPath(gateReturn, true);
                     transitionTo(AutoState.GO_SCORE_GATE);
+                    intake.runInAt(0.15);
                 }
                 break;
             case GO_SCORE_GATE:
@@ -291,8 +283,8 @@ public class AutonB_Close_P2GG_0 extends OpMode {
                 if (fireTask.isActive()) {
                 } else {
                     intake.runIn();
-                    follower.followPath(park, true);
-                    transitionTo(AutoState.EXIT);
+//                    follower.followPath(park, true);
+                    transitionTo(AutoState.DONE);
                     blocker.out();
                     fireTask = null;
                 }
