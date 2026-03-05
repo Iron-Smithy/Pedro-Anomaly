@@ -8,6 +8,7 @@ import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseProvider;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
@@ -17,9 +18,7 @@ public class DriveTask {
     private final Follower follower;
 
     private Pose startingPose;
-    private Pose goalRESET;
-    private Pose humanRESET;
-    private Alliance alliance;
+    private AlliancePoseProvider poses;
     private double fieldCentricOffset;
 
     private boolean slowMode = false;
@@ -29,17 +28,19 @@ public class DriveTask {
     private final double k = 2.0;
     private final double expKMinus1 = Math.exp(k) - 1;
 
-    public DriveTask(Pose startingPose, Follower follower, Pose goalRESET, Pose humanRESET, Alliance alliance) { // get all relevant alliance specific poses
-        this.startingPose = startingPose;
-        this.goalRESET = goalRESET;
-        this.humanRESET = humanRESET;
+    public DriveTask(
+            Follower follower,
+            AlliancePoseProvider poses,
+            Pose startingPose
+    ) {
         this.follower = follower;
-        this.alliance = alliance;
+        this.poses = poses;
+        this.startingPose = startingPose;
 
         follower.setStartingPose(startingPose);
         follower.update();
 
-        fieldCentricOffset = pose(MConstants.startPoseRed).getHeading();
+        fieldCentricOffset = poses.fieldCentricReturn();
     }
 
     public void startTeleOp() {
@@ -94,14 +95,24 @@ public class DriveTask {
         // ---------------------------
         // Pose Reset Buttons
         // ---------------------------
-        if (gamepad.psWasPressed()) { // on the PS controller looks like a little house
-            follower.setPose(goalRESET);
-            fieldCentricOffset = alliance == Alliance.RED ? 0 : Math.toRadians(180);
+        if (gamepad.triangleWasPressed()) {
+            follower.setPose(poses.get(MConstants.goalResetPoseRed));
+            fieldCentricOffset = poses.fieldCentricReturn();
         }
 
-        if (gamepad.optionsWasPressed()) { // the button labeled options
-            follower.setPose(humanRESET);
-            fieldCentricOffset = alliance == Alliance.RED ? 0 : Math.toRadians(180);
+        if (gamepad.squareWasPressed()) { // the button labeled options
+            follower.setPose(poses.get(MConstants.humanPlayerResetPoseRed));
+            fieldCentricOffset = poses.fieldCentricReturn();
+        }
+
+        if (gamepad.crossWasPressed()) { // the button labeled options
+            follower.setPose(poses.get(MConstants.gateResetRed));
+            fieldCentricOffset = poses.fieldCentricReturn();
+        }
+
+        if (gamepad.circleWasPressed()) { // the button labeled options
+            follower.setPose(poses.get(MConstants.startPoseRow1Red));
+            fieldCentricOffset = poses.fieldCentricReturn();
         }
 
         if (gamepad.shareWasPressed()) { // the button labeled share
@@ -117,14 +128,6 @@ public class DriveTask {
 
     public Pose getPose() {
         return follower.getPose();
-    }
-
-    private Pose pose(Pose redPose) {
-        if (alliance == Alliance.RED) {
-            return redPose;
-        } else {
-            return redPose.mirror();
-        }
     }
 
     public Vector getVelocity() {

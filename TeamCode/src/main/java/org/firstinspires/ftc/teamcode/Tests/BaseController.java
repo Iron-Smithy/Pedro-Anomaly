@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 // CONSTANTS
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseProvider;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
@@ -33,7 +34,7 @@ import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
 import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
 
 @Configurable
-@TeleOp (name = "Base Controller", group = "LinearOpMode")
+@TeleOp(name = "Base Controller", group = "Tests")
 public class BaseController extends OpMode {
     private Alliance alliance = Alliance.RED; // defualt
 
@@ -48,32 +49,23 @@ public class BaseController extends OpMode {
     private TelemetryManager telemetryM;
 
     private Pose startPose;
-    private Pose goalRESET;
-    private Pose humanRESET;
     private Pose goalPose;
-
-    private void doPoseMath() {
-        startPose = pose(new Pose(72, 137, Math.toRadians(270)));
-        goalRESET = pose(MConstants.goalResetPoseRed);
-        humanRESET = pose(MConstants.humanPlayerPoseRed);
-        goalPose = pose(MConstants.goalPoseRed);
-    }
-    private Pose pose(Pose redPose) {
-        if (alliance == Alliance.RED) {
-            return redPose;
-        } else {
-            return redPose.mirror();
-        }
-    }
+    AlliancePoseProvider poses;
 
     @Override
     public void init() {
         RobotHardware.init(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
 
-        doPoseMath();
+        poses = new AlliancePoseProvider(alliance);
 
-        driveTask = new DriveTask(startPose, follower, goalRESET, humanRESET, alliance);
+        startPose = poses.get(new Pose(96,111,Math.toRadians(45)));
+
+        driveTask = new DriveTask(
+                follower,
+                poses,
+                startPose
+        );
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
     }

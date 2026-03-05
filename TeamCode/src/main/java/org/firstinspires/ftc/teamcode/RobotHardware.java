@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
+import org.firstinspires.ftc.teamcode.hardware.AdafruitNeoPixel;
+
 public class RobotHardware {
     public static DcMotor frontLeftMotor;
     public static DcMotor backLeftMotor;
@@ -30,6 +32,8 @@ public class RobotHardware {
     public static DistanceSensor ballSensor1;
     public static DistanceSensor ballSensor2;
     public static DistanceSensor ballSensor3;
+
+    public static AdafruitNeoPixel pixel;
 
     public static void init(HardwareMap hwMap) {
         frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
@@ -58,5 +62,7 @@ public class RobotHardware {
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        pixel = hwMap.get(AdafruitNeoPixel.class, "pixel");
     }
 }

@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 // CONSTANTS
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseProvider;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
@@ -69,32 +70,25 @@ public class teleOp_B_0 extends OpMode {
     final double HOLD_DELAY_MS = 500;
 
     private Pose startPose;
-    private Pose goalRESET;
-    private Pose humanRESET;
     private Pose goalPose;
-
-    private void doPoseMath() {
-         startPose = pose(new Pose(100-4, 107+4, Math.toRadians(45)));
-         goalRESET = pose(MConstants.goalResetPoseRed);
-         humanRESET = pose(MConstants.humanPlayerPoseRed);
-         goalPose = pose(MConstants.goalPoseRed);
-    }
-    private Pose pose(Pose redPose) {
-        if (alliance == Alliance.RED) {
-            return redPose;
-        } else {
-            return redPose.mirror();
-        }
-    }
+    AlliancePoseProvider poses;
 
     @Override
     public void init() {
         RobotHardware.init(hardwareMap);
         Follower follower = Constants.createFollower(hardwareMap);
 
-        doPoseMath();
+        poses = new AlliancePoseProvider(alliance);
 
-        driveTask = new DriveTask(startPose, follower, goalRESET, humanRESET, alliance);
+        startPose = poses.get(new Pose(96,111,Math.toRadians(45)));
+
+        driveTask = new DriveTask(
+                follower,
+                poses,
+                startPose
+        );
+
+        goalPose = poses.get(MConstants.goalPoseRed);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -131,7 +125,7 @@ public class teleOp_B_0 extends OpMode {
 //        if () RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
 //        else RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
 
-        if (gamepad1.triangleWasPressed()) should_turret_track_target = !should_turret_track_target;
+        if (gamepad1.psWasPressed()) should_turret_track_target = !should_turret_track_target;
 
         Pose goalPose = aimTask.getGoalPose();
         double xDiff = (goalPose.getX() - currentPose.getX());
