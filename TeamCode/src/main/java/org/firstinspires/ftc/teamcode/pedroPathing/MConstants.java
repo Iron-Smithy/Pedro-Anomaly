@@ -58,11 +58,10 @@ public class MConstants {
     public static final double[] BALL_DETECT_DISTANCE_CM = {2, 6, 2.7, 3};
 
     // ========================= POSE =========================
-    public static final Pose startPoseRow1Red = new Pose(110, 15, Math.toRadians(0));
+    public static final Pose startPoseRow1Red = new Pose(110, 13, Math.toRadians(0));
+    public static final Pose goalResetPoseRed = new Pose(120, 122.5, Math.toRadians(40));
+    public static final Pose humanPlayerResetPoseRed = new Pose(8.75, 7.5, 0);
+    public static final Pose gateResetRed = new Pose(124.5, 78.5, 0);
 
-    public static final Pose goalResetPoseRed = new Pose(120, 124.5, Math.toRadians(40));
-    public static final Pose humanPlayerResetPoseRed = new Pose(8.75, 9.5, 0);
-    public static final Pose gateResetRed = new Pose(124.5, 80.5, 0);
-
-    public static final Pose goalPoseRed = new Pose(138, 138, 0);
+    public static final Pose goalPoseRed = new Pose(135, 135, 0);
 }

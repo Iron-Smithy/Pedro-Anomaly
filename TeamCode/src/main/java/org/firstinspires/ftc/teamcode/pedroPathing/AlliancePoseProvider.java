@@ -19,6 +19,10 @@ public class AlliancePoseProvider {
         return alliance;
     }
 
+    public boolean isRed() {
+        return alliance == Alliance.RED;
+    }
+
     public double fieldCentricReturn() {
         return alliance == Alliance.RED ? 0 : Math.toRadians(180);
     }

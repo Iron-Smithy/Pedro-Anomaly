@@ -9,6 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.hardware.AdafruitNeoPixel;
+import org.firstinspires.ftc.teamcode.hardware.Color;
+import java.util.Arrays;
+
 // CONSTANTS
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseProvider;
@@ -73,6 +77,9 @@ public class teleOp_B_0 extends OpMode {
     private Pose goalPose;
     AlliancePoseProvider poses;
 
+    AdafruitNeoPixel pixel;
+    Color[] pixColor = new Color[9];
+
     @Override
     public void init() {
         RobotHardware.init(hardwareMap);
@@ -80,7 +87,7 @@ public class teleOp_B_0 extends OpMode {
 
         poses = new AlliancePoseProvider(alliance);
 
-        startPose = poses.get(new Pose(96,111,Math.toRadians(45)));
+        startPose = poses.get(new Pose(96,109,Math.toRadians(45)));
 
         driveTask = new DriveTask(
                 follower,
@@ -102,6 +109,14 @@ public class teleOp_B_0 extends OpMode {
         ballSensors = new BallSensorArray();
 
         aimTask = new ShooterAimTask(goalPose, ShooterAimTask.speedMap());
+
+        pixel = RobotHardware.pixel;
+        pixel.initialize(9, 3);
+        pixel.clearLeds();
+
+        Arrays.fill(pixColor, poses.isRed() ? Color.RED : Color.BLUE);
+        pixel.setLeds(0, pixColor);
+        pixel.show();
     }
 
     @Override
@@ -120,11 +135,6 @@ public class teleOp_B_0 extends OpMode {
         telemetryM.update();
 
         // ----- Buttons -----
-        if (gamepad1.dpad_up) RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
-        else if (gamepad1.dpad_down) RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
-//        if () RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
-//        else RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
-
         if (gamepad1.psWasPressed()) should_turret_track_target = !should_turret_track_target;
 
         Pose goalPose = aimTask.getGoalPose();
@@ -146,6 +156,10 @@ public class teleOp_B_0 extends OpMode {
         } else {
             gamepad1.stopRumble();
         }
+
+        // ----- FLAP -----
+        if (aimTask.getDistanceToGoal(currentPose) > 50) RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
+        else RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
 
         // ----- Auto-fire (right bumper): sensor-based when ballSensors available -----
         if (gamepad1.right_bumper) {
