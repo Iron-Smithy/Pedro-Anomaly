@@ -17,8 +17,8 @@ public class MConstants {
     public static final double indexerPowerOut = 1.0; // clears area / reverse
 
     // ========================= Ejector =========================
-    public static final double ejectorDown = 0.0;      // rest position
-    public static final double ejectorUp = 1.0;       // up position
+    public static final double ejectorDown = 0.93;      // rest position
+    public static final double ejectorUp = 0.5;       // up position
 
     // ========================= Ejector =========================
     public static final double blockerIn = 0.5;      // rest position
@@ -27,7 +27,7 @@ public class MConstants {
     // ========================= Outtake Flap ====================
     public static final double flapDown = 0.7;
     public static final double flapUp = 0.3;
-    public static final Double distToOpen = 41.0;
+    public static final Double distToOpen = 60.0;
 
     // ========================= Outtake (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
@@ -39,7 +39,7 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0); // turret overshoot, keep increasing D until it disappears
+            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0.0007); // turret overshoot, keep increasing D until it disappears
     // original PIDF (0.006, 0, 0.0002, 0)                                                 // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
                                                                                            // Tune F to overcome friction
     public static final double MAGIC = 183.90558;
