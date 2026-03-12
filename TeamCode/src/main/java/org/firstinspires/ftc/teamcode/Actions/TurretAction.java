@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
-
+//there is a lot of give in the turret, we need to figure that out
 public class TurretAction {
     public final DcMotor motor;
 

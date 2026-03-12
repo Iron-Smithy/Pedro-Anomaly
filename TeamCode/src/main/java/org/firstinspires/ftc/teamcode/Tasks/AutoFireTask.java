@@ -61,8 +61,8 @@ public class AutoFireTask {
         this.targetVel = targetVel;
         this.ballsToFire = ballsToFire;
         this.initialFeedDelayMs = 300;
-        this.feedTimeoutMs = 500;
-        this.ejectorUpMinMs = 300;
+        this.feedTimeoutMs = 250;
+        this.ejectorUpMinMs = 100;
         this.ejectorDownMinMs = this.ejectorUpMinMs - 20;
     }
 

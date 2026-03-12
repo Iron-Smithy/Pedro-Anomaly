@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 // CONSTANTS
 import org.firstinspires.ftc.teamcode.RobotHardware;
+import org.firstinspires.ftc.teamcode.hardware.PixelController;
 import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseProvider;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -77,8 +78,7 @@ public class teleOp_B_0 extends OpMode {
     private Pose goalPose;
     AlliancePoseProvider poses;
 
-    AdafruitNeoPixel pixel;
-    Color[] pixColor = new Color[9];
+    private PixelController pixel;
 
     @Override
     public void init() {
@@ -110,12 +110,12 @@ public class teleOp_B_0 extends OpMode {
 
         aimTask = new ShooterAimTask(goalPose, ShooterAimTask.speedMap());
 
-        pixel = RobotHardware.pixel;
-        pixel.initialize(9, 3);
-        pixel.clearLeds();
+        pixel = new PixelController(alliance);
+        pixel.setAllianceColor();
+    }
 
-        Arrays.fill(pixColor, poses.isRed() ? Color.RED : Color.BLUE);
-        pixel.setLeds(0, pixColor);
+    @Override
+    public void init_loop() {
         pixel.show();
     }
 
@@ -158,7 +158,7 @@ public class teleOp_B_0 extends OpMode {
         }
 
         // ----- FLAP -----
-        if (aimTask.getDistanceToGoal(currentPose) > 50) RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
+        if (aimTask.getDistanceToGoal(currentPose) > MConstants.distToOpen) RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
         else RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
 
         // ----- Auto-fire (right bumper): sensor-based when ballSensors available -----
@@ -213,6 +213,8 @@ public class teleOp_B_0 extends OpMode {
             if (!fireTask.isActive()) fireTask = null;
         }
 
+        pixel.ballSensorTele(ballSensors.getBallCount(), ballSensors.hasBallAt(BallPosition.LAUNCH_READY));
+
         // ----- Auto-aim: shooter at distance-based speed; one button turns to face target -----
         outtakeSpeed = aimTask.getTargetSpeed(currentPose);
         outtake.spinUp(outtakeSpeed);
@@ -246,8 +248,8 @@ public class teleOp_B_0 extends OpMode {
 
         for (BallPosition p : BallPosition.values()) { // for each sensor of the enum in ball position
             telemetry.addData(
-                p.name(),
-                ballSensors.hasBallAt(p) + " (" + ballSensors.getDistanceCm(p) + "cm)"
+                    p.name(),
+                    ballSensors.hasBallAt(p) + " (" + ballSensors.getDistanceCm(p) + "cm)"
             );
         }
 

@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.hardware.Color;
 
 import java.util.Arrays;
 
-@TeleOp(name = "LED Green Test", group = "Tests")
+@TeleOp(name = "LED Test", group = "Tests")
 public class LEDTest extends LinearOpMode {
     enum LEDMode {
         BARBERSHOP,
@@ -34,6 +34,7 @@ public class LEDTest extends LinearOpMode {
 
         pixel.initialize(9, 3);
         pixel.clearLeds();
+        pixel.show();
 
         waitForStart();
 
@@ -84,6 +85,7 @@ public class LEDTest extends LinearOpMode {
                         pixel.setLeds(i, pulseColor);
                     }
                     break;
+
                 case JOY:
                     // Convert -1.0 to 1.0 into 0 to 255
                     int r = (int) (gamepad1.left_stick_x * 127.5 + 127.5);
@@ -101,10 +103,8 @@ public class LEDTest extends LinearOpMode {
 
             // 3. OUTPUT: Send the buffer to the strip
             pixel.show();
-
-            // Small sleep to keep the I2C bus happy
             idle();
-            sleep(50);
+            sleep(1000/10); // 10x per second
         }
 
         pixel.clearLeds();

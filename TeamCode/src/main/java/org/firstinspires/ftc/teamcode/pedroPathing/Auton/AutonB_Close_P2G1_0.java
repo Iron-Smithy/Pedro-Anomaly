@@ -87,7 +87,7 @@ public class AutonB_Close_P2G1_0 extends OpMode {
         DONE
     }
 
-//    private final Pose goalPose = pose(new Pose(132, 136, 0));
+    //    private final Pose goalPose = pose(new Pose(132, 136, 0));
     private Pose goalPose;
 
     private AutoState currentState = AutoState.START;

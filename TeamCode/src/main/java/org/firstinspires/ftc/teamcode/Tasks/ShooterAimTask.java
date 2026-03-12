@@ -28,22 +28,41 @@ public class ShooterAimTask {
     public static TreeMap<Double, Long> speedMap() {
         TreeMap<Double, Long> map = new TreeMap<>();
         map.put(12.0, 850L);
-        map.put(30.0, 960L); //open
-        map.put(40.0, 960L); //open
-        map.put(50.0, 1030L);
-        map.put(60.0, 1080L);
-        map.put(70.0, 1110L);
-        map.put(80.0, 1170L);
-        map.put(90.0, 1250L);
-        map.put(100.0, 1280L);
-        map.put(110.0, 1310L);
-        map.put(115.0, 1330L);
-        map.put(125.0, 1350L);
-        map.put(130.0, 1400L);
-        map.put(135.0, 1430L);
-        map.put(140.0, 1460L);
-        map.put(145.0, 1490L);
-        map.put(150.0, 1550L);
+        map.put(30.0, 850L); //not possible
+        map.put(40.0, 960L); //open good
+        map.put(50.0, 980L); //open good
+        map.put(60.0, 1030L); //good
+        map.put(70.0, 1060L); //good
+        map.put(80.0, 1110L); //good
+        map.put(90.0, 1170L); //good
+        map.put(100.0, 1220L); //good
+        map.put(110.0, 1280L); //good
+        map.put(115.0, 1320L); //good
+        map.put(125.0, 1350L); //good
+        map.put(130.0, 1370L); //good
+        map.put(135.0, 1400L); //good
+        map.put(140.0, 1430L); //good
+        map.put(145.0, 1460L); //good
+        map.put(150.0, 1490L); //good
+        map.put(155.0, 1520L); //good
+        //old
+        //map.put(12.0, 850L);
+        //        map.put(30.0, 960L); //open
+        //        map.put(40.0, 960L); //open
+        //        map.put(50.0, 1030L);
+        //        map.put(60.0, 1080L);
+        //        map.put(70.0, 1110L);
+        //        map.put(80.0, 1170L);
+        //        map.put(90.0, 1250L);
+        //        map.put(100.0, 1280L);
+        //        map.put(110.0, 1310L);
+        //        map.put(115.0, 1330L);
+        //        map.put(125.0, 1350L);
+        //        map.put(130.0, 1400L);
+        //        map.put(135.0, 1430L);
+        //        map.put(140.0, 1460L);
+        //        map.put(145.0, 1490L);
+        //        map.put(150.0, 1550L);
 
         return map;
     }

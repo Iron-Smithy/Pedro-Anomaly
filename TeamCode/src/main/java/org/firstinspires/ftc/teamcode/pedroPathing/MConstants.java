@@ -17,8 +17,8 @@ public class MConstants {
     public static final double indexerPowerOut = 1.0; // clears area / reverse
 
     // ========================= Ejector =========================
-    public static final double ejectorDown = 0.0;      // rest position
-    public static final double ejectorUp = 1.0;       // up position
+    public static final double ejectorDown = 0.93;      // rest position
+    public static final double ejectorUp = 0.5;       // up position
 
     // ========================= Ejector =========================
     public static final double blockerIn = 0.5;      // rest position
@@ -27,7 +27,7 @@ public class MConstants {
     // ========================= Outtake Flap ====================
     public static final double flapDown = 0.7;
     public static final double flapUp = 0.3;
-    public static final Double distToOpen = 41.0;
+    public static final Double distToOpen = 60.0;
 
     // ========================= Outtake (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     /** Feedforward: power per unit TPS. Tune so motor reaches target without overshoot. */
@@ -39,9 +39,9 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0); // turret overshoot, keep increasing D until it disappears
+            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0.0000); // turret overshoot, keep increasing D until it disappears
     // original PIDF (0.006, 0, 0.0002, 0)                                                 // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
-                                                                                           // Tune F to overcome friction
+    // Tune F to overcome friction
     public static final double MAGIC = 183.90558;
 
     // ========================= Auto-aim heading PID =========================
@@ -58,10 +58,10 @@ public class MConstants {
     public static final double[] BALL_DETECT_DISTANCE_CM = {2, 6, 2.7, 3};
 
     // ========================= POSE =========================
-    public static final Pose startPoseRow1Red = new Pose(110, 13, Math.toRadians(0));
-    public static final Pose goalResetPoseRed = new Pose(120, 122.5, Math.toRadians(40));
-    public static final Pose humanPlayerResetPoseRed = new Pose(8.75, 7.5, 0);
-    public static final Pose gateResetRed = new Pose(124.5, 78.5, 0);
+    public static final Pose startPoseRow1Red = new Pose(116, 15, Math.toRadians(0));
+    public static final Pose goalResetPoseRed = new Pose(121.5, 129.5, Math.toRadians(40));  //Pose(126, 124.5, Math.toRadians(40));
+    public static final Pose humanPlayerResetPoseRed = new Pose(13, 12, 0);
+    public static final Pose gateResetRed = new Pose(130.5, 80.5, 0);
 
-    public static final Pose goalPoseRed = new Pose(135, 135, 0);
+    public static final Pose goalPoseRed = new Pose(142, 142, 0);
 }
