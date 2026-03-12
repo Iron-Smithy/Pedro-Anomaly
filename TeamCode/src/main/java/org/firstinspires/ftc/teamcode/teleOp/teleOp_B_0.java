@@ -248,8 +248,8 @@ public class teleOp_B_0 extends OpMode {
 
         for (BallPosition p : BallPosition.values()) { // for each sensor of the enum in ball position
             telemetry.addData(
-                    p.name(),
-                    ballSensors.hasBallAt(p) + " (" + ballSensors.getDistanceCm(p) + "cm)"
+                p.name(),
+                ballSensors.hasBallAt(p) + " (" + ballSensors.getDistanceCm(p) + "cm)"
             );
         }
 
