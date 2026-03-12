@@ -41,7 +41,7 @@ public class MConstants {
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
             new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0.0000); // turret overshoot, keep increasing D until it disappears
     // original PIDF (0.006, 0, 0.0002, 0)                                                 // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
-    // Tune F to overcome friction
+                                                                                           // Tune F to overcome friction
     public static final double MAGIC = 183.90558;
 
     // ========================= Auto-aim heading PID =========================
