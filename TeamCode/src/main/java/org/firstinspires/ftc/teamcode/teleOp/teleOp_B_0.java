@@ -157,6 +157,7 @@ public class teleOp_B_0 extends OpMode {
             gamepad1.stopRumble();
         }
 
+
         // ----- FLAP -----
         if (aimTask.getDistanceToGoal(currentPose) > MConstants.distToOpen) RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapDown);
         else RobotHardware.outtakeAngleAdjust.setPosition(MConstants.flapUp);
