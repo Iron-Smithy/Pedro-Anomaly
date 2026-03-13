@@ -39,7 +39,7 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0.0000); // turret overshoot, keep increasing D until it disappears
+            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0.0007); // turret overshoot, keep increasing D until it disappears
     // original PIDF (0.006, 0, 0.0002, 0)                                                 // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
                                                                                            // Tune F to overcome friction
     public static final double MAGIC = 183.90558;
@@ -58,10 +58,10 @@ public class MConstants {
     public static final double[] BALL_DETECT_DISTANCE_CM = {2, 6, 2.7, 3};
 
     // ========================= POSE =========================
-    public static final Pose startPoseRow1Red = new Pose(116, 15, Math.toRadians(0));
-    public static final Pose goalResetPoseRed = new Pose(121.5, 129.5, Math.toRadians(40));  //Pose(126, 124.5, Math.toRadians(40));
-    public static final Pose humanPlayerResetPoseRed = new Pose(13, 12, 0);
-    public static final Pose gateResetRed = new Pose(130.5, 80.5, 0);
+    public static final Pose startPoseRow1Red = new Pose(114, 17, Math.toRadians(0));
+    public static final Pose goalResetPoseRed = new Pose(119.5, 131.5, Math.toRadians(40));  //Pose(126, 124.5, Math.toRadians(40));
+    public static final Pose humanPlayerResetPoseRed = new Pose(11, 14, 0);
+    public static final Pose gateResetRed = new Pose(128.5, 82.5, 0);
 
     public static final Pose goalPoseRed = new Pose(142, 142, 0);
 }
