@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseProvider;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
@@ -140,5 +141,14 @@ public class DriveTask {
 
     public double getHeading() {
         return follower.getHeading();
+    }
+
+    public double getCurrentDraw() {
+        double sum = RobotHardware.frontLeftMotor.getCurrent(CurrentUnit.AMPS);
+        sum += RobotHardware.backLeftMotor.getCurrent(CurrentUnit.AMPS);
+        sum += RobotHardware.frontRightMotor.getCurrent(CurrentUnit.AMPS);
+        sum += RobotHardware.backRightMotor.getCurrent(CurrentUnit.AMPS);
+
+        return sum / 4;
     }
 }

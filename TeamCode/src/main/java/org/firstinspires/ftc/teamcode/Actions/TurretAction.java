@@ -4,13 +4,15 @@ package org.firstinspires.ftc.teamcode.Actions;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 //there is a lot of give in the turret, we need to figure that out
 public class TurretAction {
-    public final DcMotor motor;
+    public final DcMotorEx motor;
 
     private final int leftTickMax = -265; // range = 0 < 288 > 577
     private final int rightTickMax = 265; // right most based on 3d printed limits
@@ -62,5 +64,9 @@ public class TurretAction {
         if (wrapped < leftRadMax) return leftRadMax;
 
         return wrapped;
+    }
+
+    public double getCurrentDraw() {
+        return motor.getCurrent(CurrentUnit.AMPS);
     }
 }

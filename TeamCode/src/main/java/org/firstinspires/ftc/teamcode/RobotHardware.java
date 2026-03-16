@@ -12,11 +12,11 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import org.firstinspires.ftc.teamcode.hardware.AdafruitNeoPixel;
 
 public class RobotHardware {
-    public static DcMotor frontLeftMotor;
-    public static DcMotor backLeftMotor;
-    public static DcMotor frontRightMotor;
-    public static DcMotor backRightMotor;
-    public static DcMotor intakeMotor;
+    public static DcMotorEx frontLeftMotor;
+    public static DcMotorEx backLeftMotor;
+    public static DcMotorEx frontRightMotor;
+    public static DcMotorEx backRightMotor;
+    public static DcMotorEx intakeMotor;
     public static DcMotorEx outtakeMotor;
     public static MotorEx outtakeMotorSolver;
     public static Servo indexerPaddle;
@@ -36,11 +36,11 @@ public class RobotHardware {
     public static AdafruitNeoPixel pixel;
 
     public static void init(HardwareMap hwMap) {
-        frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
-        backLeftMotor = hwMap.get(DcMotor.class, "backLeftMotor");
-        frontRightMotor = hwMap.get(DcMotor.class, "frontRightMotor");
-        backRightMotor = hwMap.get(DcMotor.class, "backRightMotor");
-        intakeMotor = hwMap.get(DcMotor.class, "intakeMotor");
+        frontLeftMotor = hwMap.get(DcMotorEx.class, "frontLeftMotor");
+        backLeftMotor = hwMap.get(DcMotorEx.class, "backLeftMotor");
+        frontRightMotor = hwMap.get(DcMotorEx.class, "frontRightMotor");
+        backRightMotor = hwMap.get(DcMotorEx.class, "backRightMotor");
+        intakeMotor = hwMap.get(DcMotorEx.class, "intakeMotor");
 
         outtakeMotor = hwMap.get(DcMotorEx.class, "outtakeMotor");
 //        outtakeMotorSolver = new MotorEx(hwMap, "outtakeMotor");

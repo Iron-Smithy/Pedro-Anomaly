@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.Actions;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
 
@@ -54,5 +55,9 @@ public class OuttakeAction {
     public boolean isAtTargetVelocity() {
         if (targetVelocity <= 0) return false;
         return Math.abs(motor.getVelocity() - targetVelocity) <= tolerance;
+    }
+
+    public double getCurrentDraw() {
+        return motor.getCurrent(CurrentUnit.AMPS);
     }
 }

@@ -7,6 +7,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.AdafruitNeoPixel;
@@ -231,27 +232,21 @@ public class teleOp_B_0 extends OpMode {
         );
 
         telemetry.addData("Alliance", alliance);
-        telemetry.addData("Is Red Alliance", alliance == Alliance.RED);
-        telemetry.addData("Goal Pose", goalPose);
-        telemetry.addData("Start Pose", startPose);
-
-        telemetry.addData("turret error", turretError);
 
         telemetry.addData("Outtake Speed (target)", outtakeSpeed);
         telemetry.addData("Outtake Speed (real)", outtake.motor.getVelocity());
         telemetry.addData("Distance to goal", aimTask.getDistanceToGoal(currentPose));
 
-        telemetry.addData("targetAngle angle (robot centric)", Math.toDegrees(limitedAngle));
-        telemetry.addData("targetTick", tickRaw);
         telemetry.addData("turret target Position", turret.controller.getTargetPosition());
         telemetry.addData("real turret position", turret.motor.getCurrentPosition());
+        telemetry.addData("turret Error", turret.controller.getTargetPosition() - turret.motor.getCurrentPosition());
 
-        for (BallPosition p : BallPosition.values()) { // for each sensor of the enum in ball position
-            telemetry.addData(
-                p.name(),
-                ballSensors.hasBallAt(p) + " (" + ballSensors.getDistanceCm(p) + "cm)"
-            );
-        }
+        telemetry.addData("Current draw", "Base: %.2f, Intake: %.2f, Turret: %.2f°, Outtake: %.2f",
+                driveTask.getCurrentDraw(),
+                intake.getCurrentDraw(),
+                turret.getCurrentDraw(),
+                outtake.getCurrentDraw()
+        );
 
         telemetry.update();
     }
