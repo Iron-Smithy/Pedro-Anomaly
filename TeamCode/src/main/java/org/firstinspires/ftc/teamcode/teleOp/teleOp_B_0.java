@@ -165,7 +165,7 @@ public class teleOp_B_0 extends OpMode {
         if (gamepad1.right_bumper) {
             blocker.in();
             if (fireTask == null) {
-                fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, outtakeSpeed, 4);
+                fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, outtakeSpeed, 3);
                 fireTask.start();
             }
         } else {

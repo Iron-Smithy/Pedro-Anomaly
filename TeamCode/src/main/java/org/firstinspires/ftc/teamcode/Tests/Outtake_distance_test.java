@@ -29,7 +29,7 @@ public class Outtake_distance_test extends OpMode {
 
     // ----- Drive -----
     private Follower follower;
-    public static Pose startingPose = new Pose(127, 87, Math.toRadians(0));
+    public static Pose startingPose = new Pose(128.5, 82.5, Math.toRadians(0));
     private double fieldCentricOffset = Math.toRadians(0); // this working. but startingPose.getHeading(); may be more clear on intention
     private final double k = 2.0;
     private final double expKMinus1 = Math.exp(k) - 1;
@@ -132,7 +132,7 @@ public class Outtake_distance_test extends OpMode {
         // ----- Drive inputs -----
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x / 2;
+        double turn = gamepad1.right_stick_x * 0.70; //70% power
 
         // ----- Auto-aim: shooter at distance-based speed; one button turns to face target -----
         Pose goalPose = aimHelper.getGoalPose();
@@ -164,16 +164,36 @@ public class Outtake_distance_test extends OpMode {
         RobotHardware.frontRightMotor.setPower((rotY - rotX - turn) / denom);
         RobotHardware.backRightMotor.setPower((rotY + rotX - turn) / denom);
 
+
+
         // ----- Subsystems -----
-        if (gamepad1.psWasPressed()) {
-            follower.setPose(new Pose(120, 127, Math.toRadians(37)));
+//        if (gamepad1.triangleWasPressed()) {
+//            follower.setPose(new Pose(119.5, 131.5, Math.toRadians(40)));
+//            fieldCentricOffset = startingPose.getHeading();
+//        }
+//        if (gamepad1.crossWasPressed()) {
+//            follower.setPose(new Pose(128.5, 82.5, Math.toRadians(0)));
+//            fieldCentricOffset = Math.toRadians(0);
+//        }
+//        if (gamepad1.squareWasPressed()) {
+//            follower.setPose(new Pose(11, 14, Math.toRadians(0)));
+//            fieldCentricOffset = Math.toRadians(0);
+//        }
+        if (gamepad1.triangleWasPressed()) {
+            follower.setPose(MConstants.goalResetPoseRed);
             fieldCentricOffset = startingPose.getHeading();
         }
-        if (gamepad1.optionsWasPressed()) {
-            follower.setPose(new Pose(7.5, 8, Math.toRadians(0)));
+        if (gamepad1.squareWasPressed()) {
+            follower.setPose(MConstants.humanPlayerResetPoseRed);
+            fieldCentricOffset = Math.toRadians(0);
+        }
+        if (gamepad1.crossWasPressed()) {
+            follower.setPose(MConstants.gateResetRed);
             fieldCentricOffset = Math.toRadians(0);
         }
         if (gamepad1.shareWasPressed()) fieldCentricOffset = follower.getHeading();
+
+
 
         // ----- Auto-fire (right bumper): sensor-based when ballSensors available -----
         if (gamepad1.right_bumper) {

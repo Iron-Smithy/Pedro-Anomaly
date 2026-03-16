@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import java.util.LinkedList;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
@@ -35,41 +36,56 @@ public class PixelController {
         pixel.show();
     }
 
+    // List to store ball counts with timestamps
+    private final LinkedList<BallDetection> detectionHistory = new LinkedList<>();
+
+    // Simple helper class to track history
+    private static class BallDetection {
+        int count;
+        long timestamp;
+        BallDetection(int count, long timestamp) {
+            this.count = count;
+            this.timestamp = timestamp;
+        }
+    }
+
     public void ballSensorTele(int ballCount, boolean ball_fire_ready) {
-        // Initialize a 9-LED strip with all LEDs off (Black)
-        Color[] strip = new Color[9];
-        for (int i = 0; i < 9; i++) {
-            strip[i] = Color.BLACK;
+        long currentTime = System.currentTimeMillis();
+
+        // 1. Add current reading to history
+        detectionHistory.add(new BallDetection(ballCount, currentTime));
+
+        // 2. Remove any readings older than 1 seconds (1000ms)
+        while (!detectionHistory.isEmpty() && (currentTime - detectionHistory.peekFirst().timestamp > 1000)) {
+            detectionHistory.removeFirst();
         }
 
-        Color baseColor = ball_fire_ready ? Color.brightGreen  : Color.brightBlue;
+        // 3. Find the highest ball count in the current 2-second window
+        int maxBallCount = 0;
+        for (BallDetection entry : detectionHistory) {
+            if (entry.count > maxBallCount) {
+                maxBallCount = entry.count;
+            }
+        }
 
-        Color altColor = ball_fire_ready ? Color.brightLime : Color.brightCyan;
+        // Use 'maxBallCount' for the display logic instead of the raw 'ballCount'
+        Color[] strip = new Color[9];
+        Arrays.fill(strip, Color.BLACK);
 
-        if (ballCount == 1) {
-            // Outermost LEDs on both sides (Index 0 and 8)
+        if (maxBallCount == 1) {
             strip[0] = Color.brightBlue;
             strip[8] = Color.brightBlue;
         }
-        else if (ballCount == 2) {
-            // Outer 3 most on both sides (0,1,2 and 6,7,8)
+        else if (maxBallCount == 2) {
             strip[0] = Color.brightRED; strip[1] = Color.brightRED; strip[2] = Color.brightRED;
             strip[6] = Color.brightRED; strip[7] = Color.brightRED; strip[8] = Color.brightRED;
         }
-        else if (ballCount >= 3) {
-            // All 9 LEDs full
-            Color[] rainbow = {
-                    Color.brightGreen, Color.brightGreen, Color.brightGreen,
-                    Color.brightGreen, Color.brightGreen, Color.brightGreen,
-                    Color.brightGreen, Color.brightGreen, Color.brightGreen
-            };
-            strip = rainbow;
+        else if (maxBallCount >= 3) {
+            Arrays.fill(strip, Color.brightGreen);
         }
 
-        // Send the final array to the controller
         setColors(strip);
     }
-
 
     public void setColors(Color[] color) {
         PixColor = color;

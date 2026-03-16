@@ -100,22 +100,22 @@ public class DriveTask {
             fieldCentricOffset = poses.fieldCentricReturn();
         }
 
-        if (gamepad.squareWasPressed()) { // the button labeled options
+        if (gamepad.squareWasPressed()) {
             follower.setPose(poses.get(MConstants.humanPlayerResetPoseRed));
             fieldCentricOffset = poses.fieldCentricReturn();
         }
 
-        if (gamepad.crossWasPressed()) { // the button labeled options
+        if (gamepad.crossWasPressed()) {
             follower.setPose(poses.get(MConstants.gateResetRed));
             fieldCentricOffset = poses.fieldCentricReturn();
         }
 
-        if (gamepad.circleWasPressed()) { // the button labeled options
-            follower.setPose(poses.get(MConstants.startPoseRow1Red));
-            fieldCentricOffset = poses.fieldCentricReturn();
-        }
+//        if (gamepad.circleWasPressed()) {
+//            follower.setPose(poses.get(MConstants.startPoseRow1Red));
+//            fieldCentricOffset = poses.fieldCentricReturn();
+//        }
 
-        if (gamepad.shareWasPressed()) { // the button labeled share
+        if (gamepad.shareWasPressed()) { // the button labeled share    options   ps is home
             fieldCentricOffset = follower.getHeading();
         }
     }

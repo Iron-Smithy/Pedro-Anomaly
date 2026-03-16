@@ -39,8 +39,8 @@ public class MConstants {
 
     // ========================= Turret (velocity PID: power = KV*vel + P*(velErr) + KS) =========================
     public static final com.pedropathing.control.PIDFCoefficients turretPIDFCoefficent =
-            new com.pedropathing.control.PIDFCoefficients(0.006, 0, 0.0004, 0.0007); // turret overshoot, keep increasing D until it disappears
-    // original PIDF (0.006, 0, 0.0002, 0)                                                 // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
+            new com.pedropathing.control.PIDFCoefficients(0.004, 0, 0.0003, 0.0007); // turret overshoot, keep increasing D until it disappears
+    // original PIDF (0.006, 0, 0.0002, 0)  (0.006, 0, 0.0004, 0.0007)  (0.004, 0, 0.0002, 0.0007);               // if clicking appears in the motor again, lower P by 10-20% then re-adjust D
                                                                                            // Tune F to overcome friction
     public static final double MAGIC = 183.90558;
 

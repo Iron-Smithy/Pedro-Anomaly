@@ -64,11 +64,24 @@ public class BallSensorArray {
         return sensors.get(position).distanceCm();
     }
 
-    public int getBallCount() {
+    public int getTotalBallCount() {
         int count = 0;
         for (BallPosition p : BallPosition.values()) {
             if (hasBallAt(p)) count++;
         }
+        return count;
+    }
+    public int getBallCount() {
+        int count = 0;
+        BallPosition[] sensor = BallPosition.values();
+
+        // Treat sensor 0 and 1 as a single entry
+        count += (hasBallAt(sensor[0]) || hasBallAt(sensor[1])) ? 1 : 0;
+
+        // Add the others individually
+        count += hasBallAt(sensor[2]) ? 1 : 0;
+        count += hasBallAt(sensor[3]) ? 1 : 0;
+
         return count;
     }
 

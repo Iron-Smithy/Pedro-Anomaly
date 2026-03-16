@@ -38,13 +38,14 @@ public class ShooterAimTask {
         map.put(100.0, 1220L); //good
         map.put(110.0, 1280L); //good
         map.put(115.0, 1320L); //good
-        map.put(125.0, 1350L); //good
-        map.put(130.0, 1370L); //good
-        map.put(135.0, 1400L); //good
-        map.put(140.0, 1430L); //good
-        map.put(145.0, 1460L); //good
-        map.put(150.0, 1490L); //good
-        map.put(155.0, 1520L); //good
+        map.put(125.0, 1330L); //good
+        map.put(130.0, 1350L); //good
+        map.put(135.0, 1380L); //good
+        map.put(140.0, 1410L); //good
+        map.put(145.0, 1440L); //
+        map.put(150.0, 1470L); //
+        map.put(155.0, 1500L); //
+        map.put(160.0, 1530L); //
         //old
         //map.put(12.0, 850L);
         //        map.put(30.0, 960L); //open

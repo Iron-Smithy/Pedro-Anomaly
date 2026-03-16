@@ -14,6 +14,7 @@ The naming convention for files and folders:
       * 1, 2, 3 = index numbers we have assigned the rows/spikes
       * H = Human player ball collection
       * G = gate
+      * S = shoot
 
     the order of those symbols in the name determines which and what order actions that file performs.
 
