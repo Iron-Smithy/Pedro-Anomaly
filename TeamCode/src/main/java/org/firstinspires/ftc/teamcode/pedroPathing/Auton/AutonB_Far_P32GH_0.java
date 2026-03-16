@@ -115,7 +115,8 @@ public class AutonB_Far_P32GH_0 extends OpMode {
         Pose gateHitPose = pose(gateHitPoseRed);
         Pose gateHitBackUpCPPose = pose(gateHitBackUpCPPoseRed);
 
-        goalPose = pose(new Pose(140, 135, 0));
+//        goalPose = pose(new Pose(142, 142, 0));
+        goalPose = pose(MConstants.goalPoseRed);
 
 
         // ========= START → SCORE =========

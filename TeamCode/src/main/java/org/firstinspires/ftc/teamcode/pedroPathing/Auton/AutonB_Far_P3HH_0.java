@@ -99,7 +99,8 @@ public class AutonB_Far_P3HH_0 extends OpMode {
         Pose backUp = pose(backUpRed);
         Pose FarPark = pose(FarParkPoseRed);
 
-        goalPose = pose(new Pose(140, 135, 0));
+//        goalPose = pose(new Pose(142, 142, 0));
+        goalPose = pose(MConstants.goalPoseRed);
 
 
         // ========= START → SCORE =========

@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.Actions.EjectorAction;
 import org.firstinspires.ftc.teamcode.Actions.IndexAction;
 import org.firstinspires.ftc.teamcode.Actions.IntakeAction;
 import org.firstinspires.ftc.teamcode.Actions.OuttakeAction;
+import org.firstinspires.ftc.teamcode.Actions.TurretAction;
 import org.firstinspires.ftc.teamcode.Sensors.BallSensorArray;
 
 /**
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Sensors.BallSensorArray;
  */
 public class AutoFireTask {
     private final OuttakeAction shooter;
+    private final TurretAction turret;
     private final IndexAction indexer;
     private final IntakeAction intake;
     private final EjectorAction ejector;
@@ -33,6 +35,7 @@ public class AutoFireTask {
 
     private enum State { // firing logic steps
         SPINNING_UP,
+        FINISH_TURN,
         FEEDING,
         EJECTOR_UP,
         EJECTOR_DOWN,
@@ -42,21 +45,22 @@ public class AutoFireTask {
     private State currentState = State.FEEDING;
     private boolean active = false;
 
-    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector,
+    public AutoFireTask(OuttakeAction shooter, TurretAction turret, IndexAction indexer, EjectorAction ejector,
                         IntakeAction intake, long targetVel) {
-        this(shooter, indexer, ejector, intake, null, targetVel, 3);
+        this(shooter, turret, indexer, ejector, intake, null, targetVel, 3);
     }
 
-    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector,
+    public AutoFireTask(OuttakeAction shooter, TurretAction turret, IndexAction indexer, EjectorAction ejector,
                         IntakeAction intake, BallSensorArray ballSensors, long targetVel) {
-        this(shooter, indexer, ejector, intake, ballSensors, targetVel, 3);
+        this(shooter, turret, indexer, ejector, intake, ballSensors, targetVel, 3);
     }
 
-    public AutoFireTask(OuttakeAction shooter, IndexAction indexer, EjectorAction ejector, IntakeAction intake, BallSensorArray ballSensors, long targetVel, int ballsToFire) {
+    public AutoFireTask(OuttakeAction shooter, TurretAction turret, IndexAction indexer, EjectorAction ejector, IntakeAction intake, BallSensorArray ballSensors, long targetVel, int ballsToFire) {
         this.shooter = shooter;
         this.indexer = indexer;
         this.ejector = ejector;
         this.intake = intake;
+        this.turret = turret;
         this.ballSensors = ballSensors;
         this.targetVel = targetVel;
         this.ballsToFire = ballsToFire;
@@ -85,6 +89,12 @@ public class AutoFireTask {
             case SPINNING_UP:
                 if (shooter.isAtTargetVelocity()) { // wait until meet target velocity
                     timer = now;
+                    currentState = State.FINISH_TURN;
+                }
+                break;
+
+            case FINISH_TURN:
+                if (turret.isAtTargetPosition(10) || (now - timer) >= 1000) {
                     currentState = State.FEEDING;
                 }
                 break;

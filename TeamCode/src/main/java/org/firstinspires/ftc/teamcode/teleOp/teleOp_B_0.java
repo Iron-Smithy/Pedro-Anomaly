@@ -241,7 +241,7 @@ public class teleOp_B_0 extends OpMode {
         telemetry.addData("real turret position", turret.motor.getCurrentPosition());
         telemetry.addData("turret Error", turret.controller.getTargetPosition() - turret.motor.getCurrentPosition());
 
-        telemetry.addData("Current draw", "Base: %.2f, Intake: %.2f, Turret: %.2f°, Outtake: %.2f",
+        telemetry.addData("Current draw", "Base: %.2f, Intake: %.2f, Turret: %.2f, Outtake: %.2f",
                 driveTask.getCurrentDraw(),
                 intake.getCurrentDraw(),
                 turret.getCurrentDraw(),

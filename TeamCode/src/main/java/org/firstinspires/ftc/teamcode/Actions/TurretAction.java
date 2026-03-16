@@ -66,6 +66,10 @@ public class TurretAction {
         return wrapped;
     }
 
+    public boolean isAtTargetPosition(int threshold) {
+        return ;
+    }
+
     public double getCurrentDraw() {
         return motor.getCurrent(CurrentUnit.AMPS);
     }
