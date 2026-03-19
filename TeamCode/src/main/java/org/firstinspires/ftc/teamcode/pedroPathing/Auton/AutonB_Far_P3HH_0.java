@@ -48,15 +48,15 @@ public class AutonB_Far_P3HH_0 extends OpMode {
     private AutoFireTask fireTask = null; // A task is a program that uses multiple actions to perform an action sequence, this one contains the artifact shooting logic
     private ShooterAimTask aimTask; // this task contains the logic pertaining to outtake speed and turret direction
 
-    private final Pose startPoseRed = new Pose(96, 7, Math.toRadians(90)); // start location
-    private final Pose ScorePoseRed = new Pose(90, 13, Math.toRadians(45)); // score location
-    private final Pose R3PrePoseRed = new Pose(99, 36, Math.toRadians(0)); // row 3 collection pre location
-    private final Pose R3CollectPoseRed = new Pose(125, 36, Math.toRadians(0)); // row 3 balls inside robot location
-    private final Pose R2PrePoseRed = new Pose(99, 60, Math.toRadians(0)); // row 2 collection pre location
-    private final Pose R2CollectPoseRed = new Pose(125, 60, Math.toRadians(0)); // row 2 balls inside robot location
-    private final Pose RHumanRed = new Pose(125, 9, Math.toRadians(0));
-    private final Pose backUpRed = new Pose(120, 9, Math.toRadians(0)); //so can re-smash into wall
-    private final Pose FarParkPoseRed = new Pose(110, 15, Math.toRadians(0));
+    private final Pose startPoseRed = new Pose(98.5, 10.5, Math.toRadians(90)); // start location   98.5, 10.5,   +2.5, +3.5
+    private final Pose ScorePoseRed = new Pose(92.5, 16.5, Math.toRadians(45)); // score location
+    private final Pose R3PrePoseRed = new Pose(101.5, 39.5, Math.toRadians(0)); // row 3 collection pre location
+    private final Pose R3CollectPoseRed = new Pose(127.5, 39.5, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose R2PrePoseRed = new Pose(101.5, 63.5, Math.toRadians(0)); // row 2 collection pre location
+    private final Pose R2CollectPoseRed = new Pose(127.5, 63.5, Math.toRadians(0)); // row 2 balls inside robot location
+    private final Pose RHumanRed = new Pose(127.5, 12.5, Math.toRadians(0));
+    private final Pose backUpRed = new Pose(122.5, 12.5, Math.toRadians(0)); //so can re-smash into wall
+    private final Pose FarParkPoseRed = new Pose(112.5, 18.5, Math.toRadians(0));
     private Pose goalPose;
 
 
@@ -99,7 +99,8 @@ public class AutonB_Far_P3HH_0 extends OpMode {
         Pose backUp = pose(backUpRed);
         Pose FarPark = pose(FarParkPoseRed);
 
-        goalPose = pose(new Pose(140, 135, 0));
+//        goalPose = pose(MConstants.goalPoseRed); //142, 142
+        goalPose = pose(new Pose(137, 142, 0));
 
 
         // ========= START → SCORE =========
@@ -159,6 +160,7 @@ public class AutonB_Far_P3HH_0 extends OpMode {
             // SCORE PRELOAD
             case GO_SCORE_PRELOAD:
                 outtake.spinUp(outtakeSpeed); // set speed based on current distance from goal
+//                turret.runToTick(80);
                 aimAtTarget(currentPose); // aim turret at the goal
 
                 if (!follower.isBusy()) { // once the robot has reached the target position
@@ -172,7 +174,8 @@ public class AutonB_Far_P3HH_0 extends OpMode {
 
             case SCORE_PRELOAD:
                 outtake.spinUp(outtakeSpeed); // keep updating speed based on distance in case the robot still moving
-                aimAtTarget(currentPose); // keep updating aim in case the robot still moving
+//                turret.runToTick(80);
+                aimAtTarget(currentPose); // aim turret at the goal
                 fireTask.update(outtakeSpeed); // update the shooting program so it can fire
 
                 if (fireTask.isActive()) {
@@ -197,11 +200,12 @@ public class AutonB_Far_P3HH_0 extends OpMode {
                 break;
             case GO_SCORE_R3:
                 outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
+//                turret.runToTick(80);
+                aimAtTarget(currentPose); // aim turret at the goal
 
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > 3000) {
                     blocker.in();
-                    indexer.runInAt(0.3); // just in case
+                    indexer.runInAt(0.3); // just/ in case
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
                     fireTask.start();
                     transitionTo(AutoState.SCORE_R3);
@@ -209,7 +213,8 @@ public class AutonB_Far_P3HH_0 extends OpMode {
                 break;
             case SCORE_R3:
                 outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
+//                turret.runToTick(80);
+                aimAtTarget(currentPose); // aim turret at the goal
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
@@ -234,9 +239,10 @@ public class AutonB_Far_P3HH_0 extends OpMode {
                 break;
             case GO_SCORE_RHuman:
                 outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
+//                turret.runToTick(80);
+                aimAtTarget(currentPose); // aim turret at the goal
 
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > 3000) {
                     blocker.in();
                     indexer.runInAt(0.3); // just in case
                     fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS);
@@ -246,7 +252,8 @@ public class AutonB_Far_P3HH_0 extends OpMode {
                 break;
             case SCORE_RHuman:
                 outtake.spinUp(outtakeSpeed);
-                aimAtTarget(currentPose);
+//                turret.runToTick(80);
+                aimAtTarget(currentPose); // aim turret at the goal
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
