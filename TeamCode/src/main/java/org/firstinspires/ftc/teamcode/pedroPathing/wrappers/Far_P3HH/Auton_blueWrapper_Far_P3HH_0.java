@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.Alliance;
 import org.firstinspires.ftc.teamcode.pedroPathing.Auton.AutonB_Far_P3HH_0;
 
-@Autonomous(name = "Auton Blue Far Double Human", group = "Far")
+@Autonomous(name = "Auton Blue 3 H H", group = "Far")
 public class Auton_blueWrapper_Far_P3HH_0 extends AutonB_Far_P3HH_0 {
     @Override
     public void init() {

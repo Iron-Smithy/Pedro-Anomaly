@@ -61,7 +61,7 @@ public class AutoFireTask {
         this.targetVel = targetVel;
         this.ballsToFire = ballsToFire;
         this.initialFeedDelayMs = 300;
-        this.feedTimeoutMs = 250;
+        this.feedTimeoutMs = 300; //was 250
         this.ejectorUpMinMs = 150; //100 works for teleop
         this.ejectorDownMinMs = this.ejectorUpMinMs - 20;
     }

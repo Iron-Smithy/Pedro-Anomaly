@@ -21,7 +21,6 @@ import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
 import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
-import org.firstinspires.ftc.teamcode.pedroPathing.RobotUtils;
 
 
 public class AutonB_Close_P2gG_0 extends OpMode {
@@ -56,10 +55,10 @@ public class AutonB_Close_P2gG_0 extends OpMode {
     private final Pose R1CollectPoseRed = new Pose(127.5, 90.5, Math.toRadians(0)); // row 1 balls inside robot location
     private final Pose ScoreR1CPPoseRed = new Pose(92.5, 90.5, Math.toRadians(0)); // smooth back-out bezier control point
     private final Pose R2PrePoseRed = new Pose(101.5, 63.5, Math.toRadians(0)); // row 2 collection pre location
-    private final Pose R2CollectPoseRed = new Pose(127.5, 63.5, Math.toRadians(0)); // row 2 balls inside robot location
+    private final Pose R2CollectPoseRed = new Pose(130.5, 63.5, Math.toRadians(0)); // row 2 balls inside robot location
     private final Pose ScoreR2CPPoseRed = new Pose(92.5, 58.5, Math.toRadians(0));  // smooth back-out bezier control point
     private final Pose R3PrePoseRed = new Pose(101.5, 39.5, Math.toRadians(0)); // row 3 collection pre location
-    private final Pose R3CollectPoseRed = new Pose(127.5, 39.5, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose R3CollectPoseRed = new Pose(130.5, 39.5, Math.toRadians(0)); // row 3 balls inside robot location
     private final Pose ScoreR3CPPoseRed = new Pose(92.5, 39.5, Math.toRadians(0));  // smooth back-out bezier control point
     private final Pose ParkPoseRed = new Pose(127.5, 88.5, Math.toRadians(0)); // start pose, make right
 
@@ -67,8 +66,8 @@ public class AutonB_Close_P2gG_0 extends OpMode {
     private final Pose gateHitBackUpCPPoseRed = new Pose(117.5, 68.5, Math.toRadians(0));
     private final Pose GateCyclePoseRed = new Pose(132.5, 63.5, Math.toRadians(40));
     private final Pose GateCyclePoseCPRed = new Pose(96.5, 63.5, Math.toRadians(0));
-    private final Pose gateHitPoseRed1 = new Pose(126.5, 68.5, Math.toRadians(0)); // Y was 73.5
-    private final Pose gateHitBackUpCPPoseRed1 = new Pose(117.5, 63.5, Math.toRadians(0)); // Y was 68.5
+    private final Pose gateHitPoseRed1 = new Pose(126.5, 78.5, Math.toRadians(0)); // Y was 73.5
+    private final Pose gateHitBackUpCPPoseRed1 = new Pose(117.5, 78.5, Math.toRadians(0)); // Y was 68.5
 
     private enum AutoState { // Auton step sequence
         START,
@@ -118,7 +117,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
 
         Pose parkPose = pose(ParkPoseRed);
 
-        goalPose = pose(MConstants.goalPoseRed);
+        goalPose = pose(new Pose(142, 142, 0));
 
         // ========= START → SCORE =========
         startToScore = follower.pathBuilder()
@@ -179,11 +178,11 @@ public class AutonB_Close_P2gG_0 extends OpMode {
             case GO_SCORE_PRELOAD:
                 outtake.spinUp(outtakeSpeed); // set speed based on current distance from goal
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
 
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > 2000) { //RobotUtils.isStable(follower)    // once the robot has reached the target position
                     blocker.in();
-                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS); // set up a new shooting program
+                    fireTask = new AutoFireTask(outtake, indexer, ejector, intake, ballSensors, scoreShooterTPS, 4 ); // set up a new shooting program
                     fireTask.start(); // start shooting
                     transitionTo(AutoState.SCORE_PRELOAD); // go to next logic step
                 }
@@ -192,7 +191,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
             case SCORE_PRELOAD:
                 outtake.spinUp(outtakeSpeed); // keep updating speed based on distance in case the robot still moving
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // keep updating aim in case the robot still moving
+//                aimAtTarget(currentPose); // keep updating aim in case the robot still moving
                 fireTask.update(outtakeSpeed); // update the shooting program so it can fire
 
                 if (fireTask.isActive()) {
@@ -235,7 +234,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
             case GO_SCORE_R2:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose);
+//                aimAtTarget(currentPose);
 
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > 3000) { //RobotUtils.isStable(follower)
                     blocker.in();
@@ -247,7 +246,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
             case SCORE_R2:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose);
+//                aimAtTarget(currentPose);
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
@@ -278,7 +277,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
             case GO_SCORE_GATE:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose);
+//                aimAtTarget(currentPose);
 
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > 3000) { //RobotUtils.isStable(follower)
                     blocker.in();
@@ -290,7 +289,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
             case SCORE_GATE:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose);
+//                aimAtTarget(currentPose);
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
@@ -305,7 +304,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
 
             // PARK
             case EXIT:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > 1000) { //RobotUtils.isStable(follower)     // once reached path and enough time has passed for robot to have settled
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > 2000) { //RobotUtils.isStable(follower)     // once reached path and enough time has passed for robot to have settled
                     transitionTo(AutoState.DONE);
                 }
                 break;
@@ -351,6 +350,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
+        turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         ejector.up(); // I don't know why this needs to be done but if not, ejector don't work the first time we call it ¯\_(ツ)_/¯
         ejector.down();
@@ -377,6 +377,7 @@ public class AutonB_Close_P2gG_0 extends OpMode {
     public void loop() {
         follower.update(); // move robot based on set pathing
 
+        aimAtTarget(follower.getPose()); // aim turret at the goal
         updateAutonomous(); // check logic tree
         outtake.update(); // adjust speed
 

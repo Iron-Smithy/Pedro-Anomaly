@@ -88,7 +88,7 @@ public class teleOp_B_0 extends OpMode {
 
         poses = new AlliancePoseProvider(alliance);
 
-        startPose = poses.get(new Pose(96,109,Math.toRadians(45)));
+        startPose = poses.get(new Pose(112.5, 18.5, Math.toRadians(0))); //FAR: 12.5, 18.5, Math.toRadians(0)    //LEAVE: 112.5, 13.5, Math.toRadians(0)    //CLOSE: 96,109,Math.toRadians(45)
 
         driveTask = new DriveTask(
                 follower,

@@ -20,7 +20,6 @@ import org.firstinspires.ftc.teamcode.Tasks.AutoFireTask;
 import org.firstinspires.ftc.teamcode.Tasks.ShooterAimTask;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.MConstants;
-import org.firstinspires.ftc.teamcode.pedroPathing.RobotUtils;
 
 
 public class AutonB_Far_P32H_0 extends OpMode {
@@ -51,9 +50,9 @@ public class AutonB_Far_P32H_0 extends OpMode {
     private final Pose startPoseRed = new Pose(98.5, 10.5, Math.toRadians(90)); // start location   98.5, 10.5,   +2.5, +3.5
     private final Pose ScorePoseRed = new Pose(92.5, 16.5, Math.toRadians(45)); // score location
     private final Pose R3PrePoseRed = new Pose(101.5, 39.5, Math.toRadians(0)); // row 3 collection pre location
-    private final Pose R3CollectPoseRed = new Pose(127.5, 39.5, Math.toRadians(0)); // row 3 balls inside robot location
+    private final Pose R3CollectPoseRed = new Pose(130.5, 39.5, Math.toRadians(0)); // row 3 balls inside robot location
     private final Pose R2PrePoseRed = new Pose(101.5, 63.5, Math.toRadians(0)); // row 2 collection pre location
-    private final Pose R2CollectPoseRed = new Pose(127.5, 63.5, Math.toRadians(0)); // row 2 balls inside robot location
+    private final Pose R2CollectPoseRed = new Pose(130.5, 63.5, Math.toRadians(0)); // row 2 balls inside robot location
     private final Pose gateHitPoseRed = new Pose(126.5, 73.5, Math.toRadians(0)); //was 125.5, 73.5,
     private final Pose gateHitBackUpCPPoseRed = new Pose(117.5, 68.5, Math.toRadians(0));
     private final Pose RHumanRed = new Pose(127.5, 12.5, Math.toRadians(0));
@@ -113,7 +112,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
         Pose FarPark = pose(FarParkPoseRed);
 
 //        goalPose = pose(MConstants.goalPoseRed); //142, 142
-        goalPose = pose(new Pose(137, 142, 0));
+        goalPose = pose(new Pose(140, 142, 0));
 
 
         // ========= START → SCORE =========
@@ -187,7 +186,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
             case GO_SCORE_PRELOAD:
                 outtake.spinUp(outtakeSpeed); // set speed based on current distance from goal
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
 
                 if (!follower.isBusy()) { //RobotUtils.isStable(follower)     // once the robot has reached the target position
                     blocker.in();
@@ -201,7 +200,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
             case SCORE_PRELOAD:
                 outtake.spinUp(outtakeSpeed); // keep updating speed based on distance in case the robot still moving
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
                 fireTask.update(outtakeSpeed); // update the shooting program so it can fire
 
                 if (fireTask.isActive()) {
@@ -227,7 +226,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
             case GO_SCORE_R3:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
 
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > 3000) { //RobotUtils.isStable(follower)
                     blocker.in();
@@ -240,7 +239,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
             case SCORE_R3:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
@@ -266,7 +265,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
             case GO_SCORE_R2:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
 
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > 3000) { //RobotUtils.isStable(follower)
                     blocker.in();
@@ -279,7 +278,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
             case SCORE_R2:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
                 fireTask.update(outtakeSpeed);
 
                 if (fireTask.isActive()) {
@@ -298,14 +297,14 @@ public class AutonB_Far_P32H_0 extends OpMode {
 //                    intake.runInAt(0.50);
                     intake.stop(); // to leave behind any extra balls
                     indexer.stop(); // to not drain battery
-                    follower.followPath(rowRHReturn, 1, false); // was 0.7
+                    follower.followPath(rowRHReturn, 1, true); // was 0.7
                     transitionTo(AutoState.GO_SCORE_RHuman);
                 }
                 break;
             case GO_SCORE_RHuman:
                 outtake.spinUp(outtakeSpeed);
 //                turret.runToTick(80);
-                aimAtTarget(currentPose); // aim turret at the goal
+//                aimAtTarget(currentPose); // aim turret at the goal
 
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > 2500) { //RobotUtils.isStable(follower)
                     blocker.in();
@@ -333,7 +332,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
 
             // PARK
             case EXIT:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > 1000) { //RobotUtils.isStable(follower)     // once reached path and enough time has passed for robot to have settled
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > 2000) { //RobotUtils.isStable(follower)     // once reached path and enough time has passed for robot to have settled
                     outtake.stop(); // turn off all components
                     indexer.stop();
                     intake.stop();
@@ -379,6 +378,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
         ballSensors = new BallSensorArray();
 
         turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset to 0
+        turret.motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         ejector.up(); // I don't know why this needs to be done but if not, ejector don't work the first time we call it ¯\_(ツ)_/¯
         ejector.down();
@@ -405,6 +405,7 @@ public class AutonB_Far_P32H_0 extends OpMode {
     public void loop() {
         follower.update(); // move robot based on set pathing
 
+        aimAtTarget(follower.getPose()); // aim turret at the goal
         updateAutonomous(); // check logic tree
         outtake.update(); // adjust speed
 
